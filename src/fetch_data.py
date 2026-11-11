@@ -3,7 +3,7 @@
 - The Experiment 1 embedding cache (`data/cache`, ~180 MB archive) from the GitHub release.
 - LoCoMo (CC BY-NC 4.0) from its authors; it is never redistributed here.
 
-Run through `uv run inv fetch-data`.
+Run through `uv run inv data.fetch`.
 """
 
 from __future__ import annotations

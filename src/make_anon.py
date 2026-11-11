@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the anonymised review copy of this repository.
 
-    uv run inv anon   (or: uv run python src/make_anon.py)
+    uv run inv paper.anon   (or: uv run python src/make_anon.py)
 
 Writes, under dist/ (git-ignored):
     anon/                          the anonymised tree (no git history)
@@ -83,7 +83,7 @@ Needs `uv`, `tectonic` and, only for re-running the experiments, a local Ollama 
 
 ```bash
 uv sync
-uv run inv fetch-data   # downloads LoCoMo (CC BY-NC 4.0, not redistributed)
+uv run inv data.fetch   # downloads LoCoMo (CC BY-NC 4.0, not redistributed)
 uv run inv analyze      # analysis, figures, numbers, paper
 ```
 

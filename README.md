@@ -19,15 +19,15 @@ real-time conversational agent. Target venue: TMLR.
 | `src/subject.py`, `src/e2_run.py`, `src/e2_analyze.py` | Experiment 2: reference agent (six memory conditions), runner, analysis |
 | `src/figures.py`, `src/make_numbers.py` | Figures, table bodies and number macros for the paper |
 | `results/` | Per-utterance retrievals (E1), sealed run bundles (E2), summaries, audit sample |
-| `tasks.py`, `src/fetch_data.py` | [Invoke](https://www.pyinvoke.org) tasks for every step; data download |
+| `tasks/`, `src/fetch_data.py` | [Invoke](https://www.pyinvoke.org) tasks for every step; data download |
 
 ## Data
 
 | What | Where | Needed for |
 |---|---|---|
 | Per-utterance retrievals (E1), sealed run bundles with every trial (E2), summaries, audit sample | in git, `results/` (~17 MB) | Re-running the analysis, figures and the paper. No model needed. |
-| Embedding cache for LoCoMo (`data/cache`, ~180 MB archive) | [Release `v0.1.0`](https://github.com/aenima-labs/stale-but-on-time/releases/tag/v0.1.0), fetched by `inv fetch-data` | Skipping the ~12 min embedding step of E1. Optional; regenerated if absent. |
-| LoCoMo conversations | Downloaded from its authors by `inv fetch-data` | E1 replay. CC BY-NC 4.0, not redistributed here. |
+| Embedding cache for LoCoMo (`data/cache`, ~180 MB archive) | [Release `v0.1.0`](https://github.com/aenima-labs/stale-but-on-time/releases/tag/v0.1.0), fetched by `inv data.fetch` | Skipping the ~12 min embedding step of E1. Optional; regenerated if absent. |
+| LoCoMo conversations | Downloaded from its authors by `inv data.fetch` | E1 replay. CC BY-NC 4.0, not redistributed here. |
 | Latest compiled paper | `paper/main.pdf` (also attached to the release) | Reading. |
 
 ## Reproduce
@@ -52,16 +52,17 @@ uv sync
 uv run inv reproduce
 ```
 
-`reproduce` runs `fetch-data`, `e1-replay`, `e1-analyze`, `build-pack`, `e2-run`,
-`e2-analyze`, `figures`, `numbers` and `paper` in that order, and each can be run alone.
+Tasks are grouped by experiment: `data.fetch`; `e1.replay`, `e1.analyze`; `e2.build-pack`,
+`e2.run`, `e2.analyze`, `e2.scrub-paths`; `paper.figures`, `paper.numbers`, `paper.build`,
+`paper.anon`. `reproduce` runs them in that order, and each can be run alone.
 Extra options go through `--args`, for example
-`uv run inv e2-run --args="--think --out results/e2-think"`.
+`uv run inv e2.run --args="--think --out results/e2-think"`.
 
 E2 uses a local `gemma4:e4b`, so a rerun will not reproduce the stored trials
 bit for bit; the sealed bundles in `results/e2` are the record the paper reports.
 `src/e2_run.py` writes the pack path into each bundle as the relative `pack`, and
 `src/scrub_paths.py` does the same for bundles made earlier (it re-seals them and
-verifies the seal): `uv run inv scrub-paths --dirs=results/e2`.
+verifies the seal): `uv run inv e2.scrub-paths --dirs=results/e2`.
 
 ## Anonymous review copy
 
@@ -69,7 +70,7 @@ TMLR review is double-blind and this repository names the authors, so reviewers
 get a separate copy:
 
 ```bash
-uv run inv anon     # needs git, uv, tectonic
+uv run inv paper.anon     # needs git, uv, tectonic
 ```
 
 It writes `dist/stale-but-on-time-anon.pdf` (the paper built in double-blind mode),
@@ -96,4 +97,4 @@ Code, pack and results: Apache-2.0 (`LICENSE`). The TMLR style files in
 
 - A human should re-read `results/e2_audit_sample.csv` against the grades.
 - Confirm two reference details: the 210 words/min figure attributed to Tauroza & Allison (1990), and volume/pages of Robertson & Zaragoza (2009).
-- Submit the paper and archive produced by `inv anon`, not the files in this repository, and do not link this repository from the submission.
+- Submit the paper and archive produced by `inv paper.anon`, not the files in this repository, and do not link this repository from the submission.
