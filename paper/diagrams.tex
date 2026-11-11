@@ -1,0 +1,92 @@
+% Diagram figures (TikZ). Colours match the data figures.
+\definecolor{ink}{HTML}{1A1A19}
+\definecolor{muted}{HTML}{5F5E5A}
+\definecolor{hair}{HTML}{C3C2B7}
+\definecolor{speech}{HTML}{EEEDE8}
+\definecolor{gen}{HTML}{CDE2FB}
+\definecolor{rec}{HTML}{F9D5C6}
+\definecolor{blue}{HTML}{2A78D6}
+\definecolor{orange}{HTML}{EB6834}
+
+\newcommand{\tlbox}[5][]{% [style] x0 x1 y label
+  \draw[draw=hair, line width=0.4pt, rounded corners=1.2pt, #1]
+    (#2,#4-0.26) rectangle (#3,#4+0.26);
+  \node[font=\scriptsize, text=ink] at ({(#2+#3)/2},#4) {#5};
+}
+
+\newcommand{\timelinefigure}{%
+\begin{tikzpicture}[x=1cm, y=1cm, >={Stealth[length=4pt]}]
+  % end of the listener's utterance
+  \draw[muted, dashed, line width=0.5pt] (7.3,1.05) -- (7.3,-5.85);
+  \node[font=\scriptsize, text=muted, anchor=south] at (7.3,1.05) {listener stops speaking};
+
+  % (a) blocking
+  \node[font=\small\bfseries, anchor=west, text=ink] at (0,0.62) {(a) Blocking retrieval};
+  \tlbox[fill=speech]{0}{3.2}{0}{agent speaks}
+  \tlbox[fill=speech]{3.3}{7.25}{0}{listener speaks}
+  \tlbox[fill=rec]{7.35}{8.55}{0}{recall}
+  \tlbox[fill=gen]{8.65}{9.85}{0}{generate}
+  \tlbox[fill=speech]{9.95}{13.4}{0}{agent speaks}
+  \draw[<->, muted, line width=0.5pt] (7.35,-0.45) -- node[below, font=\scriptsize, text=ink] {waits $c$} (8.55,-0.45);
+
+  % (b) search tool
+  \node[font=\small\bfseries, anchor=west, text=ink] at (0,-1.18) {(b) Search tool};
+  \tlbox[fill=speech]{0}{3.2}{-1.8}{agent speaks}
+  \tlbox[fill=speech]{3.3}{7.25}{-1.8}{listener speaks}
+  \tlbox[fill=gen]{7.35}{8.55}{-1.8}{decide}
+  \tlbox[fill=rec]{8.65}{9.85}{-1.8}{recall}
+  \tlbox[fill=gen]{9.95}{11.15}{-1.8}{generate}
+  \tlbox[fill=speech]{11.25}{14.7}{-1.8}{agent speaks}
+  \draw[<->, muted, line width=0.5pt] (7.35,-2.25) -- (9.85,-2.25);
+  \node[font=\scriptsize, text=ink, anchor=north west] at (7.35,-2.27) {waits one model call $+\,c$};
+
+  % (c) asynchronous
+  \node[font=\small\bfseries, anchor=west, text=ink] at (0,-3.08) {(c) Asynchronous};
+  \tlbox[fill=speech]{0}{3.2}{-3.7}{agent speaks}
+  \tlbox[fill=speech]{3.3}{7.25}{-3.7}{listener speaks}
+  \tlbox[fill=gen]{7.35}{8.55}{-3.7}{generate}
+  \tlbox[fill=speech]{8.65}{12.1}{-3.7}{agent speaks}
+  \node[font=\scriptsize, text=ink, anchor=west] at (12.25,-3.7) {waits nothing};
+  % background jobs
+  \tlbox[fill=rec]{0}{1.2}{-4.75}{recall}
+  \tlbox[fill=rec, dashed]{5.3}{6.5}{-4.75}{recall}
+  \node[font=\scriptsize, text=muted, anchor=west] at (1.3,-4.75) {from the previous reply};
+  \node[font=\scriptsize, text=muted, anchor=east] at (6.55,-4.3) {from a partial transcript};
+  % blackboard
+  \draw[draw=blue, fill=white, line width=0.6pt, rounded corners=1.2pt] (0,-5.72) rectangle (7.25,-5.36);
+  \node[font=\scriptsize, text=ink] at (3.6,-5.54) {blackboard: latest finished record};
+  \draw[->, blue, line width=0.6pt] (0.6,-5.01) -- (0.6,-5.36);
+  \draw[->, blue, line width=0.6pt] (5.9,-5.01) -- (5.9,-5.36);
+  \draw[->, blue, line width=0.6pt] (7.25,-5.54) -- (7.95,-5.54) -- (7.95,-3.96);
+  \node[font=\scriptsize, text=ink, anchor=west] at (8.05,-4.75) {read at once; never wait};
+\end{tikzpicture}}
+
+\newcommand{\architecturefigure}{%
+\begin{tikzpicture}[x=1cm, y=1cm, >={Stealth[length=4pt]},
+    box/.style={draw=hair, line width=0.5pt, rounded corners=1.5pt, fill=white,
+                align=center, font=\scriptsize, text=ink, minimum height=0.78cm, inner sep=3pt},
+    fast/.style={->, ink, line width=0.9pt},
+    slow/.style={->, blue, line width=0.6pt, dashed}]
+  % fast path
+  \node[box, fill=speech, minimum width=2.3cm] (utt) at (0,0) {incoming\\utterance};
+  \node[box, fill=gen, minimum width=2.5cm] (asm) at (4.0,0) {assembler\\(budgeted slots)};
+  \node[box, fill=gen, minimum width=1.6cm] (llm) at (8.6,0) {model};
+  \node[box, fill=speech, minimum width=2.1cm] (rep) at (12.2,0) {spoken\\reply};
+  \draw[fast] (utt) -- (asm);
+  \draw[fast] (asm) -- node[above, font=\scriptsize, text=muted] {working memory} (llm);
+  \draw[fast] (llm) -- (rep);
+  \node[font=\scriptsize\itshape, text=ink, anchor=west] at (-1.15,0.82) {reply path: reads only, never waits};
+  % slow path
+  \node[box, minimum width=2.3cm] (evt) at (0,-2.3) {conversation\\so far};
+  \node[box, fill=rec, minimum width=2.5cm] (bt) at (4.0,-2.3) {recall jobs\\(one writer per kind)};
+  \node[box, draw=blue, minimum width=3.3cm] (bb) at (8.6,-2.3) {blackboard\\record: kind, $s_{\mathrm{based}}$, body};
+  \node[box, minimum width=2.1cm] (mem) at (4.0,-3.95) {long-term\\memory};
+  \draw[slow] (utt) -- (evt);
+  \draw[slow] (evt) -- (bt);
+  \draw[slow] (bt) -- node[above, font=\scriptsize, text=muted] {write} (bb);
+  \draw[slow] (mem) -- node[right, font=\scriptsize, text=muted] {search} (bt);
+  \draw[fast, blue] (bb.north) -- ++(0,0.55) -| (asm.south);
+  \node[font=\scriptsize, text=ink, anchor=south west] at (4.15,-1.34)
+       {read latest; drop if $s_{\mathrm{now}}-s_{\mathrm{based}}>\ell_{\max}$};
+  \node[font=\scriptsize\itshape, text=ink, anchor=west] at (-1.15,-3.2) {background: may take seconds};
+\end{tikzpicture}}

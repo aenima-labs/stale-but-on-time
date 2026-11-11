@@ -1,0 +1,12 @@
+id: recall-when-asked
+title: State the remembered fact when asked
+description: When the listener asks for a fact that the memorome contains, the spoken reply states that
+  fact.
+severity: medium
+tags:
+- recall
+- grounding
+provenance:
+- Written for this study; fictional
+evaluators: []
+selftests: []

@@ -1,0 +1,380 @@
+# Source for the async-recall pack and its memorome fixture.
+# Everything here is fictional and was written for this study. The person,
+# her family, the towns, the businesses and every date are invented.
+# `src/build_pack.py` turns this file into `pack/` and `fixtures/`.
+
+persona:
+  name: Tessaly Brackwen
+  lifespan: 1941-2023
+  listener: her grandchild
+
+memorome:
+  c-birth: Tessaly Brackwen was born on 3 March 1941 in Hollin Reach, a harbour town. She was the younger of two children; her brother Ansel was four years older.
+  c-lighthouse: Her father, Wilmot, kept the lighthouse at Carrow Point. As a girl Tessaly counted the 112 steps to the lamp room every evening and wound the mechanism with him.
+  c-mother: Her mother, Edrith, was a seamstress who sewed sails in winter and wedding dresses in summer. Tessaly said she learned patience from watching her mother unpick a seam without complaint.
+  c-dog: The family dog was a wire-haired terrier called Pilchard, who rode in the bow of her father's skiff. Pilchard lived to fifteen and is buried under the quince tree.
+  c-flood: In January 1953 a storm surge flooded the lower town. Tessaly, then eleven, spent two nights in the church hall of St Brannoc and remembered the smell of wet wool ever after.
+  c-school: At school she won a prize for penmanship at the age of nine, a green fountain pen she kept all her life. She disliked arithmetic and was once punished for drawing in the margins.
+  w-apprentice: At eighteen, in 1959, she was apprenticed at the Marlowe & Finch bindery. Old Mr Finch made her sew headbands for six months before she was allowed to touch leather.
+  w-first-book: The first book she restored on her own was a water-stained hymnal from the 1953 flood. She charged nothing for it and returned it to St Brannoc chapel.
+  w-shop: She opened her own bindery, The Gilded Signature, on Tanner's Row in 1974 and ran it for twenty-nine years, closing in 2003.
+  w-marbling: Her speciality was marbled endpapers. Her signature pattern, which she called storm tide, used indigo and rust swirled with a comb made from her mother's hat pins.
+  w-ledger: Her largest commission came in 1986, rebinding the Hollin Reach harbour ledger, 640 pages recording every ship since 1802. It took her eleven weeks.
+  w-corwin: She trained one apprentice, Corwin Hale, who started by sweeping the shop floor at sixteen. He took over her tools when she retired and sent her a hand-bound diary every December.
+  w-motto: Her workshop rule was "measure twice, glue once". She had it painted above the press and repeated it to anyone who rushed.
+  h-meeting: She met Edmund in 1962 when the Carrow ferry was delayed three hours by fog. He lent her his coat and they shared a bag of peppermints.
+  h-wedding: Tessaly and Edmund married on 14 May 1964 at St Brannoc chapel. It rained all morning and cleared at the moment they walked out; she carried lilac from her mother's garden.
+  h-honeymoon: For their honeymoon they took the night train to Vessant and stayed five days. Edmund lost his hat out of the carriage window on the first evening.
+  h-clockmaker: Edmund was a clockmaker with a workshop behind the house. He repaired the town hall clock twice and refused payment both times.
+  h-clock: For their twenty-fifth anniversary Edmund built her a ship's clock in a walnut case. He set it four minutes fast on purpose so she would never miss the ferry.
+  h-waltz: Edmund's favourite tune was The Larkspur Waltz. He whistled it while working, and it was played at his funeral in 2011.
+  k-rosalind: Their daughter Rosalind was born in 1966. She became a marine biologist who studies kelp forests; Tessaly kept her first published paper in the family Bible.
+  k-jory: Their son Jory was born in 1969 and became a baker. His shop sells a saffron bun made to Tessaly's recipe.
+  k-arm: In the summer of 1977 Jory fell from the pear tree and broke his left arm. Tessaly covered the plaster cast in blue book cloth so he would stop picking at it.
+  k-first-word: Jory's first word was "boat". Rosalind, according to Tessaly, said nothing for two years and then spoke in full sentences.
+  k-wren: Her granddaughter Wren, Rosalind's child, spent every August with her. She taught Wren to sew a pamphlet stitch at the age of seven.
+  b-bees: She kept bees from 1980, eventually six hives at the end of the garden. She talked to them every morning and told them the family news first.
+  b-honey: Her heather honey won second prize at the Dunmere fair in 1991. She maintained that the winner had added sugar.
+  s-swim: Every New Year's Day she swam in the harbour, a habit she kept until she was seventy. She said the cold reset the year.
+  g-chess: On Thursday evenings she played chess with her neighbour Mr Okafor. Over thirty years he won slightly more often, a fact she disputed.
+  g-garden: Her garden had a quince tree, planted the year Rosalind was born. She made quince jelly every October and gave most of it away.
+  g-knit: She knitted one fisherman's jumper each winter, always in undyed wool. She never followed a pattern and never made two alike.
+  f-saffron: Her saffron buns were made with a pinch of cardamom and soaked currants and baked on Saturdays. The recipe came from her grandmother Hester.
+  f-soup: When anyone was ill she made leek and smoked haddock soup. She believed it cured most things and that embarrassment cured the rest.
+  f-celery: She could not stand celery and picked it out of everything. She took her tea black with a slice of lemon.
+  t-japan: In 1998 she travelled to Japan for three weeks to study suminagashi, floating-ink marbling, with a teacher named Hayato Mori. She called it the only time she felt like a beginner again.
+  t-passport: On a holiday in Port Saverne in 1983 she lost her passport on the second day and spent the rest of the week visiting the consulate. She said the consul's waiting room had the best coffee of the trip.
+  t-walk: At sixty she walked the Greywether coast path, 190 miles in sixteen days, with Rosalind joining her for the last three.
+  v-grudges: Her advice on quarrels was never to go to bed on an argument you can end with a cup of tea. She did not speak to her brother Ansel for two years after their father's funeral and regretted it.
+  v-piano: Her one stated regret was never learning the piano. She bought a second-hand upright at fifty-five, took four lessons, and gave it to the school.
+  v-faith: She was not especially religious but went to St Brannoc at Christmas and for the harvest service. She said she believed in hymns and good glue.
+  v-money: She kept household accounts in a blue ledger from 1964 onwards and never bought on credit. She let Corwin pay his rent late more than once.
+  l-hip: She had a hip replacement in 2015. Bored in hospital, she rebound the ward's visitor book with thread from a nurse's sewing kit.
+  l-flat: In 2016 she moved from the house to a second-floor flat on Quay Street with a view of the harbour mouth. She took the ship's clock and the press and little else.
+  l-cat: Her last companion was a grey cat named Vellum, who slept in the paper drawer. Vellum came from the lifeboat station, where she had been living under the slipway.
+  l-classes: In retirement she taught a free bookbinding class at the town library on Tuesday mornings. Her oldest student was ninety-one.
+  o-bone-folder: Her most prized tool was a brass-tipped bone folder given to her by Mr Finch when she finished her apprenticeship. She would not let anyone else use it.
+  o-quilt: The quilt on her bed was pieced from offcuts of her mother's dressmaking, including a square from her own wedding dress.
+  e-ansel: Her brother Ansel emigrated in 1960 and worked as a ship's engineer. They wrote to each other every month after they reconciled; she kept his letters in a biscuit tin.
+  e-radio: She listened to the shipping forecast every night before sleeping. She said it was the only poetry she knew by heart.
+
+# class: asked-continuing | asked-shift | unprompted | abstain
+# continuity: continuing (the lead-in is on the topic) | abrupt (it is not)
+cases:
+  # --- asked, continuing topic ------------------------------------------------
+  - id: honey-prize
+    class: asked-continuing
+    continuity: continuing
+    gold: [b-honey]
+    u1: Grandma kept bees, didn't she? I remember the hives at the end of the garden.
+    a1: She did. She started in 1980 and talked to them every morning, telling them the family news first.
+    u2: Did her honey ever win anything?
+    keys: [second prize, Dunmere]
+  - id: anniversary-clock
+    class: asked-continuing
+    continuity: continuing
+    gold: [h-clock]
+    u1: I have Grandpa Edmund's old tools in a box. He was a clockmaker, right?
+    a1: Yes. He had a workshop behind the house and twice repaired the town hall clock without taking payment.
+    u2: Did he ever make a clock for her?
+    keys: [four minutes, walnut, ship's clock, twenty-fifth, 25th]
+  - id: honeymoon
+    class: asked-continuing
+    continuity: continuing
+    gold: [h-honeymoon]
+    u1: I found their wedding photo yesterday. It looks like it had been raining.
+    a1: It rained all morning on 14 May 1964 and cleared just as they walked out of St Brannoc chapel.
+    u2: Where did they go afterwards, for the honeymoon?
+    keys: [Vessant]
+  - id: apprentice
+    class: asked-continuing
+    continuity: continuing
+    gold: [w-corwin]
+    u1: Tell me about her bookbinding shop.
+    a1: She opened The Gilded Signature on Tanner's Row in 1974 and ran it for twenty-nine years.
+    u2: Did anyone work there with her?
+    keys: [Corwin]
+  - id: biggest-job
+    class: asked-continuing
+    continuity: continuing
+    gold: [w-ledger]
+    u1: What kind of books did she bind at the shop?
+    a1: All kinds, though she was best known for her marbled endpapers, especially a pattern she called storm tide.
+    u2: What was the biggest job she ever took on?
+    keys: [harbour ledger, "640", "1986", eleven weeks]
+  - id: lighthouse-pet
+    class: asked-continuing
+    continuity: continuing
+    gold: [c-dog]
+    u1: What was her childhood like, out at the lighthouse?
+    a1: Her father Wilmot kept the light at Carrow Point, and she climbed the steps to the lamp room with him every evening.
+    u2: Did they have any pets out there?
+    keys: [Pilchard]
+  - id: jory-injury
+    class: asked-continuing
+    continuity: continuing
+    gold: [k-arm]
+    u1: Uncle Jory says he was a terror as a boy.
+    a1: He was born in 1969, and he grew up to be a baker, so he calmed down eventually.
+    u2: Did he ever hurt himself as a child?
+    keys: [pear tree, book cloth, "1977"]
+  - id: flat-cat
+    class: asked-continuing
+    continuity: continuing
+    gold: [l-cat]
+    u1: I visited her flat on Quay Street a few times near the end.
+    a1: She moved there in 2016, to the second floor, with a view of the harbour mouth.
+    u2: Wasn't there a cat?
+    keys: [Vellum]
+  - id: marbling-travel
+    class: asked-continuing
+    continuity: continuing
+    gold: [t-japan]
+    u1: Her marbled papers are beautiful. I have one framed.
+    a1: Marbling was her speciality. Her comb was made from her mother's hat pins.
+    u2: Did she ever travel anywhere to study it?
+    keys: [Hayato, Mori, suminagashi, Japan]
+  - id: regret
+    class: asked-continuing
+    continuity: continuing
+    gold: [v-piano, v-grudges]
+    u1: She always seemed so content with her life.
+    a1: Mostly she was. She liked to say she believed in hymns and good glue.
+    u2: Was there anything she regretted?
+    keys: [piano, Ansel, her brother]
+
+  # --- asked, abrupt topic shift ----------------------------------------------
+  - id: shift-dog-name
+    class: asked-shift
+    continuity: abrupt
+    gold: [c-dog]
+    u1: I've been reading about beekeeping lately.
+    a1: Tessaly kept bees from 1980 and told them the family news every morning.
+    u2: "Completely different question: what was the name of the dog she had as a child?"
+    keys: [Pilchard]
+  - id: shift-wedding-date
+    class: asked-shift
+    continuity: abrupt
+    gold: [h-wedding]
+    u1: Her saffron buns were the best thing about Saturdays.
+    a1: She baked them every Saturday, with cardamom and soaked currants, from her grandmother Hester's recipe.
+    u2: "That reminds me, I need it for the family tree: what date did she and Edmund get married?"
+    keys: [14 May, May 14, 14th of May, "1964"]
+  - id: shift-shop-name
+    class: asked-shift
+    continuity: abrupt
+    gold: [w-shop]
+    u1: Did she really swim in the harbour in winter?
+    a1: Every New Year's Day until she was seventy. She said the cold reset the year.
+    u2: Changing the subject, what was her bindery called?
+    keys: [Gilded Signature]
+  - id: shift-honey-prize
+    class: asked-shift
+    continuity: abrupt
+    gold: [b-honey]
+    u1: I heard Grandpa Edmund used to whistle while he worked.
+    a1: He did, always the same tune, his favourite waltz.
+    u2: On another note, did her honey ever win a prize at a fair?
+    keys: [second prize, Dunmere]
+  - id: shift-lighthouse-steps
+    class: asked-shift
+    continuity: abrupt
+    gold: [c-lighthouse]
+    u1: She played chess, didn't she?
+    a1: Every Thursday evening with her neighbour Mr Okafor, for about thirty years.
+    u2: "Something else I've wondered: how many steps were there up the lighthouse at Carrow Point?"
+    keys: ["112"]
+  - id: shift-waltz
+    class: asked-shift
+    continuity: abrupt
+    gold: [h-waltz]
+    u1: I'm thinking of walking a bit of the coast path this summer.
+    a1: She walked the whole Greywether coast path at sixty, 190 miles in sixteen days.
+    u2: Before I forget, what was the tune Grandpa Edmund loved? We want to play it at the reunion.
+    keys: [Larkspur]
+  - id: shift-teacher
+    class: asked-shift
+    continuity: abrupt
+    gold: [t-japan]
+    u1: Mum says Grandma couldn't stand celery.
+    a1: She picked it out of everything, and she took her tea black with a slice of lemon.
+    u2: Unrelated, but who was the teacher she studied with in Japan?
+    keys: [Hayato, Mori]
+  - id: shift-cat-origin
+    class: asked-shift
+    continuity: abrupt
+    gold: [l-cat]
+    u1: Her quilt is on my bed now.
+    a1: It was pieced from offcuts of her mother's dressmaking, including a square from her own wedding dress.
+    u2: Oh, and where did her cat Vellum come from originally?
+    keys: [lifeboat, slipway]
+  - id: shift-hip-year
+    class: asked-shift
+    continuity: abrupt
+    gold: [l-hip]
+    u1: Did she go to church much?
+    a1: Only at Christmas and for the harvest service at St Brannoc.
+    u2: "Different topic: what year did she have her hip replaced?"
+    keys: ["2015"]
+  - id: shift-first-word
+    class: asked-shift
+    continuity: abrupt
+    gold: [k-first-word]
+    u1: I'd love to see the harbour ledger she rebound.
+    a1: It was her largest commission, 640 pages recording every ship since 1802.
+    u2: By the way, what was Uncle Jory's first word?
+    keys: [boat]
+
+  # --- unprompted: the listener asks nothing, but a memory is relevant --------
+  - id: amb-flood
+    class: unprompted
+    continuity: continuing
+    gold: [c-flood]
+    u1: The storm last night was something. The harbour road is closed.
+    a1: Storms were part of life in Hollin Reach. Her father watched them from the lighthouse at Carrow Point.
+    u2: They're saying the lower town might flood if the surge comes in with the tide.
+    keys: ["1953", church hall, wet wool]
+  - id: amb-honey-show
+    class: unprompted
+    continuity: continuing
+    gold: [b-honey]
+    u1: My neighbour has started keeping bees.
+    a1: Tessaly would have understood that. She kept six hives at the end of the garden.
+    u2: He entered his honey in the county show this year and came nowhere, poor man.
+    keys: [second prize, Dunmere, added sugar]
+  - id: amb-saffron
+    class: unprompted
+    continuity: continuing
+    gold: [f-saffron]
+    u1: I've been baking at weekends to unwind.
+    a1: That runs in the family. Jory became a baker, after all.
+    u2: This Saturday I'm trying something with saffron for the first time.
+    keys: [cardamom, currants, Hester]
+  - id: amb-quarrel
+    class: unprompted
+    continuity: continuing
+    gold: [v-grudges]
+    u1: Things have been tense with my sister since the funeral.
+    a1: I'm sorry. That sounds hard.
+    u2: We haven't spoken in weeks, and I keep going to bed angry about it.
+    keys: [cup of tea, Ansel, two years]
+  - id: amb-apprenticeship
+    class: unprompted
+    continuity: continuing
+    gold: [w-apprentice]
+    u1: I started my apprenticeship at the joinery this month.
+    a1: Congratulations. Tessaly began as an apprentice too, at eighteen.
+    u2: So far they've only let me sweep and sand. Six weeks of sanding.
+    keys: [headbands, six months, Finch]
+  - id: amb-piano
+    class: unprompted
+    continuity: abrupt
+    gold: [v-piano]
+    u1: Work has been exhausting this week.
+    a1: I'm sorry to hear that. I hope the weekend gives you some rest.
+    u2: One nice thing, though. I've signed up for piano lessons, and the first one is on Monday.
+    keys: [second-hand upright, four lessons, regret]
+  - id: amb-passport
+    class: unprompted
+    continuity: abrupt
+    gold: [t-passport]
+    u1: The garden is finally looking decent.
+    a1: That's good to hear.
+    u2: Anyway, I'm in a panic. We fly on Friday and I can't find my passport anywhere.
+    keys: [consulate, consul, "1983", Port Saverne]
+  - id: amb-hospital
+    class: unprompted
+    continuity: abrupt
+    gold: [l-hip]
+    u1: I finally cleared out the attic this weekend.
+    a1: That's a big job. Well done.
+    u2: Dad's going into hospital next week for a new hip, and he's dreading the boredom.
+    keys: [visitor book, sewing kit, "2015"]
+  - id: amb-jumper
+    class: unprompted
+    continuity: abrupt
+    gold: [g-knit]
+    u1: The trains were a mess again this morning.
+    a1: That sounds frustrating.
+    u2: At least I got some knitting done on the way. I'm attempting my first jumper.
+    keys: [undyed, fisherman]
+  - id: amb-swim
+    class: unprompted
+    continuity: abrupt
+    gold: [s-swim]
+    u1: I've had a cold all week.
+    a1: I hope you're feeling better soon.
+    u2: My friends want me to do a New Year's Day sea swim with them. I think they're mad.
+    keys: [seventy, reset the year]
+
+  # --- abstain: the memorome is silent, with tempting near-misses -------------
+  - id: abs-rosalind-first-word
+    class: abstain
+    continuity: continuing
+    gold: []
+    u1: Mum was a quiet child, apparently.
+    a1: By Tessaly's account Rosalind said nothing for two years and then spoke in full sentences.
+    u2: So what was her actual first word?
+  - id: abs-edmund-birth-year
+    class: abstain
+    continuity: continuing
+    gold: []
+    u1: Grandpa Edmund was a clockmaker, wasn't he?
+    a1: Yes, with a workshop behind the house.
+    u2: What year was he born?
+  - id: abs-dressmaker
+    class: abstain
+    continuity: continuing
+    gold: []
+    u1: I saw the square from her wedding dress in the quilt.
+    a1: Yes, the quilt was pieced from her mother's dressmaking offcuts and includes that square.
+    u2: Who made the wedding dress?
+  - id: abs-chess-opening
+    class: abstain
+    continuity: continuing
+    gold: []
+    u1: I've taken up chess again.
+    a1: Tessaly played every Thursday evening with her neighbour Mr Okafor.
+    u2: What was her favourite opening?
+  - id: abs-japan-city
+    class: abstain
+    continuity: continuing
+    gold: []
+    u1: I'm planning a trip to Japan next spring.
+    a1: Tessaly went in 1998, for three weeks, to study suminagashi with Hayato Mori.
+    u2: Which city did she stay in?
+  - id: abs-school-name
+    class: abstain
+    continuity: abrupt
+    gold: []
+    u1: Did she like quince jelly, or did she just make it?
+    a1: She made it every October and gave most of it away.
+    u2: Different question. What was the name of the school she went to?
+  - id: abs-coat-colour
+    class: abstain
+    continuity: abrupt
+    gold: []
+    u1: Her saffron buns were famous in the family.
+    a1: Jory's shop still sells a saffron bun made to her recipe.
+    u2: Something I've always wondered. What colour was the coat Edmund lent her the day they met?
+  - id: abs-ansel-country
+    class: abstain
+    continuity: abrupt
+    gold: []
+    u1: I heard she rebound a visitor book while she was in hospital.
+    a1: She did, in 2015, with thread from a nurse's sewing kit.
+    u2: On another subject, which country did her brother Ansel emigrate to?
+  - id: abs-car
+    class: abstain
+    continuity: abrupt
+    gold: []
+    u1: She listened to the shipping forecast every night, Mum says.
+    a1: Every night before sleeping. She called it the only poetry she knew by heart.
+    u2: Random question, but what kind of car did she drive?
+  - id: abs-rosalind-university
+    class: abstain
+    continuity: abrupt
+    gold: []
+    u1: I still have one of her fisherman's jumpers.
+    a1: She knitted one each winter, always in undyed wool, and never made two alike.
+    u2: By the way, which university did Mum study at?

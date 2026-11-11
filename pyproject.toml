@@ -1,0 +1,17 @@
+[project]
+name = "stale-but-on-time"
+version = "0.1.0"
+description = "Experiments for 'Stale but on Time: The Cost of Asynchronous Memory Recall in Real-Time Conversational Agents'"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "numpy>=2.0",
+    "matplotlib>=3.9",
+    "pyyaml>=6.0",
+    "circumstances",
+]
+
+[tool.uv.sources]
+circumstances = { git = "https://github.com/aenima-labs/circumstances", rev = "8fa1ff808135b2c598828040a0a8b0eb17a8dad0" }
+
+[tool.uv]
+package = false
