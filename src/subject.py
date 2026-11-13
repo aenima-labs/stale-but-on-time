@@ -91,6 +91,12 @@ def _post(path: str, body: dict) -> dict:
 
 
 class Memorome:
+    """One person's notes and the retriever over them.
+
+    "Memorome" is the term of Xiao et al. (2026), "Memory is Not Search", Section 2,
+    for the whole collection of one person's memories.
+    """
+
     def __init__(self, name: str) -> None:
         data = json.loads((ROOT / "fixtures" / f"{name}.json").read_text())
         self.persona: dict[str, str] = data["persona"]

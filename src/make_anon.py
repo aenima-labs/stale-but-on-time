@@ -93,6 +93,10 @@ from its bundles but not re-run.
 | `vendor/circumstances/` | The evaluation framework, vendored at the commit used |
 | `paper/` | LaTeX sources, generated tables, number macros |
 
+"Memorome", in file names, code and result events, is the term of Xiao et al. (2026),
+"Memory is Not Search", Section 2, for the whole collection of one person's memories.
+Here it is the store of 48 notes.
+
 ## Reproduce
 
 Needs `uv`, `tectonic` and, only for re-running Experiments 1 and 2, a local Ollama with

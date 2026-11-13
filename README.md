@@ -22,6 +22,10 @@ real-time conversational agent. Target venue: TMLR.
 | `results/` | Per-utterance retrievals (E1), sealed run bundles (E2: `e2` main run, `e2-think` reasoning on, `e2-qwen3` second model), summaries, audit sample, provenance notes (`*_NOTES.md`) |
 | `tasks/`, `src/fetch_data.py` | [Invoke](https://www.pyinvoke.org) tasks for every step; data download |
 
+"Memorome", in file names, code and result events, is the term of Xiao et al. (2026),
+[Memory is Not Search](https://www.engramme.com/index/memory-is-not-search), Section 2,
+for the whole collection of one person's memories. Here it is the store of 48 notes.
+
 ## Data
 
 | What | Where | Needed for |
