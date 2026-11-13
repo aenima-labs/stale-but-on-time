@@ -1,0 +1,18 @@
+{
+  "kind": "cloud_run",
+  "job": "sbot-e2",
+  "execution": "sbot-e2-wd5k4",
+  "image": "europe-west1-docker.pkg.dev/kodama-500509/stale-but-on-time/e2-job:f42f7eb",
+  "commit": "f42f7eb",
+  "gpu": "nvidia-l4",
+  "vcpus": 6,
+  "memory_gib": 24,
+  "region": "europe-west1",
+  "outcome": "succeeded",
+  "started_utc": "2026-11-13T17:33:16.520644Z",
+  "completed_utc": "2026-11-13T17:45:34.088352Z",
+  "seconds": 737.567708,
+  "hours": 0.2048799188888889,
+  "cost_usd": 0.25276445353160004,
+  "note": "Billed time from the execution's start to completion (Cloud Run bills per second while the task runs); the monthly free tier is not subtracted."
+}

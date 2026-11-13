@@ -1,0 +1,330 @@
+{
+  "plan": {
+    "run": "e2-cloudrun-l4-timing",
+    "conditions": [
+      "none",
+      "tool",
+      "blocking",
+      "lag1",
+      "prefetch50",
+      "hybrid"
+    ],
+    "trials": {
+      "none": 40,
+      "tool": 40,
+      "blocking": 40,
+      "lag1": 40,
+      "prefetch50": 40,
+      "hybrid": 40
+    },
+    "provider": "ollama",
+    "model": "gemma4:e4b",
+    "embed_provider": "ollama",
+    "embed_model": "nomic-embed-text",
+    "think": false,
+    "machine": {
+      "machine_type": "",
+      "region": "europe-west1",
+      "spot": false,
+      "disk_gib": 200,
+      "disk_type": "hyperdisk-balanced",
+      "startup_min": 10.0,
+      "teardown_min": 1.0,
+      "max_lifetime_h": 1,
+      "duration_factor": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "kind": "cloud_run",
+      "gpu": "nvidia-l4",
+      "vcpus": 6,
+      "memory_gib": 24
+    },
+    "date": "2026-11-13"
+  },
+  "profile": {
+    "source": "telemetry of results/e2-cloudrun-l4-subset",
+    "token_method": "measured",
+    "provider": "ollama",
+    "model": "gemma4:e4b"
+  },
+  "matched_profile": true,
+  "prices": {
+    "chat": {
+      "provider": "ollama",
+      "model": "*",
+      "input_per_mtok": 0.0,
+      "cached_input_per_mtok": 0.0,
+      "output_per_mtok": 0.0,
+      "source": "local inference, no per-token charge",
+      "read_on": "2026-11-13"
+    },
+    "embed": {
+      "provider": "ollama",
+      "model": "*",
+      "input_per_mtok": 0.0,
+      "cached_input_per_mtok": 0.0,
+      "output_per_mtok": 0.0,
+      "source": "local inference, no per-token charge",
+      "read_on": "2026-11-13"
+    }
+  },
+  "conditions": {
+    "none": {
+      "trials": 40,
+      "chat_calls": [
+        36.0,
+        40.0,
+        44.0
+      ],
+      "input_tokens": [
+        9288.0,
+        10320.0,
+        11352.0
+      ],
+      "output_tokens": [
+        590.4,
+        656.0,
+        721.6
+      ],
+      "embed_tokens": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        127.18254806600001,
+        254.36509613200002,
+        508.73019226400004
+      ]
+    },
+    "tool": {
+      "trials": 40,
+      "chat_calls": [
+        72.0,
+        80.0,
+        88.0
+      ],
+      "input_tokens": [
+        26866.8,
+        29852.0,
+        32837.2
+      ],
+      "output_tokens": [
+        1882.8,
+        2092.0,
+        2301.2
+      ],
+      "embed_tokens": [
+        396.0,
+        440.0,
+        484.0
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        58.953621228,
+        117.907242456,
+        235.814484912
+      ]
+    },
+    "blocking": {
+      "trials": 40,
+      "chat_calls": [
+        36.0,
+        40.0,
+        44.0
+      ],
+      "input_tokens": [
+        14148.0,
+        15720.0,
+        17292.0
+      ],
+      "output_tokens": [
+        1132.8381427382994,
+        1316.0,
+        1499.1618572617006
+      ],
+      "embed_tokens": [
+        1890.0,
+        2100.0,
+        2310.0
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        13.296558372,
+        26.593116744,
+        53.186233488
+      ]
+    },
+    "lag1": {
+      "trials": 40,
+      "chat_calls": [
+        36.0,
+        40.0,
+        44.0
+      ],
+      "input_tokens": [
+        13896.0,
+        15440.0,
+        16984.0
+      ],
+      "output_tokens": [
+        1057.4666666666667,
+        1260.0,
+        1462.5333333333333
+      ],
+      "embed_tokens": [
+        1458.0,
+        1620.0,
+        1782.0
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        12.846016936,
+        25.692033872,
+        51.384067744
+      ]
+    },
+    "prefetch50": {
+      "trials": 40,
+      "chat_calls": [
+        36.0,
+        40.0,
+        44.0
+      ],
+      "input_tokens": [
+        14328.0,
+        15920.0,
+        17512.0
+      ],
+      "output_tokens": [
+        1057.4666666666667,
+        1260.0,
+        1462.5333333333333
+      ],
+      "embed_tokens": [
+        1656.0,
+        1840.0,
+        2024.0
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        12.91123343,
+        25.82246686,
+        51.64493372
+      ]
+    },
+    "hybrid": {
+      "trials": 40,
+      "chat_calls": [
+        57.598666805526626,
+        64.0,
+        70.40133319447338
+      ],
+      "input_tokens": [
+        26924.4,
+        29916.0,
+        32907.6
+      ],
+      "output_tokens": [
+        1625.7273838736874,
+        1860.0,
+        2094.2726161263126
+      ],
+      "embed_tokens": [
+        1630.8,
+        1812.0,
+        1993.2
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        19.535020334,
+        39.070040668,
+        78.140081336
+      ]
+    }
+  },
+  "totals": {
+    "chat_calls": [
+      273.59866680552665,
+      304.0,
+      334.4013331944734
+    ],
+    "input_tokens": [
+      105451.20000000001,
+      117168.0,
+      128884.79999999999
+    ],
+    "output_tokens": [
+      7346.69885994532,
+      8444.0,
+      9541.301140054678
+    ],
+    "embed_tokens": [
+      18238.8,
+      19020.0,
+      19801.2
+    ],
+    "cost_usd": [
+      0.3100492569400283,
+      0.39391651388005644,
+      0.5616510277601129
+    ],
+    "duration_s": [
+      244.72499836600002,
+      489.44999673200005,
+      978.8999934640001
+    ]
+  },
+  "machine": {
+    "machine_type": "cloud-run nvidia-l4 6 vCPU 24 GiB",
+    "region": "europe-west1",
+    "spot": false,
+    "hourly_usd": 1.2337200000000001,
+    "disk": "in-memory file system",
+    "startup_min": 10.0,
+    "teardown_min": 1.0,
+    "hours": [
+      0.2513124995461111,
+      0.3192916657588889,
+      0.45524999818444445
+    ],
+    "cost_usd": [
+      0.3100492569400283,
+      0.39391651388005644,
+      0.5616510277601129
+    ],
+    "max_lifetime_h": 1,
+    "worst_case_usd": 1.2337200000000001,
+    "price_source": "https://cloud.google.com/run/pricing",
+    "price_read_on": "2026-11-13"
+  },
+  "spends_money": true,
+  "notes": []
+}
