@@ -202,6 +202,42 @@ def fig_tradeoff(e2: dict) -> None:
     save(fig, "fig-tradeoff")
 
 
+RUN_TITLES = {
+    "e2": "gemma4, reasoning off\n(main run)",
+    "e2-think": "gemma4, reasoning on",
+    "e2-qwen3": "qwen3, reasoning off",
+}
+
+
+def fig_robust(runs: dict[str, dict]) -> None:
+    """Recall trials passed per condition, one panel per model setting."""
+    fig, axes = plt.subplots(1, len(runs), figsize=(WIDTH, 1.95), sharey=True)
+    y = np.arange(len(ORDER))[::-1]
+    for ax, (run, summary) in zip(axes, runs.items(), strict=True):
+        triples = [summary["by_condition"][c]["recall_pass"] for c in ORDER]
+        mean = np.array([100 * t[0] for t in triples])
+        lo = np.array([100 * t[1] for t in triples])
+        hi = np.array([100 * t[2] for t in triples])
+        ax.hlines(y, lo, hi, color=BLUE, linewidth=1.1, alpha=0.55)
+        ax.plot(mean, y, "o", color=BLUE, markersize=4.6, markeredgecolor="white",
+                markeredgewidth=0.7, zorder=3)
+        for xv, yv in zip(mean, y, strict=True):
+            ax.annotate(f"{xv:.0f}", (xv, yv), (0, 5.5), textcoords="offset points",
+                        fontsize=7.5, ha="center", va="bottom", color=MUTED)
+        ax.set_title(RUN_TITLES[run], pad=4)
+        ax.set_xlim(-6, 106)
+        ax.set_xticks([0, 25, 50, 75, 100])
+        ax.set_ylim(-0.6, len(ORDER) - 0.25)
+        ax.grid(axis="y", visible=False)
+        ax.tick_params(axis="y", length=0)
+    axes[0].set_yticks(y, [NAMES[c] for c in ORDER])
+    for label in axes[0].get_yticklabels():
+        label.set_color(INK)
+    fig.supxlabel("recall trials passed (%)", fontsize=9, y=-0.08)
+    fig.subplots_adjust(wspace=0.10)
+    save(fig, "fig-robust")
+
+
 def main() -> None:
     which = sys.argv[1:] or ["e1", "e2"]
     if "e1" in which:
@@ -212,6 +248,13 @@ def main() -> None:
         e2 = json.loads((ROOT / "results" / "e2_summary.json").read_text())
         fig_classes(e2)
         fig_tradeoff(e2)
+        runs = {
+            run: json.loads((ROOT / "results" / f"{run}_summary.json").read_text())
+            for run in RUN_TITLES
+            if (ROOT / "results" / f"{run}_summary.json").exists()
+        }
+        if len(runs) > 1:
+            fig_robust(runs)
 
 
 if __name__ == "__main__":

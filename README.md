@@ -17,8 +17,9 @@ real-time conversational agent. Target venue: TMLR.
 | `src/retrieval.py` | Hybrid BM25 + embedding retriever with reciprocal rank fusion |
 | `src/e1_replay.py`, `src/e1_analyze.py` | Experiment 1: staleness replay on LoCoMo, analysis, timing model |
 | `src/subject.py`, `src/e2_run.py`, `src/e2_analyze.py` | Experiment 2: reference agent (six memory conditions), runner, analysis |
+| `src/e3_analyze.py` | Experiment 3: analysis of the pack run against the product (bundles in `results/e3-kodama`, first run in `results/e3-kodama-run1`) |
 | `src/figures.py`, `src/make_numbers.py` | Figures, table bodies and number macros for the paper |
-| `results/` | Per-utterance retrievals (E1), sealed run bundles (E2), summaries, audit sample |
+| `results/` | Per-utterance retrievals (E1), sealed run bundles (E2: `e2` main run, `e2-think` reasoning on, `e2-qwen3` second model), summaries, audit sample, provenance notes (`*_NOTES.md`) |
 | `tasks/`, `src/fetch_data.py` | [Invoke](https://www.pyinvoke.org) tasks for every step; data download |
 
 ## Data
@@ -32,8 +33,8 @@ real-time conversational agent. Target venue: TMLR.
 
 ## Reproduce
 
-Requires `uv`, a local [Ollama](https://ollama.com) with `nomic-embed-text` and
-`gemma4:e4b`, and `tectonic`. The [Circumstances](https://github.com/aenima-labs/circumstances)
+Requires `uv`, a local [Ollama](https://ollama.com) with `nomic-embed-text`,
+`gemma4:e4b` and (for the second-model run) `qwen3:8b`, and `tectonic`. The [Circumstances](https://github.com/aenima-labs/circumstances)
 framework is pinned by commit in `pyproject.toml` and installed by `uv sync`.
 
 Every step is an [Invoke](https://www.pyinvoke.org) task; `uv run inv --list` shows them all.
@@ -58,8 +59,31 @@ Tasks are grouped by experiment: `data.fetch`; `e1.replay`, `e1.analyze`; `e2.bu
 Extra options go through `--args`, for example
 `uv run inv e2.run --args="--think --out results/e2-think"`.
 
-E2 uses a local `gemma4:e4b`, so a rerun will not reproduce the stored trials
-bit for bit; the sealed bundles in `results/e2` are the record the paper reports.
+`reproduce` runs the main E2 run only. The two robustness runs of Section 6.4 are
+separate, because the first is slow:
+
+```bash
+uv run inv e2.run --args="--think --out results/e2-think"
+```
+
+```bash
+uv run inv e2.run --args="--model qwen3:8b --out results/e2-qwen3"
+```
+
+The reasoning run takes about 2.7 hours on a laptop, the second-model run about 20
+minutes. `e2.analyze` analyses all three runs (`src/e2_analyze.py --run <name>`).
+
+E2 uses local models, so a rerun will not reproduce the stored trials bit for bit;
+the sealed bundles in `results/e2`, `results/e2-think` and `results/e2-qwen3` are the
+record the paper reports. Part of the reasoning run shared the GPU with another
+process; `results/e2-think_NOTES.md` gives the window, and `src/make_numbers.py`
+leaves those trials out of every latency figure.
+
+Experiment 3 runs the same cases against the product itself, which this repository
+does not contain. Its sealed bundles and trial tables are in `results/e3-kodama`
+(the reported run) and `results/e3-kodama-run1` (the first run, kept for
+disclosure); `uv run inv e2.analyze-product` re-analyses them without the product.
+`results/e3_audit_sample.csv` is the sample read against the grades.
 `src/e2_run.py` writes the pack path into each bundle as the relative `pack`, and
 `src/scrub_paths.py` does the same for bundles made earlier (it re-seals them and
 verifies the seal): `uv run inv e2.scrub-paths --dirs=results/e2`.

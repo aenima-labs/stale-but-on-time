@@ -13,7 +13,7 @@ from invoke import Collection, task
 from . import data, e1, e2, paper
 
 
-@task(pre=[e1.analyze, e2.analyze, paper.figures, paper.numbers, paper.build])
+@task(pre=[e1.analyze, e2.analyze, e2.analyze_product, paper.figures, paper.numbers, paper.build])
 def analyze(c):
     """Everything that needs no model: analysis, figures, numbers, paper."""
 
