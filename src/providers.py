@@ -51,6 +51,8 @@ SEMCONV_PROVIDER = {
 }
 # OpenAI models that reject a temperature field (Kodama: provider/options.go).
 OPENAI_FIXED_TEMPERATURE = {"gpt-5.6-luna"}
+# Anthropic models that reject a temperature field (HTTP 400 "`temperature` is deprecated").
+ANTHROPIC_FIXED_TEMPERATURE = {"claude-sonnet-5"}
 KEY_VARIABLES = {
     "openai": ("OPENAI_API_KEY", "KODAMA_MODELS__OPENAI_API_KEY"),
     "anthropic": ("ANTHROPIC_API_KEY", "KODAMA_MODELS__ANTHROPIC_API_KEY"),
@@ -231,8 +233,9 @@ class OpenAIChat(ChatClient):
     def chat(self, request: ChatRequest) -> ChatResult:
         body: dict = {
             "model": self.model,
-            "instructions": request.system,
-            "input": request.messages,
+            # The system prompt is the first input message, as in the Ollama request;
+            # JSON mode also requires the word "json" in the input messages.
+            "input": [{"role": "system", "content": request.system}, *request.messages],
             "max_output_tokens": request.max_tokens,
             "reasoning": {"effort": "low" if request.think else "none"},
             "store": False,
@@ -381,6 +384,10 @@ class AnthropicChat(ChatClient):
     def seed_supported(self) -> bool:
         return False
 
+    @property
+    def temperature_supported(self) -> bool:
+        return self.model not in ANTHROPIC_FIXED_TEMPERATURE
+
     def chat(self, request: ChatRequest) -> ChatResult:
         # No JSON mode: the reply format is asked for in the prompt, as for every provider.
         body: dict = {
@@ -388,8 +395,9 @@ class AnthropicChat(ChatClient):
             "system": request.system,
             "messages": request.messages,
             "max_tokens": request.max_tokens,
-            "temperature": request.temperature,
         }
+        if self.temperature_supported:
+            body["temperature"] = request.temperature
         if request.tool:
             fn = request.tool["function"]
             body["tools"] = [{"name": fn["name"], "description": fn["description"],
