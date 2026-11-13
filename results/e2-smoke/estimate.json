@@ -1,0 +1,152 @@
+{
+  "plan": {
+    "run": "e2-smoke",
+    "conditions": [
+      "blocking",
+      "tool"
+    ],
+    "trials": {
+      "blocking": 10,
+      "tool": 10
+    },
+    "provider": "ollama",
+    "model": "gemma4:e4b",
+    "embed_provider": "ollama",
+    "embed_model": "nomic-embed-text",
+    "think": false,
+    "machine": null,
+    "date": "2026-11-13"
+  },
+  "profile": {
+    "source": "sealed bundles of results/e2 (prompts rebuilt, tokens = characters / 4)",
+    "token_method": "chars/4",
+    "provider": "ollama",
+    "model": "gemma4:e4b"
+  },
+  "matched_profile": false,
+  "prices": {
+    "chat": {
+      "provider": "ollama",
+      "model": "*",
+      "input_per_mtok": 0.0,
+      "cached_input_per_mtok": 0.0,
+      "output_per_mtok": 0.0,
+      "source": "local inference, no per-token charge",
+      "read_on": "2026-11-13"
+    },
+    "embed": {
+      "provider": "ollama",
+      "model": "*",
+      "input_per_mtok": 0.0,
+      "cached_input_per_mtok": 0.0,
+      "output_per_mtok": 0.0,
+      "source": "local inference, no per-token charge",
+      "read_on": "2026-11-13"
+    }
+  },
+  "conditions": {
+    "blocking": {
+      "trials": 10,
+      "chat_calls": [
+        10.0,
+        10.0,
+        10
+      ],
+      "input_tokens": [
+        2842.734375,
+        3790.3125,
+        5041.115625
+      ],
+      "output_tokens": [
+        126.44999999999999,
+        252.89999999999998,
+        2200
+      ],
+      "embed_tokens": [
+        356.4375,
+        475.25,
+        632.0825
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        5.8638027600000004,
+        7.32975345,
+        10.994630175000001
+      ]
+    },
+    "tool": {
+      "trials": 10,
+      "chat_calls": [
+        10.0,
+        19.9,
+        20
+      ],
+      "input_tokens": [
+        2696.438442211055,
+        7154.55,
+        9563.368341708543
+      ],
+      "output_tokens": [
+        214.04375000000002,
+        428.08750000000003,
+        4400
+      ],
+      "embed_tokens": [
+        62.821875000000006,
+        83.7625,
+        113.10063451776651
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        11.2041904,
+        14.005237999999999,
+        21.007856999999998
+      ]
+    }
+  },
+  "totals": {
+    "chat_calls": [
+      20.0,
+      29.9,
+      30.0
+    ],
+    "input_tokens": [
+      5539.172817211055,
+      10944.8625,
+      14604.483966708543
+    ],
+    "output_tokens": [
+      340.49375,
+      680.9875,
+      6600.0
+    ],
+    "embed_tokens": [
+      4318.759375,
+      4458.5125,
+      4644.683134517766
+    ],
+    "cost_usd": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "duration_s": [
+      17.06799316,
+      21.334991449999997,
+      32.002487175
+    ]
+  },
+  "machine": null,
+  "spends_money": false,
+  "notes": [
+    "The profile (sealed bundles of results/e2 (prompts rebuilt, tokens = characters / 4); ollama/gemma4:e4b) is not a measured profile of ollama/gemma4:e4b: the range is wide and its top assumes every trial makes the most calls its condition allows and every call writes all 220 output tokens."
+  ]
+}

@@ -1,0 +1,290 @@
+{
+  "plan": {
+    "run": "e2-anthropic",
+    "conditions": [
+      "none",
+      "tool",
+      "blocking",
+      "lag1",
+      "prefetch50",
+      "hybrid"
+    ],
+    "trials": {
+      "none": 200,
+      "tool": 200,
+      "blocking": 200,
+      "lag1": 200,
+      "prefetch50": 200,
+      "hybrid": 200
+    },
+    "provider": "anthropic",
+    "model": "claude-sonnet-5",
+    "embed_provider": "openai",
+    "embed_model": "text-embedding-3-small",
+    "think": false,
+    "machine": null,
+    "date": "2026-11-13"
+  },
+  "profile": {
+    "source": "telemetry of results/e2-anthropic-pilot",
+    "token_method": "measured",
+    "provider": "anthropic",
+    "model": "claude-sonnet-5"
+  },
+  "matched_profile": true,
+  "prices": {
+    "chat": {
+      "provider": "anthropic",
+      "model": "claude-sonnet-5",
+      "input_per_mtok": 2.0,
+      "cached_input_per_mtok": 0.2,
+      "output_per_mtok": 10.0,
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "read_on": "2026-11-13"
+    },
+    "embed": {
+      "provider": "openai",
+      "model": "text-embedding-3-small",
+      "input_per_mtok": 0.02,
+      "cached_input_per_mtok": 0.02,
+      "output_per_mtok": 0.0,
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "read_on": "2026-11-13"
+    }
+  },
+  "conditions": {
+    "none": {
+      "trials": 200,
+      "chat_calls": [
+        180.0,
+        200.0,
+        220.0
+      ],
+      "input_tokens": [
+        61200.0,
+        68000.0,
+        74800.0
+      ],
+      "output_tokens": [
+        18612.0,
+        20680.0,
+        22748.0
+      ],
+      "embed_tokens": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "cost_usd": [
+        0.30852,
+        0.3428,
+        0.37708
+      ],
+      "duration_s": [
+        363.23820000000006,
+        403.59800000000007,
+        443.9578
+      ]
+    },
+    "tool": {
+      "trials": 200,
+      "chat_calls": [
+        360.0,
+        400.0,
+        440.0
+      ],
+      "input_tokens": [
+        248490.0,
+        276100.0,
+        303710.0
+      ],
+      "output_tokens": [
+        42192.0,
+        46880.0,
+        51568.0
+      ],
+      "embed_tokens": [
+        1655.9999999999998,
+        1839.9999999999998,
+        2023.9999999999998
+      ],
+      "cost_usd": [
+        0.91893312,
+        1.0210367999999999,
+        1.12314048
+      ],
+      "duration_s": [
+        696.5395020000001,
+        773.9327800000001,
+        851.3260580000002
+      ]
+    },
+    "blocking": {
+      "trials": 200,
+      "chat_calls": [
+        180.0,
+        200.0,
+        220.0
+      ],
+      "input_tokens": [
+        97650.0,
+        108500.0,
+        119350.0
+      ],
+      "output_tokens": [
+        17190.0,
+        19100.0,
+        21010.0
+      ],
+      "embed_tokens": [
+        9000.0,
+        10000.0,
+        11000.0
+      ],
+      "cost_usd": [
+        0.36738000000000004,
+        0.40819999999999995,
+        0.44902
+      ],
+      "duration_s": [
+        379.615824,
+        421.79535999999996,
+        463.974896
+      ]
+    },
+    "lag1": {
+      "trials": 200,
+      "chat_calls": [
+        180.0,
+        200.0,
+        220.0
+      ],
+      "input_tokens": [
+        95040.0,
+        105600.0,
+        116160.0
+      ],
+      "output_tokens": [
+        12924.0,
+        14360.0,
+        15796.0
+      ],
+      "embed_tokens": [
+        6840.0,
+        7600.0,
+        8360.0
+      ],
+      "cost_usd": [
+        0.3194568,
+        0.354952,
+        0.3904472
+      ],
+      "duration_s": [
+        316.58808600000003,
+        351.76453999999995,
+        386.94099399999993
+      ]
+    },
+    "prefetch50": {
+      "trials": 200,
+      "chat_calls": [
+        180.0,
+        200.0,
+        220.0
+      ],
+      "input_tokens": [
+        95040.0,
+        105600.0,
+        116160.0
+      ],
+      "output_tokens": [
+        12257.999999999998,
+        13619.999999999998,
+        14981.999999999998
+      ],
+      "embed_tokens": [
+        7830.0,
+        8700.0,
+        9570.0
+      ],
+      "cost_usd": [
+        0.3128166,
+        0.347574,
+        0.3823314
+      ],
+      "duration_s": [
+        306.66799799999995,
+        340.74222,
+        374.816442
+      ]
+    },
+    "hybrid": {
+      "trials": 200,
+      "chat_calls": [
+        270.0,
+        300.0,
+        330.0
+      ],
+      "input_tokens": [
+        252180.0,
+        280200.0,
+        308220.0
+      ],
+      "output_tokens": [
+        22626.0,
+        25140.0,
+        27654.0
+      ],
+      "embed_tokens": [
+        7578.0,
+        8420.0,
+        9262.0
+      ],
+      "cost_usd": [
+        0.7307715600000001,
+        0.8119683999999999,
+        0.89316524
+      ],
+      "duration_s": [
+        543.601512,
+        604.00168,
+        664.4018479999999
+      ]
+    }
+  },
+  "totals": {
+    "chat_calls": [
+      1350.0,
+      1500.0,
+      1650.0
+    ],
+    "input_tokens": [
+      849600.0,
+      944000.0,
+      1038400.0
+    ],
+    "output_tokens": [
+      125802.0,
+      139780.0,
+      153758.0
+    ],
+    "embed_tokens": [
+      43524.0,
+      47180.0,
+      50836.0
+    ],
+    "cost_usd": [
+      2.95809048,
+      3.2867436,
+      3.61539672
+    ],
+    "duration_s": [
+      2606.2511219999997,
+      2895.8345799999997,
+      3185.418038
+    ]
+  },
+  "machine": null,
+  "spends_money": true,
+  "notes": []
+}
