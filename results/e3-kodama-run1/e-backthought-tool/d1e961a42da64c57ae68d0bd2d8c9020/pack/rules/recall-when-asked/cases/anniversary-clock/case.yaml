@@ -1,0 +1,63 @@
+id: recall-when-asked/anniversary-clock
+title: Did he ever make a clock for her?
+description: asked-continuing after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: I have Grandpa Edmund's old tools in a box. He was a clockmaker, right?
+    - role: assistant
+      content: Yes. He had a workshop behind the house and twice repaired the town hall clock without
+        taking payment.
+    lead_in_gap_s: 2.29
+actions:
+- kind: message
+  role: user
+  content: Did he ever make a clock for her?
+expected_outcomes:
+- 'Mention a fact from: h-clock.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - four minutes
+    - walnut
+    - ship's clock
+    - twenty-fifth
+    - 25th
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: For their twenty-fifth anniversary Edmund built her a ship's clock in a walnut case. He set
+      it four minutes fast on purpose so she would never miss the ferry.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-continuing
+- continuity:continuing
+- gold:h-clock

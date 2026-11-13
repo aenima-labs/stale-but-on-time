@@ -1,0 +1,65 @@
+id: recall-unprompted/amb-passport
+title: Anyway, I'm in a panic. We fly on Friday and I can't find my passport anywhere.
+description: unprompted after a abrupt lead-in.
+targets:
+- recall-unprompted
+polarity: normal
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: The garden is finally looking decent.
+    - role: assistant
+      content: That's good to hear.
+    lead_in_gap_s: 4.57
+actions:
+- kind: message
+  role: user
+  content: Anyway, I'm in a panic. We fly on Friday and I can't find my passport anywhere.
+expected_outcomes:
+- 'Mention a fact from: t-passport.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    regex: (?:consulate|consul|1983|Port\ Saverne|nineteen[-\s]+eighty[-\s]+three|nineteen[-\s]+hundred[-\s]+and[-\s]+eighty[-\s]+three|nineteen[-\s]+hundred[-\s]+eighty[-\s]+three)
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: On a holiday in Port Saverne in 1983 she lost her passport on the second day and spent the
+      rest of the week visiting the consulate. She said the consul's waiting room had the best coffee
+      of the trip.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I think it was Nineteen Eighty Three.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:unprompted
+- continuity:abrupt
+- gold:t-passport

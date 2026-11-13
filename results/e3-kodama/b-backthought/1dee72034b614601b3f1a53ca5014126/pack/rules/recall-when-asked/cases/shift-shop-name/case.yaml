@@ -1,0 +1,58 @@
+id: recall-when-asked/shift-shop-name
+title: Changing the subject, what was her bindery called?
+description: asked-shift after a abrupt lead-in.
+targets:
+- recall-when-asked
+polarity: recovery
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: Did she really swim in the harbour in winter?
+    - role: assistant
+      content: Every New Year's Day until she was seventy. She said the cold reset the year.
+    lead_in_gap_s: 2.29
+actions:
+- kind: message
+  role: user
+  content: Changing the subject, what was her bindery called?
+expected_outcomes:
+- 'Mention a fact from: w-shop.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - Gilded Signature
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: She opened her own bindery, The Gilded Signature, on Tanner's Row in 1974 and ran it for
+      twenty-nine years, closing in 2003.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-shift
+- continuity:abrupt
+- gold:w-shop

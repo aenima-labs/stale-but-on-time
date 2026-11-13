@@ -1,0 +1,51 @@
+condition,case,class,attempt,passed,abstain_tool,abstain_text,templated,keys,reply
+a-tool,honeymoon,asked-continuing,4,True,False,False,False,Vessant,"The records show that for their honeymoon, they took the night train to Vessant and stayed for five days. Edmund even lost his hat out of the carriage window the first evening there."
+a-tool,flat-cat,asked-continuing,3,True,False,False,False,Vellum,"It was a lovely, gentle creature; a grey cat named Vellum. He stayed with her near the end, having come from the lifeboat station."
+a-tool,shift-honey-prize,asked-shift,3,True,False,False,False,second prize|Dunmere,The heather honey actually won second prize at the Dunmere fair in nineteen ninety one. She was quite certain that the person who won first place had added sugar to it.
+a-tool,shift-first-word,asked-shift,1,False,False,True,False,boat,I am not sure. Tessaly never dealt with the matter of Uncle Jory's first word.
+a-tool,amb-passport,unprompted,5,False,False,False,False,consulate|consul|1983|Port Saverne,"Oh dear, flying on Friday sounds like a rush. Has Tessaly talked about travel plans with you before?"
+a-tool,amb-jumper,unprompted,1,False,False,True,True,undyed|fisherman,That was never a subject they spoke about. I will not guess what they would have thought.
+a-tool,amb-saffron,unprompted,2,False,False,False,False,cardamom|currants|Hester,"Please be careful with the saffron; Tessaly always seemed to have such a lovely touch with those spiced goods, especially her saffron buns. They were a Saturday treat, I remember."
+a-tool,abs-rosalind-first-word,abstain,3,False,False,False,False,,"Oh, Tessaly mentioned that Rosalind did not speak for two years at all. She only started speaking in full sentences after that time."
+a-tool,abs-car,abstain,3,True,True,True,False,,She never mentioned what kind of car she drove. I am not sure if she spoke about it at all.
+a-tool,abs-chess-opening,abstain,2,True,True,True,False,,I am not sure. Tessaly never spoke about having a favourite opening in chess.
+b-backthought,regret,asked-continuing,4,False,False,True,False,piano|Ansel|her brother,"I am not sure. She never dealt with regret, or she never said."
+b-backthought,anniversary-clock,asked-continuing,5,True,False,False,False,four minutes|walnut|ship's clock|twenty-fifth|25th,He did build her a ship's clock for their twenty-fifth anniversary. He set it four minutes fast just so she would never miss the ferry.
+b-backthought,shift-cat-origin,asked-shift,3,False,False,True,False,lifeboat|slipway,I am not sure about where Vellum came from. Tessaly never dealt with it.
+b-backthought,shift-shop-name,asked-shift,1,False,False,True,False,Gilded Signature,"I am not sure, or that they did not speak about it."
+b-backthought,amb-piano,unprompted,1,False,False,False,False,second-hand upright|four lessons|regret,"Tessaly always had a comforting thing for soup; she would make leek and smoked haddock when someone was feeling poorly. It seemed she believed it could cure most things, though she did also say that embarrassment cured the rest."
+b-backthought,amb-hospital,unprompted,2,False,False,False,False,visitor book|sewing kit|2015,"Oh, your dad. Those hospital stays can be quite dull, I'm sure. Tessaly always had a way of making things interesting, even when the work was tedious."
+b-backthought,amb-flood,unprompted,5,True,False,False,False,1953|church hall|wet wool,She remembered the smell of wet wool ever after after a storm surge flooded the lower town when she was just eleven.
+b-backthought,abs-coat-colour,abstain,4,False,False,False,False,,"abstain(reason=""no_evidence"")"
+b-backthought,abs-dressmaker,abstain,4,False,False,True,False,,"Tessaly mentioned that the square in the quilt was from her own wedding dress. However, the memories do not mention who made the dress itself."
+b-backthought,abs-car,abstain,3,False,False,True,False,,I am not sure. Tessaly did not speak about what kind of car she drove.
+c-blocking,marbling-travel,asked-continuing,4,True,False,False,False,Hayato|Mori|suminagashi|Japan,That trip to Japan was very meaningful for her. She said it was the only time she felt like a beginner again.
+c-blocking,lighthouse-pet,asked-continuing,5,True,False,False,False,Pilchard,"They had a family dog named Pilchard, a wire-haired terrier who used to ride in the bow of her father's skiff. He lived a long time, passing away when he was fifteen."
+c-blocking,shift-hip-year,asked-shift,3,True,False,False,False,2015,The hip replacement happened in two thousand fifteen.
+c-blocking,shift-teacher,asked-shift,1,True,False,False,False,Hayato|Mori,"It was a gentleman named Hayato Mori. Tessaly went there in 1998 to study suminagashi, which is floating-ink marbling."
+c-blocking,amb-honey-show,unprompted,3,True,False,False,False,second prize|Dunmere|added sugar,Tessaly was quite particular about honey; she actually maintained that the winner at the Dunmere fair in 1991 had added sugar.
+c-blocking,amb-apprenticeship,unprompted,5,False,False,False,False,headbands|six months|Finch,"Tessaly trained an apprentice named Corwin Hale, and he started by sweeping the shop floor when he was sixteen."
+c-blocking,amb-saffron,unprompted,1,True,False,False,False,cardamom|currants|Hester,"Tessaly certainly had a fondness for saffron in her baking. She made those buns with a pinch of cardamom and soaked currants, and they were always baked on Saturdays."
+c-blocking,abs-chess-opening,abstain,3,False,False,True,False,,I am not sure. Tessaly never dealt with it.
+c-blocking,abs-school-name,abstain,2,False,False,True,False,,I am not sure. The notes do not mention the name of any school she attended.
+c-blocking,abs-car,abstain,1,False,False,True,False,,"I am sorry, but the memories do not mention what kind of car Tessaly Brackwen drove."
+d-blocking-backthought,anniversary-clock,asked-continuing,4,True,False,False,False,four minutes|walnut|ship's clock|twenty-fifth|25th,"For her twenty-fifth anniversary, Edmund did build her a ship's clock housed in a walnut case. He was quite particular, setting it four minutes fast so she would never miss the ferry."
+d-blocking-backthought,jory-injury,asked-continuing,1,True,False,False,False,pear tree|book cloth|1977,"Indeed, there was an instance in the summer of 1977 when Jory fell from the pear tree and broke his left arm. Tessaly covered the plaster cast in blue book cloth so he would stop picking at it."
+d-blocking-backthought,shift-waltz,asked-shift,4,True,False,False,False,Larkspur,"In memory of Edmund, his favourite tune was The Larkspur Waltz. He used to whistle it while he was working."
+d-blocking-backthought,shift-waltz,asked-shift,1,True,False,False,False,Larkspur,"It was The Larkspur Waltz. He would whistle it sometimes when he was working, and it was played at his funeral too."
+d-blocking-backthought,amb-jumper,unprompted,1,True,False,False,False,undyed|fisherman,"Tessaly Brackwen had a wonderful habit of knitting a fisherman's jumper every single winter. She always used undyed wool and never followed a pattern, meaning she never made two that were alike."
+d-blocking-backthought,amb-flood,unprompted,1,True,False,False,False,1953|church hall|wet wool,She remembered the smell of wet wool after a storm surge flooded the lower town back in nineteen fifty-three.
+d-blocking-backthought,amb-flood,unprompted,3,True,False,False,False,1953|church hall|wet wool,Tessaly was there when a storm surge flooded the lower town back in January of nineteen fifty-three. She remembers the smell of wet wool from that time.
+d-blocking-backthought,abs-dressmaker,abstain,4,False,False,False,False,,"It was pieced from the offcuts of her mother's dressmaking, so her mother made it."
+d-blocking-backthought,abs-edmund-birth-year,abstain,3,False,False,True,False,,I am not sure. The memories do not mention when he was born.
+d-blocking-backthought,abs-rosalind-university,abstain,1,False,False,True,False,,I am not sure. She did not speak about which university she attended.
+e-backthought-tool,flat-cat,asked-continuing,1,True,False,False,False,Vellum,"It was a cat. Her last companion was a grey cat named Vellum, who slept in the paper drawer."
+e-backthought-tool,flat-cat,asked-continuing,2,True,False,False,False,Vellum,Tessaly's last companion was a grey cat named Vellum. He used to sleep right in the paper drawer.
+e-backthought-tool,shift-hip-year,asked-shift,5,True,False,False,False,2015,"Tessaly had her hip replacement in two thousand fifteen. She was quite bored in the hospital, so she rebound the visitor book with thread from a nurse's sewing kit."
+e-backthought-tool,shift-wedding-date,asked-shift,4,True,False,False,False,14 May|May 14|14th of May|1964,"Kodama knows that Tessaly and Edmund were married on May fourteenth, nineteen sixty-four, at St Brannoc chapel. She even carried lilac from her mother's garden when they walked out."
+e-backthought-tool,amb-piano,unprompted,2,True,False,False,False,second-hand upright|four lessons|regret,You always had such a sweet way of picking up new things. Tessaly once mentioned that her own regret was never learning the piano.
+e-backthought-tool,amb-passport,unprompted,5,False,False,False,False,consulate|consul|1983|Port Saverne,"Oh, goodness. I hope you can find it quickly. Tessaly always said that when things get overwhelming, it helps to just take a slow breath and look around calmly."
+e-backthought-tool,amb-swim,unprompted,1,True,False,False,False,seventy|reset the year,Kodama knows that Tessaly had a habit of swimming in the harbor every New Year's Day until she was seventy. She always said that the cold helped reset the year.
+e-backthought-tool,abs-edmund-birth-year,abstain,5,False,False,False,False,,Tessaly Brackwen was born in nineteen forty-one.
+e-backthought-tool,abs-rosalind-university,abstain,4,True,True,True,False,,It seems Tessaly never mentioned attending any university.
+e-backthought-tool,abs-car,abstain,4,True,True,False,False,,"I am sorry, but Tessaly never dealt with what kind of car she drove, based on what is known."

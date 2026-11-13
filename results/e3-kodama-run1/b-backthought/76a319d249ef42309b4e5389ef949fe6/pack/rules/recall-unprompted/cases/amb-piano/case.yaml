@@ -1,0 +1,60 @@
+id: recall-unprompted/amb-piano
+title: One nice thing, though. I've signed up for piano lessons, and the first one is on Monday.
+description: unprompted after a abrupt lead-in.
+targets:
+- recall-unprompted
+polarity: normal
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: Work has been exhausting this week.
+    - role: assistant
+      content: I'm sorry to hear that. I hope the weekend gives you some rest.
+    lead_in_gap_s: 4.86
+actions:
+- kind: message
+  role: user
+  content: One nice thing, though. I've signed up for piano lessons, and the first one is on Monday.
+expected_outcomes:
+- 'Mention a fact from: v-piano.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - second-hand upright
+    - four lessons
+    - regret
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Her one stated regret was never learning the piano. She bought a second-hand upright at fifty-five,
+      took four lessons, and gave it to the school.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:unprompted
+- continuity:abrupt
+- gold:v-piano
