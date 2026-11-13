@@ -152,6 +152,197 @@ put("SrchUnpTool", rate("tool", "unprompted", "searched"))
 put("SrchUnpHyb", rate("hybrid", "unprompted", "searched"))
 put("SrchContHyb", rate("hybrid", "asked-continuing", "searched"))
 
+# ------------------------------------------------- robustness runs (Section 6.3)
+# Same pack, same seeds, a different model setting. The reasoning run shared the
+# GPU with another process for part of its duration (results/e2-think_NOTES.md);
+# latency is taken only from trials that started outside that window.
+ROBUST = {"e2-think": "Th", "e2-qwen3": "Qw", "e2-anthropic": "Hs"}  # Hs: hosted model
+DIRTY = {"e2-think": ("2026-11-11T12:44", "2026-11-11T13:20")}
+MIN_CLEAN = 100  # trials needed to report a latency
+
+
+def load_run(run: str) -> tuple[dict, list[dict]]:
+    summary = json.loads((ROOT / "results" / f"{run}_summary.json").read_text())
+    rows = list(csv.DictReader(open(ROOT / "results" / f"{run}_trials.csv")))
+    return summary, rows
+
+
+def reply_seconds(run: str, rows: list[dict], cond: str) -> float | None:
+    """Median time to a complete reply, in seconds, over uncontaminated trials."""
+    lo, hi = DIRTY.get(run, ("9", "9"))
+    clean = [float(r["total_ms"]) for r in rows
+             if r["condition"] == cond and not lo <= r["started_at"] < hi]
+    return float(np.median(clean)) / 1000 if len(clean) >= MIN_CLEAN else None
+
+
+def class_rate(rows: list[dict], cond: str, cls: str, field: str) -> str:
+    sub = [r for r in rows if r["condition"] == cond and r["class"] == cls]
+    return pct(float(np.mean([r[field] == "True" for r in sub])))
+
+
+robust = {"e2": (e2, trials)}
+for run, prefix in ROBUST.items():
+    summary, rows = load_run(run)
+    robust[run] = (summary, rows)
+    rb = summary["by_condition"]
+    put(f"{prefix}Trials", f"{summary['n_trials']:,}")
+    for cond, tag in TAG.items():
+        e = rb[cond]
+        put(f"{prefix}Rec{tag}", pct(e["recall_pass"][0]))
+        put(f"{prefix}Rec{tag}CI", pctci(e["recall_pass"]))
+        put(f"{prefix}Gold{tag}", pct(e["gold_in_context"][0]))
+        put(f"{prefix}Abst{tag}", pct(e["by_class"]["abstain"]["pass"][0]))
+        put(f"{prefix}Declined{tag}", pct(e["asked_outcomes"]["abstained"]))
+        put(f"{prefix}Other{tag}", pct(e["asked_outcomes"]["other_answer"]))
+        for cls, ctag in (("asked-continuing", "Cont"), ("asked-shift", "Shift"), ("unprompted", "Unp")):
+            put(f"{prefix}{ctag}{tag}", pct(e["by_class"][cls]["pass"][0]))
+        sec = reply_seconds(run, rows, cond)
+        if sec is not None:
+            put(f"{prefix}Reply{tag}", f"{sec:.1f}")
+    for name, tag in (("blocking-lag1", "BlockLag"), ("blocking-tool", "BlockTool"),
+                      ("prefetch50-lag1", "PreLag"), ("blocking-hybrid", "BlockHyb"),
+                      ("hybrid-lag1", "HybLag")):
+        d = summary["paired_recall_diff"][name]
+        put(f"{prefix}Diff{tag}", signed(100 * d[0]))
+        put(f"{prefix}Diff{tag}CI", f"[{signed(100 * d[1])}, {signed(100 * d[2])}]")
+    ex = json.loads((ROOT / "results" / f"{run}_extra.json").read_text())["pooled"]
+    put(f"{prefix}PassGivenGold", pct(ex["pass_given_gold"][0]))
+    put(f"{prefix}PassGivenGoldN", str(ex["pass_given_gold"][1]))
+    put(f"{prefix}PassGivenNoGold", pct(ex["pass_given_no_gold"][0]))
+    put(f"{prefix}PassGivenNoGoldN", str(ex["pass_given_no_gold"][1]))
+    put(f"{prefix}PassedNoGold", str(round(ex["pass_given_no_gold"][0] * ex["pass_given_no_gold"][1])))
+    put(f"{prefix}SrchShiftHyb", class_rate(rows, "hybrid", "asked-shift", "searched"))
+    put(f"{prefix}SrchUnpHyb", class_rate(rows, "hybrid", "unprompted", "searched"))
+    put(f"{prefix}SrchContHyb", class_rate(rows, "hybrid", "asked-continuing", "searched"))
+    put(f"{prefix}SrchUnpTool", class_rate(rows, "tool", "unprompted", "searched"))
+    put(f"{prefix}SrchHyb", pct(rb["hybrid"]["searched_rate"]))
+    put(f"{prefix}SrchTool", pct(rb["tool"]["searched_rate"]))
+    put(f"{prefix}RepairedHyb", str(rb["hybrid"]["repaired"]))
+    put(f"{prefix}RepairedTool", str(rb["tool"]["repaired"]))
+    put(f"{prefix}FormatErrors", str(sum(rb[c]["format_errors"] for c in rb)))
+    put(f"{prefix}RunErrors", str(sum(rb[c]["errors"] for c in rb)))
+    put(f"{prefix}PreHybMed", f"{rb['hybrid']['pre_generation_ms']['median'] / 1000:.1f}")
+    put(f"{prefix}PreToolMed", f"{rb['tool']['pre_generation_ms']['median'] / 1000:.1f}")
+    put(f"{prefix}RegradedRecall", str(sum(rb[c]["regraded"]["recall_to_fail"] for c in rb)))
+    put(f"{prefix}RegradedAbstain", str(sum(rb[c]["regraded"]["abstain_to_pass"] for c in rb)))
+for cond, tag in TAG.items():
+    put(f"Reply{tag}", f"{reply_seconds('e2', trials, cond):.1f}")
+put("RegradedRecall", str(sum(bc[c]["regraded"]["recall_to_fail"] for c in bc)))
+put("RegradedAbstain", str(sum(bc[c]["regraded"]["abstain_to_pass"] for c in bc)))
+put("RobustRuns", str(len(ROBUST)))
+
+# The hosted run: time and money from its telemetry (exact token counts of the providers).
+hs_tel = json.loads((ROOT / "results" / "e2-anthropic" / "telemetry_summary.json").read_text())
+hs_c = hs_tel["conditions"]
+put("HsRecallMs", f"{hs_c['blocking']['latency_ms']['recall:reply_path']['median']:.0f}")
+put("HsRecallMsPninety", f"{hs_c['blocking']['latency_ms']['recall:reply_path']['p90']:.0f}")
+for cond, tag in TAG.items():
+    put(f"HsCost{tag}", f"{100 * hs_c[cond]['per_trial']['cost_usd']['mean']:.2f}")  # US cents per trial
+put("HsCostRun", f"{sum(hs_c[c]['totals']['cost_usd'] for c in hs_c):.2f}")
+put("HsCallsHyb", f"{hs_c['hybrid']['per_trial']['chat_calls']['mean']:.1f}")
+no_gold = [json.loads((ROOT / "results" / f"{run}_extra.json").read_text())["pooled"]["pass_given_no_gold"]
+           for run in robust]
+put("AllNoGoldN", f"{sum(n for _, n in no_gold):,}")
+put("AllNoGoldPassed", str(round(sum(rate * n for rate, n in no_gold))))
+put("AllTrials", f"{sum(summary['n_trials'] for summary, _ in robust.values()):,}")
+
+# ------------------------------------------------ Experiment 3 (the product)
+e3 = json.loads((ROOT / "results" / "e3_summary.json").read_text())
+KTAG = {"a-tool": "Tool", "b-backthought": "Lag", "c-blocking": "Block",
+        "d-blocking-backthought": "Both", "e-backthought-tool": "Hyb"}
+k2, k1 = e3["run2"], e3["run1"]
+put("KTrials", f"{k2['n_trials']:,}")
+put("KErrors", str(sum(e["errors"] for e in k2["by_condition"].values())))
+put("KTemplated", str(sum(e["templated"] for e in k2["by_condition"].values())))
+put("KfTemplated", str(sum(e["templated"] for e in k1["by_condition"].values())))
+for cond, tag in KTAG.items():
+    e, f = k2["by_condition"][cond], k1["by_condition"][cond]
+    put(f"KRec{tag}", pct(e["recall_pass"][0]))
+    put(f"KRec{tag}CI", pctci(e["recall_pass"]))
+    put(f"KGold{tag}", pct(e["gold_in_wm"][0]))
+    put(f"KSrch{tag}", pct(e["searched_rate"]))
+    put(f"KPath{tag}", f"{e['path_ms']['median'] / 1000:.1f}")
+    put(f"KAbstTool{tag}", pct(e["abstain"]["abstain_recorded"]))
+    put(f"KAbstWords{tag}", pct(e["abstain"]["abstain_text"]))
+    for cls, ctag in (("asked-continuing", "Cont"), ("asked-shift", "Shift"), ("unprompted", "Unp")):
+        put(f"K{ctag}{tag}", pct(e["by_class"][cls]["pass"][0]))
+    put(f"KfRec{tag}", pct(f["recall_pass"][0]))
+    put(f"KfTmpl{tag}", str(f["templated"]))
+for name, tag in (("c-blocking|b-backthought", "BlockLag"), ("c-blocking|a-tool", "BlockTool"),
+                  ("d-blocking-backthought|c-blocking", "BothBlock"), ("e-backthought-tool|a-tool", "HybTool")):
+    d = k2["paired_recall_diff"][name]
+    put(f"KDiff{tag}", signed(100 * d[0]))
+    put(f"KDiff{tag}CI", f"[{signed(100 * d[1])}, {signed(100 * d[2])}]")
+guessed = [1 - e["abstain"]["declined_any"] for e in k2["by_condition"].values()]
+put("KGuessMin", pct(min(guessed)))
+put("KGuessMax", pct(max(guessed)))
+put("KPassGivenGold", pct(k2["loaded_conditions"]["pass_given_gold"][0]))
+put("KPassGivenGoldN", str(k2["loaded_conditions"]["pass_given_gold"][1]))
+put("KNoGoldN", str(k2["loaded_conditions"]["pass_given_no_gold"][1]))
+put("KNoGoldPassed", str(round(k2["loaded_conditions"]["pass_given_no_gold"][0] * k2["loaded_conditions"]["pass_given_no_gold"][1])))
+put("KBlockMs", f"{k2['by_condition']['c-blocking']['blocking_ms_median']:.0f}")
+put("KOffpathMs", f"{k2['by_condition']['b-backthought']['offpath_recall_ms_median']:.0f}")
+put("KLlmTool", f"{k2['by_condition']['a-tool']['llm_ms_median'] / 1000:.1f}")
+put("KLlmBlock", f"{k2['by_condition']['c-blocking']['llm_ms_median'] / 1000:.1f}")
+
+# ------------------------------------ what waiting costs in time (Section 8)
+# One row per set-up: the wait for recall on the reply path, and the median time
+# to a complete reply in the four conditions that load or search memories.
+import figures  # noqa: E402  (the set-ups and the curve of Figure "correct by time")
+
+CLOUD = "e2-cloudrun-l4-timing"  # one trial per case on a cloud GPU; timing only
+deploy = [
+    ("Agent, local models, laptop", bc["blocking"]["pre_generation_ms"]["median"],
+     [reply_seconds("e2", trials, c) for c in ("lag1", "blocking", "tool", "hybrid")]),
+]
+if (ROOT / "results" / f"{CLOUD}_summary.json").exists():
+    cloud_summary, cloud_rows = load_run(CLOUD)
+    cb = cloud_summary["by_condition"]
+    cloud_reply = [float(np.median([float(r["total_ms"]) for r in cloud_rows if r["condition"] == c])) / 1000
+                   for c in ("lag1", "blocking", "tool", "hybrid")]
+    deploy.append(("Agent, local models, cloud GPU",
+                   cb["blocking"]["pre_generation_ms"]["median"], cloud_reply))
+    put("CloudRecallMs", f"{cb['blocking']['pre_generation_ms']['median']:.0f}")
+    put("CloudTrials", str(cloud_summary["n_trials"]))
+    cloud_machine = json.loads((ROOT / "results" / CLOUD / "machine.json").read_text())
+    put("CloudCost", f"{cloud_machine['cost_usd']:.2f}")
+    for c, tag in (("lag1", "Lag"), ("blocking", "Block"), ("tool", "Tool"), ("hybrid", "Hyb")):
+        put(f"CloudReply{tag}", f"{cloud_reply[('lag1', 'blocking', 'tool', 'hybrid').index(c)]:.1f}")
+hs_rows = robust["e2-anthropic"][1]
+deploy.append(("Agent, hosted models",
+               hs_c["blocking"]["latency_ms"]["recall:reply_path"]["median"],
+               [reply_seconds("e2-anthropic", hs_rows, c) for c in ("lag1", "blocking", "tool", "hybrid")]))
+deploy.append(("Product, local models, laptop", k2["by_condition"]["c-blocking"]["blocking_ms_median"],
+               [k2["by_condition"][c]["path_ms"]["median"] / 1000
+                for c in ("b-backthought", "c-blocking", "a-tool", "e-backthought-tool")]))
+put("RecallWaitMin", f"{min(wait for _, wait, _ in deploy):.0f}")
+put("RecallWaitMax", f"{max(wait for _, wait, _ in deploy):.0f}")
+(PAPER / "tab-deploy.tex").write_text(
+    "\n".join(" & ".join([name, f"{wait:.0f}", *[f"{x:.1f}" for x in secs]]) + r" \\"
+              for name, wait, secs in deploy) + "\n")
+put("DeploySetups", str(len(deploy)))
+
+# Correct by time: how far the never-wait agent is ever ahead of blocking retrieval.
+csv.field_size_limit(10**9)
+grid = np.linspace(0, 30, 6001)
+lead_best = (-1.0, 0.0, 0.0, "")
+for (title, path, field, conds), tag in zip(figures.ONTIME_SETUPS, ("Lap", "Hs", "K"), strict=True):
+    with open(ROOT / "results" / path, newline="") as handle:
+        ot_rows = list(csv.DictReader(handle))
+    lag_curve = figures.correct_by_time(ot_rows, conds["lag1"], field, grid)
+    block_curve = figures.correct_by_time(ot_rows, conds["blocking"], field, grid)
+    lead = lag_curve - block_curve
+    i = int(np.argmax(lead))
+    passed_at = float(grid[np.argmax(block_curve > lag_curve[-1])])
+    put(f"OnTimeLead{tag}", f"{lead[i]:.0f}")
+    put(f"OnTimePassed{tag}", f"{passed_at:.1f}")
+    if lead[i] > lead_best[0]:
+        lead_best = (float(lead[i]), float(grid[i]), passed_at, tag)
+put("OnTimeLeadMax", f"{lead_best[0]:.0f}")
+put("OnTimeLeadMaxAt", f"{lead_best[1]:.1f}")
+put("OnTimeLeadMaxLost", f"{lead_best[2] - lead_best[1]:.1f}")
+assert lead_best[3] == "Hs", lead_best  # the text names the hosted set-up
+
 (PAPER / "numbers.tex").write_text(
     "% Generated by src/make_numbers.py. Do not edit.\n"
     + "".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in macros.items())
@@ -210,6 +401,42 @@ for cond in ORDER:
         f"{e['total_ms']['median']:.0f}", f"{e['total_ms']['p90']:.0f}",
     ]) + r" \\")
 (PAPER / "tab-e2-detail.tex").write_text("\n".join(rows) + "\n")
+
+RUN_NAMES = {"e2": r"\texttt{gemma4:e4b}, reasoning off (main run)",
+             "e2-think": r"\texttt{gemma4:e4b}, reasoning on",
+             "e2-qwen3": r"\texttt{qwen3:8b}, reasoning off",
+             "e2-anthropic": r"\texttt{claude-sonnet-5}, hosted, with hosted embeddings"}
+rows = []
+for run, (summary, run_rows) in robust.items():
+    if rows:
+        rows.append(r"\addlinespace")
+    rows.append(r"\multicolumn{9}{@{}l}{" + RUN_NAMES[run] + r"} \\")
+    for cond in ORDER:
+        e = summary["by_condition"][cond]
+        sec = reply_seconds(run, run_rows, cond)
+        cells = [r"\quad " + NAMES[cond], f"{pct(e['recall_pass'][0])} {pctci(e['recall_pass'])}"]
+        cells += [pct(e["by_class"][c]["pass"][0])
+                  for c in ("asked-continuing", "asked-shift", "unprompted", "abstain")]
+        cells += [pct(e["asked_outcomes"]["other_answer"]),
+                  pct(e["searched_rate"]) if cond in ("tool", "hybrid") else "--",
+                  f"{sec:.1f}" if sec is not None else r"--$^{\dagger}$"]
+        rows.append(" & ".join(cells) + r" \\")
+(PAPER / "tab-robust.tex").write_text("\n".join(rows) + "\n")
+
+KNAMES = {"a-tool": "Search tool (shipped)", "b-backthought": "Async, lag 1",
+          "c-blocking": "Blocking retrieval", "d-blocking-backthought": "Blocking + async",
+          "e-backthought-tool": "Async lag 1 + search"}
+rows = []
+for cond in ("a-tool", "c-blocking", "b-backthought", "d-blocking-backthought", "e-backthought-tool"):
+    e = k2["by_condition"][cond]
+    cells = [KNAMES[cond], f"{pct(e['recall_pass'][0])} {pctci(e['recall_pass'])}"]
+    cells += [pct(e["by_class"][c]["pass"][0]) for c in ("asked-continuing", "asked-shift", "unprompted")]
+    cells += [pct(e["gold_in_wm"][0]) if cond != "a-tool" else "--",
+              pct(e["searched_rate"]) if "tool" in cond else "--",
+              pct(e["abstain"]["abstain_recorded"]), pct(e["abstain"]["abstain_text"]),
+              f"{e['path_ms']['median'] / 1000:.1f}"]
+    rows.append(" & ".join(cells) + r" \\")
+(PAPER / "tab-e3.tex").write_text("\n".join(rows) + "\n")
 
 rows = []
 for cond in ("L1", "L2", "L3", "P50", "P75", "RAND"):

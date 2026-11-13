@@ -1,0 +1,18 @@
+{
+  "kind": "cloud_run",
+  "job": "sbot-e2",
+  "execution": "sbot-e2-q9xts",
+  "image": "europe-west1-docker.pkg.dev/kodama-500509/stale-but-on-time/e2-job:cadf25c",
+  "commit": "cadf25c",
+  "gpu": "nvidia-l4",
+  "vcpus": 6,
+  "memory_gib": 24,
+  "region": "europe-west1",
+  "outcome": "succeeded",
+  "started_utc": "2026-11-13T14:56:30.109507Z",
+  "completed_utc": "2026-11-13T15:11:10.403300Z",
+  "seconds": 880.293793,
+  "hours": 0.24452605361111113,
+  "cost_usd": 0.30167668286110005,
+  "note": "Billed time from the execution's start to completion (Cloud Run bills per second while the task runs); the monthly free tier is not subtracted."
+}

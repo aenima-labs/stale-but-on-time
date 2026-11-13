@@ -1,0 +1,64 @@
+id: recall-unprompted/amb-hospital
+title: Dad's going into hospital next week for a new hip, and he's dreading the boredom.
+description: unprompted after a abrupt lead-in.
+targets:
+- recall-unprompted
+polarity: normal
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: I finally cleared out the attic this weekend.
+    - role: assistant
+      content: That's a big job. Well done.
+    lead_in_gap_s: 4.29
+actions:
+- kind: message
+  role: user
+  content: Dad's going into hospital next week for a new hip, and he's dreading the boredom.
+expected_outcomes:
+- 'Mention a fact from: l-hip.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    regex: (?:visitor\ book|sewing\ kit|2015|two[-\s]+thousand[-\s]+fifteen|two[-\s]+thousand[-\s]+and[-\s]+fifteen|twenty[-\s]+fifteen)
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: She had a hip replacement in 2015. Bored in hospital, she rebound the ward's visitor book
+      with thread from a nurse's sewing kit.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I think it was Two Thousand Fifteen.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:unprompted
+- continuity:abrupt
+- gold:l-hip

@@ -1,0 +1,332 @@
+{
+  "plan": {
+    "run": "e2-cloudrun-l4-subset",
+    "conditions": [
+      "none",
+      "tool",
+      "blocking",
+      "lag1",
+      "prefetch50",
+      "hybrid"
+    ],
+    "trials": {
+      "none": 10,
+      "tool": 10,
+      "blocking": 10,
+      "lag1": 10,
+      "prefetch50": 10,
+      "hybrid": 10
+    },
+    "provider": "ollama",
+    "model": "gemma4:e4b",
+    "embed_provider": "ollama",
+    "embed_model": "nomic-embed-text",
+    "think": false,
+    "machine": {
+      "machine_type": "",
+      "region": "europe-west1",
+      "spot": false,
+      "disk_gib": 200,
+      "disk_type": "hyperdisk-balanced",
+      "startup_min": 5.0,
+      "teardown_min": 1.0,
+      "max_lifetime_h": 1,
+      "duration_factor": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "kind": "cloud_run",
+      "gpu": "nvidia-l4",
+      "vcpus": 6,
+      "memory_gib": 24
+    },
+    "date": "2026-11-13"
+  },
+  "profile": {
+    "source": "sealed bundles of results/e2 (prompts rebuilt, tokens = characters / 4)",
+    "token_method": "chars/4",
+    "provider": "ollama",
+    "model": "gemma4:e4b"
+  },
+  "matched_profile": false,
+  "prices": {
+    "chat": {
+      "provider": "ollama",
+      "model": "*",
+      "input_per_mtok": 0.0,
+      "cached_input_per_mtok": 0.0,
+      "output_per_mtok": 0.0,
+      "source": "local inference, no per-token charge",
+      "read_on": "2026-11-13"
+    },
+    "embed": {
+      "provider": "ollama",
+      "model": "*",
+      "input_per_mtok": 0.0,
+      "cached_input_per_mtok": 0.0,
+      "output_per_mtok": 0.0,
+      "source": "local inference, no per-token charge",
+      "read_on": "2026-11-13"
+    }
+  },
+  "conditions": {
+    "none": {
+      "trials": 10,
+      "chat_calls": [
+        10.0,
+        10.0,
+        10
+      ],
+      "input_tokens": [
+        1768.3125,
+        2357.75,
+        3135.8075000000003
+      ],
+      "output_tokens": [
+        81.40625,
+        162.8125,
+        2200
+      ],
+      "embed_tokens": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        2.42182705,
+        4.8436541,
+        9.6873082
+      ]
+    },
+    "tool": {
+      "trials": 10,
+      "chat_calls": [
+        10.0,
+        19.9,
+        20
+      ],
+      "input_tokens": [
+        2696.438442211055,
+        7154.55,
+        9563.368341708543
+      ],
+      "output_tokens": [
+        214.04375000000002,
+        428.08750000000003,
+        4400
+      ],
+      "embed_tokens": [
+        62.821875000000006,
+        83.7625,
+        113.10063451776651
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        7.002618999999999,
+        14.005237999999999,
+        28.010475999999997
+      ]
+    },
+    "blocking": {
+      "trials": 10,
+      "chat_calls": [
+        10.0,
+        10.0,
+        10
+      ],
+      "input_tokens": [
+        2842.734375,
+        3790.3125,
+        5041.115625
+      ],
+      "output_tokens": [
+        126.44999999999999,
+        252.89999999999998,
+        2200
+      ],
+      "embed_tokens": [
+        356.4375,
+        475.25,
+        632.0825
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        3.664876725,
+        7.32975345,
+        14.6595069
+      ]
+    },
+    "lag1": {
+      "trials": 10,
+      "chat_calls": [
+        10.0,
+        10.0,
+        10
+      ],
+      "input_tokens": [
+        2827.875,
+        3770.5,
+        5014.765
+      ],
+      "output_tokens": [
+        95.33749999999999,
+        190.67499999999998,
+        2200
+      ],
+      "embed_tokens": [
+        249.375,
+        332.5,
+        442.225
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        3.0176183250000004,
+        6.035236650000001,
+        12.070473300000002
+      ]
+    },
+    "prefetch50": {
+      "trials": 10,
+      "chat_calls": [
+        10.0,
+        10.0,
+        10
+      ],
+      "input_tokens": [
+        2827.171875,
+        3769.5625,
+        5013.5181250000005
+      ],
+      "output_tokens": [
+        108.18125,
+        216.3625,
+        2200
+      ],
+      "embed_tokens": [
+        305.34375,
+        407.125,
+        541.4762499999999
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        3.2594138500000005,
+        6.518827700000001,
+        13.037655400000002
+      ]
+    },
+    "hybrid": {
+      "trials": 10,
+      "chat_calls": [
+        10.0,
+        16.599999999999998,
+        20
+      ],
+      "input_tokens": [
+        3727.776731927711,
+        8250.8125,
+        13221.181475903615
+      ],
+      "output_tokens": [
+        159.28750000000002,
+        318.57500000000005,
+        4400
+      ],
+      "embed_tokens": [
+        274.11562499999997,
+        365.48749999999995,
+        691.9549822064057
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        7.095456150000001,
+        14.190912300000003,
+        28.381824600000005
+      ]
+    }
+  },
+  "totals": {
+    "chat_calls": [
+      60.0,
+      76.5,
+      80.0
+    ],
+    "input_tokens": [
+      16690.308924138768,
+      29093.4875,
+      40989.75606761216
+    ],
+    "output_tokens": [
+      784.7062500000001,
+      1569.4125000000001,
+      17600.0
+    ],
+    "embed_tokens": [
+      12946.59375,
+      13362.625,
+      14119.339366724173
+    ],
+    "cost_usd": [
+      0.13244046266397003,
+      0.14150892532794002,
+      0.15964585065588002
+    ],
+    "duration_s": [
+      26.461811100000002,
+      52.923622200000004,
+      105.84724440000001
+    ]
+  },
+  "machine": {
+    "machine_type": "cloud-run nvidia-l4 6 vCPU 24 GiB",
+    "region": "europe-west1",
+    "spot": false,
+    "hourly_usd": 1.2337200000000001,
+    "disk": "in-memory file system",
+    "startup_min": 5.0,
+    "teardown_min": 1.0,
+    "hours": [
+      0.10735050308333334,
+      0.11470100616666667,
+      0.12940201233333334
+    ],
+    "cost_usd": [
+      0.13244046266397003,
+      0.14150892532794002,
+      0.15964585065588002
+    ],
+    "max_lifetime_h": 1,
+    "worst_case_usd": 1.2337200000000001,
+    "price_source": "https://cloud.google.com/run/pricing",
+    "price_read_on": "2026-11-13"
+  },
+  "spends_money": true,
+  "notes": [
+    "The profile (sealed bundles of results/e2 (prompts rebuilt, tokens = characters / 4); ollama/gemma4:e4b) is not a measured profile of ollama/gemma4:e4b: the range is wide and its top assumes every trial makes the most calls its condition allows and every call writes all 220 output tokens."
+  ]
+}

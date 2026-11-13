@@ -9,10 +9,18 @@ dependencies = [
     "pyyaml>=6.0",
     "invoke>=2.2",
     "circumstances",
+    "opentelemetry-api>=1.30",
+    "opentelemetry-sdk>=1.30",
+    "opentelemetry-exporter-otlp-proto-http>=1.30",
 ]
 
 [tool.uv.sources]
 circumstances = { git = "https://github.com/aenima-labs/circumstances", rev = "8fa1ff808135b2c598828040a0a8b0eb17a8dad0" }
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+]
 
 [tool.uv]
 package = false

@@ -1,0 +1,55 @@
+{
+  "condition": "e-backthought-tool",
+  "mode": "text",
+  "recall": {
+    "backthought": "on",
+    "blocking": "off",
+    "tool": "on"
+  },
+  "settings_id": "4732df47-ced5-4337-b00a-7c1368809963",
+  "settings_document": {
+    "models": {
+      "stt": {
+        "model": "base.en",
+        "language": "en",
+        "provider": "local"
+      },
+      "tts": {
+        "voice": "en_US-lessac-medium",
+        "provider": "local",
+        "fallback_provider": "off"
+      },
+      "vad": {
+        "speech_threshold": 500,
+        "end_silence_frames": 45
+      },
+      "recall": {
+        "tool": "on",
+        "blocking": "off",
+        "backthought": "on"
+      },
+      "realtime": {
+        "model": "gemma4:e4b",
+        "provider": "ollama-local"
+      },
+      "memorizer": {
+        "model": "gemma4:e4b",
+        "provider": "ollama-local"
+      }
+    },
+    "prompts": {
+      "friend": 1,
+      "interviewer": 1,
+      "schema_default": 1
+    }
+  },
+  "started_at": "2026-11-11T19:37:05+00:00",
+  "finished_at": "2026-11-11T20:09:12+00:00",
+  "seconds": 1928,
+  "trials": 200,
+  "passed": 115,
+  "bundle": "d1f3ee178ff94e1082ee273546c3c989",
+  "seal_problems": [],
+  "backend_commit": "52dbd04",
+  "api": "http://127.0.0.1:18080"
+}

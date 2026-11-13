@@ -6,14 +6,16 @@
     uv run inv e1.replay
     uv run inv e2.run --args="--think --out results/e2-think"
     uv run inv paper.anon                      # anonymised review copy under dist/
+    uv run inv e2.estimate --args="--provider openai"   # estimate only, nothing runs
+    uv run inv gcp.run --run e2-cloudrun-l4    # Cloud Run GPU job (asks before spending)
 """
 
 from invoke import Collection, task
 
-from . import data, e1, e2, paper
+from . import data, e1, e2, gcp, paper
 
 
-@task(pre=[e1.analyze, e2.analyze, paper.figures, paper.numbers, paper.build])
+@task(pre=[e1.analyze, e2.analyze, e2.analyze_product, paper.figures, paper.numbers, paper.build])
 def analyze(c):
     """Everything that needs no model: analysis, figures, numbers, paper."""
 
@@ -33,3 +35,4 @@ ns.add_collection(Collection.from_module(data), name="data")
 ns.add_collection(Collection.from_module(e1), name="e1")
 ns.add_collection(Collection.from_module(e2), name="e2")
 ns.add_collection(Collection.from_module(paper), name="paper")
+ns.add_collection(Collection.from_module(gcp), name="gcp")

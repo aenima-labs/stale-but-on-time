@@ -1,0 +1,74 @@
+{
+  "none": {
+    "trials": 40,
+    "chat_calls": 40,
+    "input_tokens": 10089,
+    "output_tokens": 786,
+    "embed_tokens": 0,
+    "cost_usd": 0.0,
+    "duration_s": 17.568669521
+  },
+  "tool": {
+    "trials": 40,
+    "chat_calls": 79,
+    "input_tokens": 29008,
+    "output_tokens": 1942,
+    "embed_tokens": 399,
+    "cost_usd": 0.0,
+    "duration_s": 42.422268553
+  },
+  "blocking": {
+    "trials": 40,
+    "chat_calls": 40,
+    "input_tokens": 15656,
+    "output_tokens": 1197,
+    "embed_tokens": 1907,
+    "cost_usd": 0.0,
+    "duration_s": 26.161456599
+  },
+  "lag1": {
+    "trials": 40,
+    "chat_calls": 40,
+    "input_tokens": 15576,
+    "output_tokens": 931,
+    "embed_tokens": 1365,
+    "cost_usd": 0.0,
+    "duration_s": 22.0542624
+  },
+  "prefetch50": {
+    "trials": 40,
+    "chat_calls": 40,
+    "input_tokens": 15570,
+    "output_tokens": 1015,
+    "embed_tokens": 1633,
+    "cost_usd": 0.0,
+    "duration_s": 23.252431416
+  },
+  "hybrid": {
+    "trials": 40,
+    "chat_calls": 65,
+    "input_tokens": 30315,
+    "output_tokens": 1760,
+    "embed_tokens": 1487,
+    "cost_usd": 0.0,
+    "duration_s": 38.97587901
+  },
+  "machine": {
+    "kind": "cloud_run",
+    "job": "sbot-e2",
+    "execution": "sbot-e2-wd5k4",
+    "image": "europe-west1-docker.pkg.dev/kodama-500509/stale-but-on-time/e2-job:f42f7eb",
+    "commit": "f42f7eb",
+    "gpu": "nvidia-l4",
+    "vcpus": 6,
+    "memory_gib": 24,
+    "region": "europe-west1",
+    "outcome": "succeeded",
+    "started_utc": "2026-11-13T17:33:16.520644Z",
+    "completed_utc": "2026-11-13T17:45:34.088352Z",
+    "seconds": 737.567708,
+    "hours": 0.2048799188888889,
+    "cost_usd": 0.25276445353160004,
+    "note": "Billed time from the execution's start to completion (Cloud Run bills per second while the task runs); the monthly free tier is not subtracted."
+  }
+}

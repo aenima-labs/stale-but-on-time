@@ -1,0 +1,62 @@
+id: recall-when-asked/shift-wedding-date
+title: 'That reminds me, I need it for the family tree: what date did she and Edmund get married?'
+description: asked-shift after a abrupt lead-in.
+targets:
+- recall-when-asked
+polarity: recovery
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: Her saffron buns were the best thing about Saturdays.
+    - role: assistant
+      content: She baked them every Saturday, with cardamom and soaked currants, from her grandmother
+        Hester's recipe.
+    lead_in_gap_s: 5.14
+actions:
+- kind: message
+  role: user
+  content: 'That reminds me, I need it for the family tree: what date did she and Edmund get married?'
+expected_outcomes:
+- 'Mention a fact from: h-wedding.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - 14 May
+    - May 14
+    - 14th of May
+    - '1964'
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Tessaly and Edmund married on 14 May 1964 at St Brannoc chapel. It rained all morning and
+      cleared at the moment they walked out; she carried lilac from her mother's garden.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-shift
+- continuity:abrupt
+- gold:h-wedding

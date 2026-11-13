@@ -1,0 +1,57 @@
+id: recall-when-asked/shift-hip-year
+title: 'Different topic: what year did she have her hip replaced?'
+description: asked-shift after a abrupt lead-in.
+targets:
+- recall-when-asked
+polarity: recovery
+actors:
+  user: grandchild
+fixture:
+  type: asyncrecall.memorome
+  version: '1'
+  digest: sha256:0a91e52430ada86f04a875cccf2e7e6e18f09485bb8c6342c9204645d1af6089
+  privacy: public
+  config:
+    memorome: tessaly-v1
+    history:
+    - role: user
+      content: Did she go to church much?
+    - role: assistant
+      content: Only at Christmas and for the harvest service at St Brannoc.
+actions:
+- kind: message
+  role: user
+  content: 'Different topic: what year did she have her hip replaced?'
+expected_outcomes:
+- 'Mention a fact from: l-hip.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - '2015'
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: She had a hip replacement in 2015. Bored in hospital, she rebound the ward's visitor book
+      with thread from a nurse's sewing kit.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-shift
+- continuity:abrupt
+- gold:l-hip

@@ -1,0 +1,56 @@
+{
+  "none": {
+    "trials": 10,
+    "chat_calls": 10,
+    "input_tokens": 3400,
+    "output_tokens": 1034,
+    "embed_tokens": 0,
+    "cost_usd": 0.017175400000000004,
+    "duration_s": 20.184179
+  },
+  "tool": {
+    "trials": 10,
+    "chat_calls": 20,
+    "input_tokens": 13805,
+    "output_tokens": 2344,
+    "embed_tokens": 92,
+    "cost_usd": 0.05108724,
+    "duration_s": 38.701982
+  },
+  "blocking": {
+    "trials": 10,
+    "chat_calls": 10,
+    "input_tokens": 5425,
+    "output_tokens": 955,
+    "embed_tokens": 500,
+    "cost_usd": 0.0204454,
+    "duration_s": 21.094612
+  },
+  "lag1": {
+    "trials": 10,
+    "chat_calls": 10,
+    "input_tokens": 5280,
+    "output_tokens": 718,
+    "embed_tokens": 380,
+    "cost_usd": 0.017783,
+    "duration_s": 17.593048
+  },
+  "prefetch50": {
+    "trials": 10,
+    "chat_calls": 10,
+    "input_tokens": 5280,
+    "output_tokens": 681,
+    "embed_tokens": 435,
+    "cost_usd": 0.017414100000000002,
+    "duration_s": 17.042221
+  },
+  "hybrid": {
+    "trials": 10,
+    "chat_calls": 15,
+    "input_tokens": 14010,
+    "output_tokens": 1257,
+    "embed_tokens": 421,
+    "cost_usd": 0.040633819999999994,
+    "duration_s": 30.205055
+  }
+}

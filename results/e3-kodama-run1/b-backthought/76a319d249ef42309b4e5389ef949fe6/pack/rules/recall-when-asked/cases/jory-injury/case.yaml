@@ -1,0 +1,60 @@
+id: recall-when-asked/jory-injury
+title: Did he ever hurt himself as a child?
+description: asked-continuing after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: Uncle Jory says he was a terror as a boy.
+    - role: assistant
+      content: He was born in 1969, and he grew up to be a baker, so he calmed down eventually.
+    lead_in_gap_s: 2.29
+actions:
+- kind: message
+  role: user
+  content: Did he ever hurt himself as a child?
+expected_outcomes:
+- 'Mention a fact from: k-arm.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - pear tree
+    - book cloth
+    - '1977'
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: In the summer of 1977 Jory fell from the pear tree and broke his left arm. Tessaly covered
+      the plaster cast in blue book cloth so he would stop picking at it.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-continuing
+- continuity:continuing
+- gold:k-arm

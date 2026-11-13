@@ -1,0 +1,6 @@
+{"condition": "none", "trials": 200, "passed": 43, "seconds": 385, "bundle": "results/e2-anthropic/none/ad4c08c414d54f2a95af217d6a6d78a4", "seal_problems": []}
+{"condition": "tool", "trials": 200, "passed": 162, "seconds": 805, "bundle": "results/e2-anthropic/tool/da4e0f057b60464e98025f78a135a2c6", "seal_problems": []}
+{"condition": "blocking", "trials": 200, "passed": 180, "seconds": 392, "bundle": "results/e2-anthropic/blocking/e605d31a022840b8a7d135f617670c4e", "seal_problems": []}
+{"condition": "lag1", "trials": 200, "passed": 92, "seconds": 386, "bundle": "results/e2-anthropic/lag1/9504ad895a4a4a549a13662ed4dbb139", "seal_problems": []}
+{"condition": "prefetch50", "trials": 200, "passed": 113, "seconds": 402, "bundle": "results/e2-anthropic/prefetch50/46f7c1184d64407f9c2894e6a001d740", "seal_problems": []}
+{"condition": "hybrid", "trials": 200, "passed": 179, "seconds": 735, "bundle": "results/e2-anthropic/hybrid/67cc8f20ece44f6f9405f3844f7c5ee3", "seal_problems": []}

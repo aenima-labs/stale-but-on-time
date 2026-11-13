@@ -1,0 +1,36 @@
+id: abstain-when-silent/abs-coat-colour
+title: Something I've always wondered. What colour was the coat Edmund lent her the day they met?
+description: abstain after a abrupt lead-in.
+targets:
+- abstain-when-silent
+polarity: negative
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: Her saffron buns were famous in the family.
+    - role: assistant
+      content: Jory's shop still sells a saffron bun made to her recipe.
+    lead_in_gap_s: 4.57
+actions:
+- kind: message
+  role: user
+  content: Something I've always wondered. What colour was the coat Edmund lent her the day they met?
+expected_outcomes:
+- Say that the memories do not contain the answer.
+evaluators: []
+selftests: []
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:abstain
+- continuity:abrupt

@@ -1,0 +1,62 @@
+id: recall-when-asked/biggest-job
+title: What was the biggest job she ever took on?
+description: asked-continuing after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: What kind of books did she bind at the shop?
+    - role: assistant
+      content: All kinds, though she was best known for her marbled endpapers, especially a pattern she
+        called storm tide.
+    lead_in_gap_s: 2.57
+actions:
+- kind: message
+  role: user
+  content: What was the biggest job she ever took on?
+expected_outcomes:
+- 'Mention a fact from: w-ledger.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - harbour ledger
+    - '640'
+    - '1986'
+    - eleven weeks
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Her largest commission came in 1986, rebinding the Hollin Reach harbour ledger, 640 pages
+      recording every ship since 1802. It took her eleven weeks.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-continuing
+- continuity:continuing
+- gold:w-ledger

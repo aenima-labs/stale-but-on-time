@@ -1,0 +1,58 @@
+id: recall-when-asked/shift-dog-name
+title: 'Completely different question: what was the name of the dog she had as a child?'
+description: asked-shift after a abrupt lead-in.
+targets:
+- recall-when-asked
+polarity: recovery
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: I've been reading about beekeeping lately.
+    - role: assistant
+      content: Tessaly kept bees from 1980 and told them the family news every morning.
+    lead_in_gap_s: 4.29
+actions:
+- kind: message
+  role: user
+  content: 'Completely different question: what was the name of the dog she had as a child?'
+expected_outcomes:
+- 'Mention a fact from: c-dog.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - Pilchard
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: The family dog was a wire-haired terrier called Pilchard, who rode in the bow of her father's
+      skiff. Pilchard lived to fifteen and is buried under the quince tree.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-shift
+- continuity:abrupt
+- gold:c-dog

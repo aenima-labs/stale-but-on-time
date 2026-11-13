@@ -1,0 +1,6 @@
+{"condition": "none", "trials": 200, "passed": 28, "seconds": 140, "bundle": "results/e2-qwen3/none/9795203438164cec81d2d01667500fd5", "seal_problems": []}
+{"condition": "tool", "trials": 200, "passed": 123, "seconds": 314, "bundle": "results/e2-qwen3/tool/770c4c0755c14720950c1f2b7a64e86d", "seal_problems": []}
+{"condition": "blocking", "trials": 200, "passed": 144, "seconds": 171, "bundle": "results/e2-qwen3/blocking/dc310d0bdf0d4783a78a3ffa9387294a", "seal_problems": []}
+{"condition": "lag1", "trials": 200, "passed": 71, "seconds": 150, "bundle": "results/e2-qwen3/lag1/443718b819e64805bdb505752ad046a7", "seal_problems": []}
+{"condition": "prefetch50", "trials": 200, "passed": 109, "seconds": 160, "bundle": "results/e2-qwen3/prefetch50/460c00b4f0b74ef39d1ac64d03888406", "seal_problems": []}
+{"condition": "hybrid", "trials": 200, "passed": 93, "seconds": 264, "bundle": "results/e2-qwen3/hybrid/dae6112b8d704872b1e121d171b22099", "seal_problems": []}

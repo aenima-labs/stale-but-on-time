@@ -1,0 +1,58 @@
+id: recall-when-asked/shift-lighthouse-steps
+title: 'Something else I''ve wondered: how many steps were there up the lighthouse at Carrow Point?'
+description: asked-shift after a abrupt lead-in.
+targets:
+- recall-when-asked
+polarity: recovery
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: She played chess, didn't she?
+    - role: assistant
+      content: Every Thursday evening with her neighbour Mr Okafor, for about thirty years.
+    lead_in_gap_s: 4.29
+actions:
+- kind: message
+  role: user
+  content: 'Something else I''ve wondered: how many steps were there up the lighthouse at Carrow Point?'
+expected_outcomes:
+- 'Mention a fact from: c-lighthouse.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - '112'
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Her father, Wilmot, kept the lighthouse at Carrow Point. As a girl Tessaly counted the 112
+      steps to the lamp room every evening and wound the mechanism with him.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-shift
+- continuity:abrupt
+- gold:c-lighthouse

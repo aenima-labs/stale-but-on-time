@@ -1,15 +1,27 @@
-"""Experiment 2 analysis. Reads the sealed bundles under ``results/e2`` and
-writes ``results/e2_summary.json`` plus ``results/e2_trials.csv``.
+"""Experiment 2 analysis. Reads the sealed bundles under ``results/<run>`` and
+writes ``results/<run>_summary.json``, ``results/<run>_trials.csv`` and
+``results/<run>_extra.json``. ``<run>`` defaults to ``e2`` (the main run); the
+robustness runs are ``e2-think`` and ``e2-qwen3``.
 
 Confidence intervals are 95% percentile intervals from a bootstrap that
 resamples cases (the unit of authoring); the five trials of a case stay
 together.
+
+Grades are the sealed ones with two corrections, applied to every run alike
+(``passed_sealed`` keeps the sealed grade, ``regraded`` marks a difference):
+
+* A recall trial passes only if a key starts at the start of a word. The sealed
+  evaluator matches substrings, so the key "Mori" matched inside "memories".
+* A reply that did not follow the JSON reply format has no ``abstained`` flag.
+  It is then read as text: a refusal in words counts as an abstention.
 """
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
+import re
 from collections import defaultdict
 from pathlib import Path
 
@@ -24,13 +36,29 @@ CLASSES = ("asked-continuing", "asked-shift", "unprompted", "abstain")
 BOOT = 10000
 SEED = 20261110
 
+# A refusal in words, for replies without the JSON flag. Checked by reading every
+# unformatted abstention-class reply of the hosted run: 60 refusals matched, and
+# the 6 that did not match were guesses or empty.
+REFUSAL = re.compile(
+    r"\b(?:do(?:es)?n[’']t|do not|did(?:n[’']t| not)) (?:actually |really |quite )?(?:know|have|recall|remember)\b"
+    r"|\bnot (?:sure|certain)\b|\bno (?:memory|memories|record|idea)\b"
+    r"|\b(?:can[’']t|cannot|could(?:n[’']t| not)) (?:say|tell|recall|remember)\b"
+    r"|\bnot something I\b|\bnever (?:told|mentioned|said|shared)\b|\bI[’']m afraid I\b",
+    re.IGNORECASE,
+)
 
-def load() -> list[dict]:
+
+def key_starts_word(reply: str, keys: list) -> bool:
+    """True if a key occurs at the start of a word ("regret" in "regretted", not "Mori" in "memories")."""
+    return any(re.search(r"(?<![A-Za-z])" + re.escape(str(k)), reply, re.IGNORECASE) for k in keys)
+
+
+def load(run: str) -> list[dict]:
     source = yaml.safe_load((ROOT / "pack-src" / "tessaly.yaml").read_text())
     meta = {c["id"]: c for c in source["cases"]}
     rows: list[dict] = []
     for condition in CONDITIONS:
-        bundles = sorted((ROOT / "results" / "e2" / condition).iterdir())
+        bundles = sorted((ROOT / "results" / run / condition).iterdir())
         assert len(bundles) == 1, condition
         assert verify_bundle(bundles[0]) == [], condition
         for path in sorted((bundles[0] / "trials").glob("*.json")):
@@ -41,7 +69,15 @@ def load() -> list[dict]:
             met = {e["name"]: e["value"] for e in events if e["kind"] == "metric"}
             ctx = [e["components"]["recall"] for e in events if e["kind"] == "context_snapshot"]
             reply = [e["content"] for e in events if e["kind"] == "message" and e["role"] == "assistant"]
-            passed = bool(trial["grades"]) and all(g["status"] == "pass" for g in trial["grades"])
+            sealed = bool(trial["grades"]) and all(g["status"] == "pass" for g in trial["grades"])
+            text = reply[-1] if reply else ""
+            format_ok = bool(obs.get("reply.format_ok"))
+            refused_in_words = (not format_ok) and bool(REFUSAL.search(text))
+            abstained = bool(obs.get("reply.abstained")) or refused_in_words
+            if case["class"] == "abstain":
+                passed = sealed or refused_in_words
+            else:
+                passed = sealed and key_starts_word(text, case["keys"])
             rows.append(
                 {
                     "condition": condition,
@@ -51,16 +87,20 @@ def load() -> list[dict]:
                     "attempt": trial["attempt"],
                     "seed": trial["seed"],
                     "passed": passed,
-                    "abstained": bool(obs.get("reply.abstained")),
-                    "format_ok": bool(obs.get("reply.format_ok")),
+                    "passed_sealed": sealed,
+                    "regraded": passed != sealed,
+                    "abstained": abstained,
+                    "format_ok": format_ok,
                     "repaired": bool(obs.get("reply.repaired", False)),
                     "searched": any(e["kind"] == "tool_call" for e in events),
                     "gold_in_context": bool(case["gold"]) and any(g in ctx[-1] for g in case["gold"]) if ctx else False,
                     "error": trial["trajectory"]["error"] or "",
+                    "started_at": trial["trajectory"]["started_at"],
+                    "llm_calls": met.get("path.llm_calls", float("nan")),
                     "pre_generation_ms": met.get("path.pre_generation_ms", float("nan")),
                     "total_ms": met.get("path.total_ms", float("nan")),
                     "offpath_recall_ms": met.get("offpath.recall_ms", float("nan")),
-                    "reply": reply[-1] if reply else "",
+                    "reply": text,
                 }
             )
     return rows
@@ -90,9 +130,12 @@ def paired_diff(rows: list[dict], a: str, b: str, rng: np.random.Generator) -> l
 
 
 def main() -> None:
-    rows = load()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--run", default="e2", help="run directory name under results/")
+    run = parser.parse_args().run
+    rows = load(run)
     rng = np.random.default_rng(SEED)
-    with open(ROOT / "results" / "e2_trials.csv", "w", newline="") as handle:
+    with open(ROOT / "results" / f"{run}_trials.csv", "w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
@@ -106,6 +149,10 @@ def main() -> None:
             "trials": len(sub),
             "errors": sum(bool(r["error"]) for r in sub),
             "format_errors": sum(not r["format_ok"] for r in sub),
+            "regraded": {
+                "recall_to_fail": sum(r["regraded"] for r in recall),
+                "abstain_to_pass": sum(r["regraded"] for r in sub if r["class"] == "abstain"),
+            },
             "repaired": sum(r["repaired"] for r in sub),
             "searched_rate": float(np.mean([r["searched"] for r in sub])),
             "recall_pass": case_boot(recall, "passed", rng),
@@ -167,7 +214,7 @@ def main() -> None:
             ("blocking", "hybrid"),
         )
     }
-    (ROOT / "results" / "e2_summary.json").write_text(json.dumps(out, indent=1))
+    (ROOT / "results" / f"{run}_summary.json").write_text(json.dumps(out, indent=1))
 
     # Mediation: pass rate of recall trials given whether a target note was in context.
     def given(sub: list[dict], present: bool) -> list:
@@ -186,7 +233,7 @@ def main() -> None:
         "pass_given_gold": given(with_memory, True),
         "pass_given_no_gold": given(with_memory, False),
     }
-    (ROOT / "results" / "e2_extra.json").write_text(json.dumps(extra, indent=1))
+    (ROOT / "results" / f"{run}_extra.json").write_text(json.dumps(extra, indent=1))
 
     def pct(triple: list[float]) -> str:
         return f"{100 * triple[0]:5.1f} [{100 * triple[1]:4.0f},{100 * triple[2]:4.0f}]"

@@ -5,6 +5,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 1,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 0
+   },
    "repaired": 0,
    "searched_rate": 0.0,
    "recall_pass": [
@@ -35,8 +39,8 @@
    "offpath_recall_ms_median": 0.0,
    "asked_outcomes": {
     "stated_fact": 0.0,
-    "abstained": 0.98,
-    "other_answer": 0.02
+    "abstained": 0.99,
+    "other_answer": 0.01
    },
    "by_class": {
     "asked-continuing": {
@@ -109,6 +113,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 0,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 0
+   },
    "repaired": 1,
    "searched_rate": 0.985,
    "recall_pass": [
@@ -213,6 +221,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 0,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 0
+   },
    "repaired": 0,
    "searched_rate": 0.0,
    "recall_pass": [
@@ -317,6 +329,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 0,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 0
+   },
    "repaired": 0,
    "searched_rate": 0.0,
    "recall_pass": [
@@ -421,6 +437,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 0,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 0
+   },
    "repaired": 0,
    "searched_rate": 0.0,
    "recall_pass": [
@@ -525,6 +545,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 0,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 0
+   },
    "repaired": 51,
    "searched_rate": 0.405,
    "recall_pass": [

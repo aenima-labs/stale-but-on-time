@@ -1,0 +1,792 @@
+{
+  "run": "e2-anthropic-pilot",
+  "conditions": {
+    "none": {
+      "trials": 10,
+      "models": [
+        "anthropic/claude-sonnet-5",
+        "openai/text-embedding-3-small"
+      ],
+      "latency_ms": {
+        "chat:reply": {
+          "median": 1508.054,
+          "p90": 3164.6605999999997,
+          "n": 10
+        },
+        "embeddings:index": {
+          "median": 1980.979,
+          "p90": 1980.979,
+          "n": 1
+        },
+        "reply_path": {
+          "median": 1508.3935000000001,
+          "p90": 3164.8795,
+          "n": 10
+        },
+        "trial": {
+          "median": 1509.3595,
+          "p90": 3363.8462999999992,
+          "n": 10
+        }
+      },
+      "per_trial": {
+        "chat_calls": {
+          "n": 10,
+          "mean": 1.0,
+          "median": 1.0,
+          "p90": 1.0,
+          "sd": 0.0
+        },
+        "input_tokens": {
+          "n": 10,
+          "mean": 340.0,
+          "median": 340.0,
+          "p90": 345.0,
+          "sd": 5.270462766947299
+        },
+        "output_tokens": {
+          "n": 10,
+          "mean": 103.4,
+          "median": 65.5,
+          "p90": 188.7,
+          "sd": 64.56899840910927
+        },
+        "cached_input_tokens": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "reasoning_tokens": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "embed_tokens": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "cost_usd": {
+          "n": 10,
+          "mean": 0.0017140000000000002,
+          "median": 0.001335,
+          "p90": 0.0025570000000000002,
+          "sd": 0.0006411482754489098
+        },
+        "wall_ms": {
+          "n": 10,
+          "mean": 2017.9900000000002,
+          "median": 1509.3595,
+          "p90": 3363.8462999999992,
+          "sd": 1336.8631128015065
+        },
+        "path_total_ms": {
+          "n": 10,
+          "mean": 1818.8368121860549,
+          "median": 1508.1954370252788,
+          "p90": 3164.757658378221,
+          "sd": 849.7533121725304
+        }
+      },
+      "totals": {
+        "chat_calls": 10,
+        "input_tokens": 3400,
+        "output_tokens": 1034,
+        "cached_input_tokens": 0,
+        "embed_tokens": 1770,
+        "cost_usd": 0.017175400000000004,
+        "wall_s": 20.184179,
+        "errors": 0,
+        "chat_calls_without_tokens": 0
+      },
+      "overhead_index": {
+        "embed_tokens": 1770,
+        "cost_usd": 3.54e-05,
+        "calls": 1
+      },
+      "ollama_model_loads": {
+        "calls": 0,
+        "calls_with_load": 0,
+        "trials_affected": 0,
+        "threshold_ms": 1000.0
+      },
+      "prices_missing": []
+    },
+    "tool": {
+      "trials": 10,
+      "models": [
+        "anthropic/claude-sonnet-5",
+        "openai/text-embedding-3-small"
+      ],
+      "latency_ms": {
+        "chat:reply": {
+          "median": 1231.063,
+          "p90": 2530.066,
+          "n": 10
+        },
+        "chat:tool_offer": {
+          "median": 1701.3725,
+          "p90": 2310.9339999999997,
+          "n": 10
+        },
+        "embeddings:index": {
+          "median": 825.169,
+          "p90": 825.169,
+          "n": 1
+        },
+        "embeddings:query": {
+          "median": 358.27,
+          "p90": 766.5033,
+          "n": 10
+        },
+        "execute_tool": {
+          "median": 359.073,
+          "p90": 767.0372,
+          "n": 10
+        },
+        "recall:tool": {
+          "median": 358.9275,
+          "p90": 766.9638,
+          "n": 10
+        },
+        "reply_path": {
+          "median": 3668.444,
+          "p90": 4874.0589,
+          "n": 10
+        },
+        "trial": {
+          "median": 3669.214,
+          "p90": 4957.783299999999,
+          "n": 10
+        }
+      },
+      "per_trial": {
+        "chat_calls": {
+          "n": 10,
+          "mean": 2.0,
+          "median": 2.0,
+          "p90": 2.0,
+          "sd": 0.0
+        },
+        "input_tokens": {
+          "n": 10,
+          "mean": 1380.5,
+          "median": 1380.5,
+          "p90": 1389.0,
+          "sd": 8.959786703810408
+        },
+        "output_tokens": {
+          "n": 10,
+          "mean": 234.4,
+          "median": 233.0,
+          "p90": 268.09999999999997,
+          "sd": 33.8959191250707
+        },
+        "cached_input_tokens": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "reasoning_tokens": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "embed_tokens": {
+          "n": 10,
+          "mean": 9.2,
+          "median": 9.5,
+          "p90": 10.0,
+          "sd": 0.9189365834726815
+        },
+        "cost_usd": {
+          "n": 10,
+          "mean": 0.005105184,
+          "median": 0.00509119,
+          "p90": 0.005459162,
+          "sd": 0.0003516652200665347
+        },
+        "wall_ms": {
+          "n": 10,
+          "mean": 3869.6639000000005,
+          "median": 3669.214,
+          "p90": 4957.783299999999,
+          "sd": 1152.959141560576
+        },
+        "path_total_ms": {
+          "n": 10,
+          "mean": 3785.7908207923174,
+          "median": 3668.3406664524227,
+          "p90": 4873.877891711891,
+          "sd": 987.514292236802
+        }
+      },
+      "totals": {
+        "chat_calls": 20,
+        "input_tokens": 13805,
+        "output_tokens": 2344,
+        "cached_input_tokens": 0,
+        "embed_tokens": 1862,
+        "cost_usd": 0.05108724,
+        "wall_s": 38.701982,
+        "errors": 0,
+        "chat_calls_without_tokens": 0
+      },
+      "overhead_index": {
+        "embed_tokens": 1770,
+        "cost_usd": 3.54e-05,
+        "calls": 1
+      },
+      "ollama_model_loads": {
+        "calls": 0,
+        "calls_with_load": 0,
+        "trials_affected": 0,
+        "threshold_ms": 1000.0
+      },
+      "prices_missing": []
+    },
+    "blocking": {
+      "trials": 10,
+      "models": [
+        "anthropic/claude-sonnet-5",
+        "openai/text-embedding-3-small"
+      ],
+      "latency_ms": {
+        "chat:reply": {
+          "median": 1615.1365,
+          "p90": 1835.7650999999998,
+          "n": 10
+        },
+        "embeddings:index": {
+          "median": 908.388,
+          "p90": 908.388,
+          "n": 1
+        },
+        "embeddings:query": {
+          "median": 328.491,
+          "p90": 394.4599,
+          "n": 10
+        },
+        "recall:reply_path": {
+          "median": 329.349,
+          "p90": 395.53610000000003,
+          "n": 10
+        },
+        "reply_path": {
+          "median": 1933.379,
+          "p90": 2164.3990999999996,
+          "n": 10
+        },
+        "trial": {
+          "median": 1934.059,
+          "p90": 2793.1318,
+          "n": 10
+        }
+      },
+      "per_trial": {
+        "chat_calls": {
+          "n": 10,
+          "mean": 1.0,
+          "median": 1.0,
+          "p90": 1.0,
+          "sd": 0.0
+        },
+        "input_tokens": {
+          "n": 10,
+          "mean": 542.5,
+          "median": 542.5,
+          "p90": 549.0,
+          "sd": 6.851601597031489
+        },
+        "output_tokens": {
+          "n": 10,
+          "mean": 95.5,
+          "median": 96.5,
+          "p90": 101.0,
+          "sd": 7.905694150420948
+        },
+        "cached_input_tokens": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "reasoning_tokens": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "embed_tokens": {
+          "n": 10,
+          "mean": 50.0,
+          "median": 50.0,
+          "p90": 52.0,
+          "sd": 2.1081851067789197
+        },
+        "cost_usd": {
+          "n": 10,
+          "mean": 0.0020410000000000003,
+          "median": 0.002051,
+          "p90": 0.002106368,
+          "sd": 8.18280147626716e-05
+        },
+        "wall_ms": {
+          "n": 10,
+          "mean": 2108.9768,
+          "median": 1934.059,
+          "p90": 2793.1318,
+          "sd": 426.49598668550726
+        },
+        "path_total_ms": {
+          "n": 10,
+          "mean": 2016.9222916243598,
+          "median": 1933.1987084588036,
+          "p90": 2164.021295891143,
+          "sd": 287.40540786589906
+        }
+      },
+      "totals": {
+        "chat_calls": 10,
+        "input_tokens": 5425,
+        "output_tokens": 955,
+        "cached_input_tokens": 0,
+        "embed_tokens": 2270,
+        "cost_usd": 0.0204454,
+        "wall_s": 21.094612,
+        "errors": 0,
+        "chat_calls_without_tokens": 0
+      },
+      "overhead_index": {
+        "embed_tokens": 1770,
+        "cost_usd": 3.54e-05,
+        "calls": 1
+      },
+      "ollama_model_loads": {
+        "calls": 0,
+        "calls_with_load": 0,
+        "trials_affected": 0,
+        "threshold_ms": 1000.0
+      },
+      "prices_missing": []
+    },
+    "lag1": {
+      "trials": 10,
+      "models": [
+        "anthropic/claude-sonnet-5",
+        "openai/text-embedding-3-small"
+      ],
+      "latency_ms": {
+        "chat:reply": {
+          "median": 1327.9969999999998,
+          "p90": 1719.8201,
+          "n": 10
+        },
+        "embeddings:index": {
+          "median": 919.995,
+          "p90": 919.995,
+          "n": 1
+        },
+        "embeddings:query": {
+          "median": 317.2015,
+          "p90": 410.0657,
+          "n": 10
+        },
+        "recall:off_path": {
+          "median": 317.9525,
+          "p90": 411.834,
+          "n": 10
+        },
+        "reply_path": {
+          "median": 1328.245,
+          "p90": 1720.1795999999997,
+          "n": 10
+        },
+        "trial": {
+          "median": 1754.45,
+          "p90": 2368.3795,
+          "n": 10
+        }
+      },
+      "per_trial": {
+        "chat_calls": {
+          "n": 10,
+          "mean": 1.0,
+          "median": 1.0,
+          "p90": 1.0,
+          "sd": 0.0
+        },
+        "input_tokens": {
+          "n": 10,
+          "mean": 528.0,
+          "median": 528.0,
+          "p90": 536.0,
+          "sd": 8.432740427115679
+        },
+        "output_tokens": {
+          "n": 10,
+          "mean": 71.8,
+          "median": 77.5,
+          "p90": 97.1,
+          "sd": 27.23070162722788
+        },
+        "cached_input_tokens": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "reasoning_tokens": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "embed_tokens": {
+          "n": 10,
+          "mean": 38.0,
+          "median": 38.0,
+          "p90": 43.0,
+          "sd": 5.270462766947299
+        },
+        "cost_usd": {
+          "n": 10,
+          "mean": 0.0017747599999999998,
+          "median": 0.00183176,
+          "p90": 0.00204386,
+          "sd": 0.00028839018707300007
+        },
+        "wall_ms": {
+          "n": 10,
+          "mean": 1758.8227,
+          "median": 1754.45,
+          "p90": 2368.3795,
+          "sd": 437.95003479368387
+        },
+        "path_total_ms": {
+          "n": 10,
+          "mean": 1333.9241333771497,
+          "median": 1328.1030000653118,
+          "p90": 1719.9628583854062,
+          "sd": 402.54129325842325
+        }
+      },
+      "totals": {
+        "chat_calls": 10,
+        "input_tokens": 5280,
+        "output_tokens": 718,
+        "cached_input_tokens": 0,
+        "embed_tokens": 2150,
+        "cost_usd": 0.017783,
+        "wall_s": 17.593048,
+        "errors": 0,
+        "chat_calls_without_tokens": 0
+      },
+      "overhead_index": {
+        "embed_tokens": 1770,
+        "cost_usd": 3.54e-05,
+        "calls": 1
+      },
+      "ollama_model_loads": {
+        "calls": 0,
+        "calls_with_load": 0,
+        "trials_affected": 0,
+        "threshold_ms": 1000.0
+      },
+      "prices_missing": []
+    },
+    "prefetch50": {
+      "trials": 10,
+      "models": [
+        "anthropic/claude-sonnet-5",
+        "openai/text-embedding-3-small"
+      ],
+      "latency_ms": {
+        "chat:reply": {
+          "median": 1239.5639999999999,
+          "p90": 1731.9226999999998,
+          "n": 10
+        },
+        "embeddings:index": {
+          "median": 945.13,
+          "p90": 945.13,
+          "n": 1
+        },
+        "embeddings:query": {
+          "median": 319.0135,
+          "p90": 351.42609999999996,
+          "n": 10
+        },
+        "recall:off_path": {
+          "median": 319.85,
+          "p90": 352.29540000000003,
+          "n": 10
+        },
+        "reply_path": {
+          "median": 1240.165,
+          "p90": 1732.2361999999998,
+          "n": 10
+        },
+        "trial": {
+          "median": 1837.9085,
+          "p90": 2134.9922,
+          "n": 10
+        }
+      },
+      "per_trial": {
+        "chat_calls": {
+          "n": 10,
+          "mean": 1.0,
+          "median": 1.0,
+          "p90": 1.0,
+          "sd": 0.0
+        },
+        "input_tokens": {
+          "n": 10,
+          "mean": 528.0,
+          "median": 528.0,
+          "p90": 536.0,
+          "sd": 8.432740427115679
+        },
+        "output_tokens": {
+          "n": 10,
+          "mean": 68.1,
+          "median": 60.5,
+          "p90": 95.8,
+          "sd": 26.597618941050595
+        },
+        "cached_input_tokens": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "reasoning_tokens": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "embed_tokens": {
+          "n": 10,
+          "mean": 43.5,
+          "median": 43.5,
+          "p90": 47.0,
+          "sd": 3.689323936863109
+        },
+        "cost_usd": {
+          "n": 10,
+          "mean": 0.00173787,
+          "median": 0.0016618700000000002,
+          "p90": 0.00203094,
+          "sd": 0.000282452640868046
+        },
+        "wall_ms": {
+          "n": 10,
+          "mean": 1703.7111,
+          "median": 1837.9085,
+          "p90": 2134.9922,
+          "sd": 410.8934011393683
+        },
+        "path_total_ms": {
+          "n": 10,
+          "mean": 1282.411362696439,
+          "median": 1239.7106040734798,
+          "p90": 1732.0423543453217,
+          "sd": 411.49228402028086
+        }
+      },
+      "totals": {
+        "chat_calls": 10,
+        "input_tokens": 5280,
+        "output_tokens": 681,
+        "cached_input_tokens": 0,
+        "embed_tokens": 2205,
+        "cost_usd": 0.017414100000000002,
+        "wall_s": 17.042221,
+        "errors": 0,
+        "chat_calls_without_tokens": 0
+      },
+      "overhead_index": {
+        "embed_tokens": 1770,
+        "cost_usd": 3.54e-05,
+        "calls": 1
+      },
+      "ollama_model_loads": {
+        "calls": 0,
+        "calls_with_load": 0,
+        "trials_affected": 0,
+        "threshold_ms": 1000.0
+      },
+      "prices_missing": []
+    },
+    "hybrid": {
+      "trials": 10,
+      "models": [
+        "anthropic/claude-sonnet-5",
+        "openai/text-embedding-3-small"
+      ],
+      "latency_ms": {
+        "chat:reply": {
+          "median": 1664.559,
+          "p90": 1932.7484,
+          "n": 5
+        },
+        "chat:tool_offer": {
+          "median": 1564.931,
+          "p90": 1675.1147999999998,
+          "n": 10
+        },
+        "embeddings:index": {
+          "median": 1001.519,
+          "p90": 1001.519,
+          "n": 1
+        },
+        "embeddings:query": {
+          "median": 318.314,
+          "p90": 350.093,
+          "n": 15
+        },
+        "execute_tool": {
+          "median": 312.124,
+          "p90": 337.82480000000004,
+          "n": 5
+        },
+        "recall:off_path": {
+          "median": 323.1595,
+          "p90": 345.433,
+          "n": 10
+        },
+        "recall:tool": {
+          "median": 311.92,
+          "p90": 337.74879999999996,
+          "n": 5
+        },
+        "reply_path": {
+          "median": 2533.276,
+          "p90": 3613.8635,
+          "n": 10
+        },
+        "trial": {
+          "median": 2864.457,
+          "p90": 4289.1852,
+          "n": 10
+        }
+      },
+      "per_trial": {
+        "chat_calls": {
+          "n": 10,
+          "mean": 1.5,
+          "median": 1.5,
+          "p90": 2.0,
+          "sd": 0.5270462766947299
+        },
+        "input_tokens": {
+          "n": 10,
+          "mean": 1401.0,
+          "median": 1401.0,
+          "p90": 1777.0,
+          "sd": 396.33880007443685
+        },
+        "output_tokens": {
+          "n": 10,
+          "mean": 125.7,
+          "median": 123.5,
+          "p90": 171.7,
+          "sd": 38.84170153041416
+        },
+        "cached_input_tokens": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "reasoning_tokens": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "embed_tokens": {
+          "n": 10,
+          "mean": 42.1,
+          "median": 42.5,
+          "p90": 43.0,
+          "sd": 0.9944289260117531
+        },
+        "cost_usd": {
+          "n": 10,
+          "mean": 0.004059842,
+          "median": 0.00403784,
+          "p90": 0.00527182,
+          "sd": 0.0011743464472519741
+        },
+        "wall_ms": {
+          "n": 10,
+          "mean": 3020.0083999999997,
+          "median": 2864.457,
+          "p90": 4289.1852,
+          "sd": 1204.878143268457
+        },
+        "path_total_ms": {
+          "n": 10,
+          "mean": 2592.7816830575466,
+          "median": 2533.0503539880738,
+          "p90": 3613.664170424454,
+          "sd": 1061.1872143802582
+        }
+      },
+      "totals": {
+        "chat_calls": 15,
+        "input_tokens": 14010,
+        "output_tokens": 1257,
+        "cached_input_tokens": 0,
+        "embed_tokens": 2191,
+        "cost_usd": 0.040633819999999994,
+        "wall_s": 30.205055,
+        "errors": 0,
+        "chat_calls_without_tokens": 0
+      },
+      "overhead_index": {
+        "embed_tokens": 1770,
+        "cost_usd": 3.54e-05,
+        "calls": 1
+      },
+      "ollama_model_loads": {
+        "calls": 0,
+        "calls_with_load": 0,
+        "trials_affected": 0,
+        "threshold_ms": 1000.0
+      },
+      "prices_missing": []
+    }
+  },
+  "run_totals": {
+    "trials": 60,
+    "chat_calls": 75,
+    "input_tokens": 47200,
+    "output_tokens": 6989,
+    "embed_tokens": 12448,
+    "cost_usd": 0.16453896,
+    "wall_s": 144.821097
+  },
+  "prices": "pricing/prices.yaml"
+}
