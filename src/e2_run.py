@@ -169,6 +169,8 @@ def main() -> None:
     parser.add_argument("--kodama-secrets", type=Path, default=None,
                         help="Kodama's config/secrets.yaml, read for API keys not in the environment")
     parser.add_argument("--vertex-project", default=None, help="GCP project for Vertex (or VERTEX_PROJECT)")
+    parser.add_argument("--openai-api", choices=["responses", "chat"], default="responses",
+                        help="OpenAI endpoint: responses (as Kodama) or chat (Chat Completions, which takes a seed)")
     parser.add_argument("--yes", action="store_true", help="start a run that spends money without asking")
     parser.add_argument("--estimate-only", action="store_true", help="print the estimate and stop")
     parser.add_argument("--no-telemetry", action="store_true", help="do not write spans")
@@ -213,7 +215,7 @@ def main() -> None:
     def make_clients():
         return (
             chat_client(args.provider, model, kodama_secrets=args.kodama_secrets,
-                        vertex_project=args.vertex_project),
+                        vertex_project=args.vertex_project, openai_api=args.openai_api),
             embed_client(args.embed_provider, embed_model, kodama_secrets=args.kodama_secrets),
         )
 

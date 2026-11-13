@@ -84,8 +84,7 @@ def test_traced_chat_records_semconv_attributes_without_content(tmp_path):
             return providers.ChatResult("{\"reply\": \"secret words\"}", [], Usage(120, 7, 100, 0),
                                         finish_reason="stop", response_model="gpt-5.6-luna-2026-07-30")
 
-        @property
-        def temperature_supported(self):
+        def temperature_sent(self, request):
             return False
 
     req = ChatRequest("SYSTEM PROMPT", [{"role": "user", "content": "hello"}], None, 0.7, 5, 220, False)
@@ -128,7 +127,8 @@ def test_openai_responses_parsing(monkeypatch):
     assert r.tool_calls == [("memory_search", {"query": "Ansel"})]
     assert r.finish_reason == "tool_calls" and r.usage.input_tokens == 500
     url, body, headers = calls[0]
-    assert url.endswith("/responses") and "temperature" not in body and "seed" not in body
+    # reasoning off: the temperature is sent; the Responses API takes no seed
+    assert url.endswith("/responses") and body["temperature"] == 0.7 and "seed" not in body
     assert body["reasoning"] == {"effort": "none"} and body["tools"][0]["name"] == "memory_search"
 
 
@@ -190,3 +190,18 @@ def test_kodama_traces_become_one_trace_per_trial(tmp_path):
     assert s["totals"]["input_tokens"] == 1200 and s["totals"]["cost_usd"] == 0.0  # local model
     assert set(s["latency_ms"]) >= {"chat:kodama.classifier.advice", "chat:kodama.turn", "trial"}
     assert s["latency_ms"]["trial"]["median"] == pytest.approx(3000)
+
+
+def test_openai_chat_completions_sends_seed(monkeypatch):
+    fake, calls = _fake_http({"id": "c1", "model": "gpt-5.6-luna", "choices": [
+        {"finish_reason": "stop", "message": {"content": "{\"reply\": \"hi\", \"abstained\": false}"}}],
+        "usage": {"prompt_tokens": 40, "completion_tokens": 9}})
+    monkeypatch.setattr(providers, "_http", fake)
+    client = providers.OpenAIChatCompletions("gpt-5.6-luna", "sk-test")
+    r = client.chat(ChatRequest("sys", [{"role": "user", "content": "u"}], None, 0.7, 11, 220, False))
+    url, body, _ = calls[0]
+    assert url.endswith("/chat/completions") and body["seed"] == 11 and body["temperature"] == 0.7
+    assert body["reasoning_effort"] == "none" and r.usage.input_tokens == 40
+    thinking = ChatRequest("sys", [{"role": "user", "content": "u"}], None, 0.7, 11, 2048, True)
+    client.chat(thinking)
+    assert "temperature" not in calls[1][1]  # refused with reasoning on

@@ -49,10 +49,14 @@ SEMCONV_PROVIDER = {
     "vertex": "gcp.vertex_ai",
     "anthropic": "anthropic",
 }
-# OpenAI models that reject a temperature field (Kodama: provider/options.go).
-OPENAI_FIXED_TEMPERATURE = {"gpt-5.6-luna"}
+# The gpt-5.6 models take a temperature only with reasoning effort "none" (probed
+# 2026-11-13: accepted with "none", HTTP 400 with "low" and "medium"). Kodama marks
+# gpt-5.6-luna as rejecting it because it runs luna with reasoning on.
 # Anthropic models that reject a temperature field (HTTP 400 "`temperature` is deprecated").
-ANTHROPIC_FIXED_TEMPERATURE = {"claude-sonnet-5"}
+# Probed 2026-11-13: refused by claude-sonnet-5, claude-haiku-5-5 and claude-opus-5-5
+# ("`temperature` is deprecated for this model"); accepted by claude-sonnet-4-6 and
+# claude-haiku-4-5. No Claude model takes a seed.
+ANTHROPIC_FIXED_TEMPERATURE = {"claude-sonnet-5", "claude-haiku-5-5", "claude-opus-5-5"}
 KEY_VARIABLES = {
     "openai": ("OPENAI_API_KEY", "KODAMA_MODELS__OPENAI_API_KEY"),
     "anthropic": ("ANTHROPIC_API_KEY", "KODAMA_MODELS__ANTHROPIC_API_KEY"),
@@ -161,6 +165,10 @@ class ChatClient:
     def temperature_supported(self) -> bool:
         return True
 
+    def temperature_sent(self, request: ChatRequest) -> bool:
+        """Whether this request carries the temperature (some models refuse it)."""
+        return self.temperature_supported
+
 
 class OllamaChat(ChatClient):
     provider = "ollama"
@@ -224,11 +232,10 @@ class OpenAIChat(ChatClient):
 
     @property
     def seed_supported(self) -> bool:
-        return False  # the Responses API takes no seed
+        return False  # the Responses API takes no seed ("Unknown parameter: 'seed'")
 
-    @property
-    def temperature_supported(self) -> bool:
-        return self.model not in OPENAI_FIXED_TEMPERATURE
+    def temperature_sent(self, request: ChatRequest) -> bool:
+        return not request.think  # refused with reasoning on
 
     def count_tokens(self, request: ChatRequest) -> int:
         """Exact input tokens from OpenAI's input-token counting endpoint."""
@@ -253,7 +260,7 @@ class OpenAIChat(ChatClient):
             "reasoning": {"effort": "low" if request.think else "none"},
             "store": False,
         }
-        if self.temperature_supported:
+        if self.temperature_sent(request):
             body["temperature"] = request.temperature
         if request.tool:
             fn = request.tool["function"]
@@ -301,6 +308,33 @@ class OpenAIChat(ChatClient):
         )
 
 
+class OpenAIChatCompletions(OpenAIChat):
+    """OpenAI through Chat Completions, which takes a seed (Beta, best effort);
+    the Responses API does not. Same models, prices and token counter."""
+
+    @property
+    def seed_supported(self) -> bool:
+        return True
+
+    def chat(self, request: ChatRequest) -> ChatResult:
+        body: dict = {
+            "model": self.model,
+            "messages": [{"role": "system", "content": request.system}, *request.messages],
+            "max_completion_tokens": request.max_tokens,
+            "reasoning_effort": "low" if request.think else "none",
+            "seed": request.seed,
+        }
+        if self.temperature_sent(request):
+            body["temperature"] = request.temperature
+        if request.tool:
+            body["tools"] = [request.tool]
+        else:
+            body["response_format"] = {"type": "json_object"}
+        raw, attempts = _http(f"{self.base}/chat/completions", body,
+                              {"Authorization": f"Bearer {self._key}"}, retries=HOSTED_RETRIES)
+        return _parse_chat_completion(raw, attempts)
+
+
 class _VertexToken:
     """An ADC access token from gcloud, refreshed every 30 minutes."""
 
@@ -344,8 +378,10 @@ class VertexChat(ChatClient):
             "max_tokens": request.max_tokens,
             "temperature": request.temperature,
             "seed": request.seed,
-            # Gemini 3 cannot switch reasoning off; "minimal" is the smallest setting.
-            "reasoning_effort": "low" if request.think else "minimal",
+            # Gemini 3.8 Flash cannot switch thinking off; "low" is its smallest
+            # level (the thinking page lists LOW, MEDIUM, HIGH; MINIMAL only for
+            # older Flash models), and it ignores a custom temperature.
+            "reasoning_effort": "low",
         }
         if request.tool:
             body["tools"] = [request.tool]
@@ -515,12 +551,13 @@ class OpenAIEmbed(EmbedClient):
 
 
 def chat_client(provider: str, model: str | None, *, kodama_secrets: Path | None = None,
-                vertex_project: str | None = None) -> ChatClient:
+                vertex_project: str | None = None, openai_api: str = "responses") -> ChatClient:
     model = model or DEFAULT_MODELS[provider]
     if provider == "ollama":
         return OllamaChat(model)
     if provider == "openai":
-        return OpenAIChat(model, resolve_key("openai", kodama_secrets))
+        cls = OpenAIChatCompletions if openai_api == "chat" else OpenAIChat
+        return cls(model, resolve_key("openai", kodama_secrets))
     if provider == "anthropic":
         return AnthropicChat(model, resolve_key("anthropic", kodama_secrets))
     if provider == "vertex":
@@ -561,7 +598,7 @@ def traced_chat(tracer: trace.Tracer, client: ChatClient, request: ChatRequest, 
         span.set_attribute("gen_ai.provider.name", SEMCONV_PROVIDER[client.provider])
         span.set_attribute("gen_ai.request.model", client.model)
         span.set_attribute("gen_ai.request.max_tokens", request.max_tokens)
-        if client.temperature_supported:
+        if client.temperature_sent(request):
             span.set_attribute("gen_ai.request.temperature", request.temperature)
         if client.seed_supported:
             span.set_attribute("gen_ai.request.seed", request.seed)

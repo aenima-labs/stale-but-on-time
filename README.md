@@ -138,13 +138,19 @@ bundles, with tokens counted as characters / 4) the estimate scales, and
 `pricing/prices.yaml`, each with its source and the date it was read.
 
 **Hosted providers** (`--provider openai|vertex|anthropic`, `--embed-provider
-openai`) keep the prompt, retriever, cases, seeds and grading. Differences:
-`gpt-5.6-luna` and `claude-sonnet-5` reject a temperature, so none is sent (the
-providers' default applies); OpenAI and Anthropic take no seed; Anthropic has no
-JSON mode, so the reply format comes from the prompt alone; Gemini 3 reasoning
-cannot be switched off, so it runs at `minimal`; `--embed-provider openai`
-changes the dense half of the retriever (`text-embedding-3-small`, as Kodama's
-hosted instances). Keys come from `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` (or
+openai`) keep the prompt, retriever, cases, seeds and grading. Differences
+(checked against the APIs on 2026-11-13):
+
+| | temperature 0.7 | seed | JSON mode | reasoning off |
+|---|---|---|---|---|
+| OpenAI `gpt-5.6-*`, Responses API (default, as Kodama) | sent (refused once reasoning is on) | not accepted | yes | yes (`effort: none`) |
+| OpenAI `gpt-5.6-*`, `--openai-api chat` | sent | sent (Beta, best effort) | yes | yes |
+| Anthropic Claude 5.x (`sonnet-5`, `haiku-5-5`, `opus-5-5`) | refused, not sent | not accepted | no (prompt only) | yes |
+| Anthropic `claude-sonnet-4-6`, `claude-haiku-4-5` | sent | not accepted | no (prompt only) | yes |
+| Vertex `gemini-3.8-flash` | ignored by the model | sent | yes | no (lowest level: `low`) |
+
+`--embed-provider openai` changes the dense half of the retriever
+(`text-embedding-3-small`, as Kodama's hosted instances). Keys come from `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` (or
 Kodama's `KODAMA_MODELS__*` names), or from Kodama's `config/secrets.yaml` with
 `--kodama-secrets`; Vertex uses Application Default Credentials. Check a
 provider with one trial (no bundle, a fraction of a cent):

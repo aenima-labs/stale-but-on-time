@@ -33,7 +33,7 @@ async def check(args: argparse.Namespace) -> int:
     pack = load_pack(ROOT / "pack")
     case = pack.case(args.case)
     chat = chat_client(args.provider, args.model, kodama_secrets=args.kodama_secrets,
-                       vertex_project=args.vertex_project)
+                       vertex_project=args.vertex_project, openai_api=args.openai_api)
     embed = embed_client(args.embed_provider, args.embed_model, kodama_secrets=args.kodama_secrets)
     spans_file = args.spans or Path(tempfile.mkdtemp()) / "check.spans.jsonl"
     spans_file.unlink(missing_ok=True)
@@ -89,6 +89,7 @@ def main() -> None:
     parser.add_argument("--case", default="recall-when-asked/anniversary-clock")
     parser.add_argument("--kodama-secrets", type=Path, default=None)
     parser.add_argument("--vertex-project", default=None)
+    parser.add_argument("--openai-api", choices=["responses", "chat"], default="responses")
     parser.add_argument("--spans", type=Path, default=None)
     raise SystemExit(asyncio.run(check(parser.parse_args())))
 
