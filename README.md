@@ -24,7 +24,7 @@ real-time conversational agent. Target venue: TMLR.
 | `tests/` | Unit tests (`uv run inv e2.test`) |
 | `src/e3_analyze.py` | Experiment 3: analysis of the pack run against the product (bundles in `results/e3-kodama`, first run in `results/e3-kodama-run1`) |
 | `src/figures.py`, `src/make_numbers.py` | Figures, table bodies and number macros for the paper |
-| `results/` | Per-utterance retrievals (E1), sealed run bundles (E2: `e2` main run, `e2-think` reasoning on, `e2-qwen3` second model), summaries, audit sample, provenance notes (`*_NOTES.md`) |
+| `results/` | Per-utterance retrievals (E1), sealed run bundles (E2: `e2` main run, `e2-think` reasoning on, `e2-qwen3` second model, `e2-anthropic` hosted model), summaries, audit sample, provenance notes (`*_NOTES.md`) |
 | `tasks/`, `src/fetch_data.py` | [Invoke](https://www.pyinvoke.org) tasks for every step; data download |
 
 "Memorome", in file names, code and result events, is the term of Xiao et al. (2026),
@@ -69,8 +69,8 @@ Tasks are grouped by experiment: `data.fetch`; `e1.replay`, `e1.analyze`; `e2.bu
 Extra options go through `--args`, for example
 `uv run inv e2.run --args="--think --out results/e2-think"`.
 
-`reproduce` runs the main E2 run only. The two robustness runs of Section 6.4 are
-separate, because the first is slow:
+`reproduce` runs the main E2 run only. The three further runs of Section 6.3 are
+separate, because the first is slow and the third costs money:
 
 ```bash
 uv run inv e2.run --args="--think --out results/e2-think"
@@ -80,11 +80,23 @@ uv run inv e2.run --args="--think --out results/e2-think"
 uv run inv e2.run --args="--model qwen3:8b --out results/e2-qwen3"
 ```
 
-The reasoning run takes about 2.7 hours on a laptop, the second-model run about 20
-minutes. `e2.analyze` analyses all three runs (`src/e2_analyze.py --run <name>`).
+```bash
+uv run inv e2.run --args="--provider anthropic --embed-provider openai --out results/e2-anthropic"
+```
 
-E2 uses local models, so a rerun will not reproduce the stored trials bit for bit;
-the sealed bundles in `results/e2`, `results/e2-think` and `results/e2-qwen3` are the
+The reasoning run takes about 2.7 hours on a laptop, the second-model run about 20
+minutes, and the hosted run about 50 minutes and 3.5 US dollars (it prints an estimate
+and asks before it starts; `results/e2-anthropic_NOTES.md` lists how it differs from
+the local runs). `e2.analyze` analyses all four runs (`src/e2_analyze.py --run <name>`).
+
+The analysis applies two corrections to the sealed grades, to every run alike: a key
+must begin a word (the key "Mori" had matched inside "memories"), and a reply that
+left out the JSON reply format is read as text, so that a refusal in words counts as
+an abstention. `<run>_trials.csv` keeps the sealed grade as `passed_sealed` and marks
+each changed trial as `regraded`; only the hosted run has any.
+
+A rerun will not reproduce the stored trials bit for bit; the sealed bundles in
+`results/e2`, `results/e2-think`, `results/e2-qwen3` and `results/e2-anthropic` are the
 record the paper reports. Part of the reasoning run shared the GPU with another
 process; `results/e2-think_NOTES.md` gives the window, and `src/make_numbers.py`
 leaves those trials out of every latency figure.

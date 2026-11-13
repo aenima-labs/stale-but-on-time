@@ -64,8 +64,8 @@
 \newcommand{\ShiftNone}{0}
 \newcommand{\UnpNone}{0}
 \newcommand{\StatedNone}{0}
-\newcommand{\DeclinedNone}{98}
-\newcommand{\OtherNone}{2}
+\newcommand{\DeclinedNone}{99}
+\newcommand{\OtherNone}{1}
 \newcommand{\RecTool}{82}
 \newcommand{\RecToolCI}{[71, 91]}
 \newcommand{\GoldTool}{85}
@@ -241,6 +241,8 @@
 \newcommand{\ThRunErrors}{0}
 \newcommand{\ThPreHybMed}{5.6}
 \newcommand{\ThPreToolMed}{2.0}
+\newcommand{\ThRegradedRecall}{0}
+\newcommand{\ThRegradedAbstain}{0}
 \newcommand{\QwTrials}{1,200}
 \newcommand{\QwRecNone}{0}
 \newcommand{\QwRecNoneCI}{[0, 0]}
@@ -329,15 +331,120 @@
 \newcommand{\QwRunErrors}{0}
 \newcommand{\QwPreHybMed}{0.5}
 \newcommand{\QwPreToolMed}{0.6}
+\newcommand{\QwRegradedRecall}{0}
+\newcommand{\QwRegradedAbstain}{0}
+\newcommand{\HsTrials}{1,200}
+\newcommand{\HsRecNone}{0}
+\newcommand{\HsRecNoneCI}{[0, 0]}
+\newcommand{\HsGoldNone}{0}
+\newcommand{\HsAbstNone}{100}
+\newcommand{\HsDeclinedNone}{100}
+\newcommand{\HsOtherNone}{0}
+\newcommand{\HsContNone}{0}
+\newcommand{\HsShiftNone}{0}
+\newcommand{\HsUnpNone}{0}
+\newcommand{\HsReplyNone}{1.9}
+\newcommand{\HsRecTool}{86}
+\newcommand{\HsRecToolCI}{[75, 95]}
+\newcommand{\HsGoldTool}{87}
+\newcommand{\HsAbstTool}{100}
+\newcommand{\HsDeclinedTool}{3}
+\newcommand{\HsOtherTool}{3}
+\newcommand{\HsContTool}{94}
+\newcommand{\HsShiftTool}{94}
+\newcommand{\HsUnpTool}{70}
+\newcommand{\HsReplyTool}{3.9}
+\newcommand{\HsRecBlock}{93}
+\newcommand{\HsRecBlockCI}{[83, 100]}
+\newcommand{\HsGoldBlock}{93}
+\newcommand{\HsAbstBlock}{100}
+\newcommand{\HsDeclinedBlock}{10}
+\newcommand{\HsOtherBlock}{1}
+\newcommand{\HsContBlock}{80}
+\newcommand{\HsShiftBlock}{98}
+\newcommand{\HsUnpBlock}{100}
+\newcommand{\HsReplyBlock}{1.9}
+\newcommand{\HsRecLag}{30}
+\newcommand{\HsRecLagCI}{[13, 47]}
+\newcommand{\HsGoldLag}{30}
+\newcommand{\HsAbstLag}{94}
+\newcommand{\HsDeclinedLag}{85}
+\newcommand{\HsOtherLag}{0}
+\newcommand{\HsContLag}{30}
+\newcommand{\HsShiftLag}{0}
+\newcommand{\HsUnpLag}{60}
+\newcommand{\HsReplyLag}{1.5}
+\newcommand{\HsRecPre}{50}
+\newcommand{\HsRecPreCI}{[33, 67]}
+\newcommand{\HsGoldPre}{50}
+\newcommand{\HsAbstPre}{94}
+\newcommand{\HsDeclinedPre}{60}
+\newcommand{\HsOtherPre}{0}
+\newcommand{\HsContPre}{40}
+\newcommand{\HsShiftPre}{40}
+\newcommand{\HsUnpPre}{70}
+\newcommand{\HsReplyPre}{1.5}
+\newcommand{\HsRecHyb}{91}
+\newcommand{\HsRecHybCI}{[83, 98]}
+\newcommand{\HsGoldHyb}{92}
+\newcommand{\HsAbstHyb}{100}
+\newcommand{\HsDeclinedHyb}{4}
+\newcommand{\HsOtherHyb}{1}
+\newcommand{\HsContHyb}{92}
+\newcommand{\HsShiftHyb}{98}
+\newcommand{\HsUnpHyb}{84}
+\newcommand{\HsReplyHyb}{3.4}
+\newcommand{\HsDiffBlockLag}{63}
+\newcommand{\HsDiffBlockLagCI}{[46, 79]}
+\newcommand{\HsDiffBlockTool}{7}
+\newcommand{\HsDiffBlockToolCI}{[$-$5, 19]}
+\newcommand{\HsDiffPreLag}{20}
+\newcommand{\HsDiffPreLagCI}{[7, 33]}
+\newcommand{\HsDiffBlockHyb}{1}
+\newcommand{\HsDiffBlockHybCI}{[$-$9, 11]}
+\newcommand{\HsDiffHybLag}{61}
+\newcommand{\HsDiffHybLagCI}{[45, 77]}
+\newcommand{\HsPassGivenGold}{99}
+\newcommand{\HsPassGivenGoldN}{529}
+\newcommand{\HsPassGivenNoGold}{0}
+\newcommand{\HsPassGivenNoGoldN}{221}
+\newcommand{\HsPassedNoGold}{1}
+\newcommand{\HsSrchShiftHyb}{100}
+\newcommand{\HsSrchUnpHyb}{64}
+\newcommand{\HsSrchContHyb}{80}
+\newcommand{\HsSrchUnpTool}{98}
+\newcommand{\HsSrchHyb}{86}
+\newcommand{\HsSrchTool}{100}
+\newcommand{\HsRepairedHyb}{9}
+\newcommand{\HsRepairedTool}{1}
+\newcommand{\HsFormatErrors}{314}
+\newcommand{\HsRunErrors}{0}
+\newcommand{\HsPreHybMed}{1.8}
+\newcommand{\HsPreToolMed}{1.9}
+\newcommand{\HsRegradedRecall}{10}
+\newcommand{\HsRegradedAbstain}{60}
 \newcommand{\ReplyNone}{0.4}
 \newcommand{\ReplyTool}{1.4}
 \newcommand{\ReplyBlock}{0.8}
 \newcommand{\ReplyLag}{0.5}
 \newcommand{\ReplyPre}{0.6}
 \newcommand{\ReplyHyb}{1.3}
-\newcommand{\AllNoGoldN}{928}
-\newcommand{\AllNoGoldPassed}{0}
-\newcommand{\AllTrials}{3,600}
+\newcommand{\RegradedRecall}{0}
+\newcommand{\RegradedAbstain}{0}
+\newcommand{\RobustRuns}{3}
+\newcommand{\HsRecallMs}{336}
+\newcommand{\HsRecallMsPninety}{416}
+\newcommand{\HsCostNone}{0.17}
+\newcommand{\HsCostTool}{0.50}
+\newcommand{\HsCostBlock}{0.20}
+\newcommand{\HsCostLag}{0.18}
+\newcommand{\HsCostPre}{0.19}
+\newcommand{\HsCostHyb}{0.50}
+\newcommand{\HsCostRun}{3.47}
+\newcommand{\HsCallsHyb}{1.9}
+\newcommand{\AllNoGoldN}{1,149}
+\newcommand{\AllNoGoldPassed}{1}
+\newcommand{\AllTrials}{4,800}
 \newcommand{\KTrials}{1,000}
 \newcommand{\KErrors}{0}
 \newcommand{\KTemplated}{61}
@@ -420,3 +527,13 @@
 \newcommand{\KOffpathMs}{19}
 \newcommand{\KLlmTool}{3.9}
 \newcommand{\KLlmBlock}{1.7}
+\newcommand{\DeploySetups}{3}
+\newcommand{\OnTimeLeadLap}{0}
+\newcommand{\OnTimePassedLap}{0.7}
+\newcommand{\OnTimeLeadHs}{4}
+\newcommand{\OnTimePassedHs}{1.8}
+\newcommand{\OnTimeLeadK}{1}
+\newcommand{\OnTimePassedK}{4.0}
+\newcommand{\OnTimeLeadMax}{4}
+\newcommand{\OnTimeLeadMaxAt}{1.5}
+\newcommand{\OnTimeLeadMaxLost}{0.2}

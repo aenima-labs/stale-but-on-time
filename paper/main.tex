@@ -38,7 +38,7 @@
 \maketitle
 
 \begin{abstract}
-A voice agent has to reply quickly, and retrieving long-term memories on the reply path takes time. A common remedy moves recall off that path: background jobs prepare context, and the reply uses whatever is ready. The price is staleness, because that context was computed before the listener's latest words. We measure the price. On \EoneTurns{} replayed utterances of LoCoMo, recall computed one utterance early shares \OvLone{} of its top-5 memories with fresh retrieval; computed on half of the incoming utterance, it shares \OvPhalf{}. In end-to-end trials with a small local model, a never-wait agent passes \RecLag\% of the cases that need a memory, against \RecBlock\% for blocking retrieval and \RecTool\% for a search tool. No trial passed without the right memory in context, and the loss was the same with the model's reasoning mode on and with a second model. What followed a missing memory did differ: one model abstained, the other sometimes invented an answer. We then built the design into the product it was specified for. There, the never-wait record passed \KRecLag\% and retrieval that blocked for a median of \KBlockMs\,ms passed \KRecBlock\%. Asynchronous recall should carry only work that is too slow to block on, start on partial transcripts, and expire within one exchange.
+A voice agent has to reply quickly, and retrieving long-term memories on the reply path takes time. A common remedy moves recall off that path: background jobs prepare context, and the reply uses whatever is ready. The price is staleness, because that context was computed before the listener's latest words. We measure the price. On \EoneTurns{} replayed utterances of LoCoMo, recall computed one utterance early shares \OvLone{} of its top-5 memories with fresh retrieval; computed on half of the incoming utterance, it shares \OvPhalf{}. In end-to-end trials with a small local model, a never-wait agent passes \RecLag\% of the cases that need a memory, against \RecBlock\% for blocking retrieval and \RecTool\% for a search tool. No trial passed without the right memory in context, and the loss was the same with the model's reasoning mode on, with a second local model and with a hosted model. What followed a missing memory did differ: one model sometimes invented an answer, and only the stronger settings searched past stale notes, at the price of a second model call. We then built the design into the product it was specified for. There, the never-wait record passed \KRecLag\% and retrieval that blocked for a median of \KBlockMs\,ms passed \KRecBlock\%. Across our set-ups the wait for retrieval was between \PreBlockMed{} and \HsRecallMs\,ms, and at no moment had the never-wait agent answered more than \OnTimeLeadMax{} points more of the trials correctly. Asynchronous recall should carry only work that is too slow to block on, start on partial transcripts, and expire within one exchange.
 \end{abstract}
 
 \begingroup
@@ -67,8 +67,10 @@ We ask this question for a voice companion that we are building\ifanon\else, \pr
 
 \begin{enumerate}[leftmargin=*,itemsep=2pt,topsep=3pt]
 \item \emph{Early recall is half different.} On \EoneTurns{} utterances of human conversation, recall computed one utterance early shares \OvLone{} of its top five memories with fresh retrieval, and three utterances early \OvLthree{}, close to the \OvRand{} of unrelated context. Starting on half of the incoming utterance brings it back to \OvPhalf{} (Section~\ref{sec:e1}).
-\item \emph{The difference decides the reply.} Over \EtwoTrials{} sealed trials, a never-wait agent passes \RecLag\% of the cases that need a memory, blocking retrieval \RecBlock\% and a search tool \RecTool\%. No trial passed without the right memory in context. With reasoning on, or with a second model, these pass rates barely move; whether the agent then abstains or invents, and whether it searches past stale notes, changes with both (Section~\ref{sec:e2}).
+\item \emph{The difference decides the reply.} Over \EtwoTrials{} sealed trials, a never-wait agent passes \RecLag\% of the cases that need a memory, blocking retrieval \RecBlock\% and a search tool \RecTool\%. No trial passed without the right memory in context. With reasoning on, with a second local model or with a hosted model, the loss barely moves; whether the agent then abstains or invents, and whether it searches past stale notes, changes with the model (Section~\ref{sec:e2}).
 \item \emph{The product behaves the same way.} In \KTrials{} trials against \product{} itself, the never-wait record passes \KRecLag\% and blocking retrieval \KRecBlock\%, at a median cost of \KBlockMs\,ms on the reply path. The search tool that the product shipped with passes \KRecTool\% and makes the reply about two seconds slower (Section~\ref{sec:e3}).
+
+\item \emph{Waiting is cheap, and not waiting is never usefully faster.} The wait for retrieval was \PreBlockMed\,ms with a local embedding model and \HsRecallMs\,ms with a hosted one. Counted as correct answers by time, the never-wait agent is at most \OnTimeLeadMax{} points ahead, for \OnTimeLeadMaxLost\,s (Section~\ref{sec:time}).
 \end{enumerate}
 
 These results are less favourable to asynchronous recall than we expected. Section~\ref{sec:discussion} draws out what they imply for design.
@@ -78,34 +80,7 @@ These results are less favourable to asynchronous recall than we expected. Secti
 
 \paragraph{Memory for conversational agents.} Retrieval-augmented generation retrieves with the user's query before generating \citep{lewis2020rag}, and agent memory systems add stores that the agent writes and searches itself \citep{packer2023memgpt,park2023generative,chhikara2025mem0,xu2025amem,hu2025memoryage}. Benchmarks such as LoCoMo \citep{maharana2024locomo} and LongMemEval \citep{wu2024longmemeval} score answers to questions asked after the conversation, and do not model when, within a live turn, a memory has to be available. \citet{xiao2026memory} argue that such benchmarks measure search and that memory should be recalled proactively from context; \citet{liu2025innerthoughts} study agents that form thoughts in parallel with a conversation and decide when to voice them.
 
-\paragraph{Taking slow work off the reply path.} Table~\ref{tab:related} lists the closest systems: Talker--Reasoner \citep{christakopoulou2024talker}, VoiceAgentRAG \citep{qiu2026voiceagentrag}, PMFR \citep{gan2025pmfr}, Stream RAG \citep{arora2025streamrag}, MoshiRAG \citep{chien2026moshirag,defossez2024moshi} and sleep-time compute \citep{lin2025sleeptime}. In each, a slow process works beside a fast one and hands over its result through shared state, an idea that goes back to the blackboard of Hearsay-II \citep{erman1980hearsay}; \citet{ginart2024async} give an event-driven architecture for it. The closest is VoiceAgentRAG, whose background agent predicts follow-up topics and prefetches documents into a cache, with blocking retrieval as the fallback on a miss. Our design belongs to this family and does not claim the idea of asynchronous retrieval. The difference is in the question. These papers show that latency falls; we measure what is lost when the reply never waits, as a function of how far behind the background result is.
-
-\begin{table}[t]
-\caption{Systems that move retrieval or reasoning off the reply path, as described in the cited papers.}
-\label{tab:related}
-\vspace{4pt}
-\centering
-\small
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.6cm}YY>{\raggedright\arraybackslash}p{4.2cm}@{}}
-\toprule
-System & Background work is driven by & Does the reply wait? & Reported evaluation \\
-\midrule
-Talker--Reasoner & Reasoner plans and calls tools & No; talker reads shared memory & Discussion of a sleep-coaching agent \\
-\addlinespace[2pt]
-VoiceAgentRAG & Follow-up topics predicted by a model & Only on a cache miss & Cache hit rate, retrieval time \\
-\addlinespace[2pt]
-PMFR & Knowledge adequacy check & No; refinement follows & Latency; response quality on TopiOCQA \\
-\addlinespace[2pt]
-Stream RAG & Tool queries predicted during user speech & Partly & QA accuracy, tool latency on AudioCRAG \\
-\addlinespace[2pt]
-MoshiRAG & Model detects knowledge-demanding queries & No; retrieval finishes during the response & Factuality of spoken answers \\
-\addlinespace[2pt]
-Sleep-time compute & Anticipated queries, offline & No & Accuracy against test-time compute \\
-\midrule
-This work & Recent utterances and partial transcripts & Never & Divergence from fresh retrieval; task success by lag \\
-\bottomrule
-\end{tabularx}
-\end{table}
+\paragraph{Taking slow work off the reply path.} The closest systems, compared in Table~\ref{tab:related} of the appendix, are Talker--Reasoner \citep{christakopoulou2024talker}, VoiceAgentRAG \citep{qiu2026voiceagentrag}, PMFR \citep{gan2025pmfr}, Stream RAG \citep{arora2025streamrag}, MoshiRAG \citep{chien2026moshirag,defossez2024moshi} and sleep-time compute \citep{lin2025sleeptime}. In each, a slow process works beside a fast one and hands over its result through shared state, an idea that goes back to the blackboard of Hearsay-II \citep{erman1980hearsay}; \citet{ginart2024async} give an event-driven architecture for it. The closest is VoiceAgentRAG, whose background agent predicts follow-up topics and prefetches documents into a cache, with blocking retrieval as the fallback on a miss. Our design belongs to this family and does not claim the idea of asynchronous retrieval. The difference is in the question. These papers show that latency falls; we measure what is lost when the reply never waits, as a function of how far behind the background result is.
 
 \section{Asynchronous context assembly}
 \label{sec:design}
@@ -132,9 +107,7 @@ Two properties follow. The reply path costs one read, whatever $c$ is. And $c$ d
 \section{Evaluation method}
 \label{sec:method}
 
-The experiments compare conditions that differ only in \emph{when} recall sees the conversation, so the comparison must hold everything else fixed and must record what was in the model's context on each trial. We use \framework{}, an open-source framework for testing complete agent systems in scripted situations. A \emph{pack} is a directory of data: rules, cases with fixtures and scripted actions, and evaluators with known-pass and known-fail self-tests. A \emph{subject plugin} connects the agent under test and returns each trial as an ordered list of typed events: messages, tool calls, snapshots of the assembled context, observations and metrics. A single run says little about a stochastic agent \citep{yao2024taubench}, so the runner repeats every case with fixed seeds. It grades the stored events and seals the run in a bundle of hashed files, so results can be regraded without running the agent again.
-
-Three features matter here. Each memory condition is a different subject run on the same pack, with the same seed for trial $n$ of a case. The context snapshot records which memories the model saw, which lets us test whether success depends on anything else. And the framework separates text matches, which it classes as the weakest tier of evidence, from checks on recorded state. We say below which tier each result rests on.
+The experiments compare conditions that differ only in \emph{when} recall sees the conversation, so everything else must be held fixed and the model's context must be recorded on each trial. We use \framework{}, an open-source framework for testing complete agent systems in scripted situations. A \emph{pack} holds rules, cases with scripted actions, and evaluators with known-pass and known-fail self-tests. A \emph{subject plugin} connects the agent under test and returns each trial as a list of typed events: messages, tool calls, snapshots of the assembled context, observations and metrics. A single run says little about a stochastic agent \citep{yao2024taubench}, so the runner repeats every case, grades the stored events and seals the run in a bundle of hashed files, which can be regraded without running the agent again. Each memory condition is a different subject on the same pack. The context snapshot records which memories the model saw, which lets us test whether success depends on anything else. The framework separates text matches, its weakest tier of evidence, from checks on recorded state, and we say which tier each result rests on.
 
 \section{Experiment 1: how stale is recall that was computed early?}
 \label{sec:e1}
@@ -164,29 +137,9 @@ Figure~\ref{fig:staleness} shows the result, and Table~\ref{tab:e1} in the appen
 
 \emph{A partial transcript recovers much of it.} A record that has seen the first quarter of the incoming utterance reaches \OvPquarter{}; half of it gives \OvPhalf{} and three quarters \OvPthreeq{}. The fresh top memory is in the half-utterance top five \TopOnePhalf\% of the time.
 
-\emph{A longer window softens staleness but does not remove it.} With $w=5$ the lag-1 overlap is \OvWfiveLone{}; with $w=1$, where the record is based on a single different utterance, it is \OvWoneLone{}, barely above the floor. The window only changes how much of the two ambiences is literally the same text.
-
 \emph{The loss is not confined to topic shifts, and part of it may not matter.} Lag-1 overlap is \ShiftLoneQone{} in the quarter of utterances that continue the preceding ones most closely and \ShiftLoneQfour{} in the most abrupt quarter: almost every new utterance moves the retrieved set. Measured against retrieval with the utterance that actually came next, lag 1 keeps \HindRetained\% of the margin that fresh recall has over the floor, so part of what lag replaces was not going to be needed (Appendix~\ref{app:e1}).
 
-\subsection{From recall cost to staleness}
-\label{sec:timing}
-
-A slow recall job has to start early. We turn the cost $c$ of a job into the overlap a never-wait agent can expect, using the replayed utterances and a simple model of time. Let $n_j$ be the number of words in $u_j$ and $r$ the speaking rate, so that $u_j$ lasts $d_j = n_j / r$ seconds. We treat the incoming utterance $u_t$ as the listener's and $u_{t-1}$ as the agent's.
-
-A job that starts when the agent's reply $u_{t-1}$ exists as text finishes in time if $c \le d_{t-1} + d_t$, and gives lag 1. Jobs from the agent's earlier replies give lag 3 if $c \le d_{t-3} + \dots + d_t$ and lag 5 if $c \le d_{t-5} + \dots + d_t$. A job that starts on a partial transcript at fraction $p$ of the listener's utterance finishes in time if $c \le (1-p)\,d_t$. The assembler uses the freshest record that is ready and leaves the slot empty, with overlap 0, when none is. We use $r = 150$ words per minute and repeat the analysis at 210, the rate \citet{tauroza1990speech} report for conversation. The model ignores pauses between turns and the delay of the recogniser. LoCoMo is written chat, so its durations are estimates. At 150 words per minute the median utterance lasts \UttMedianSec\,s and the median lag-1 job has \SlackMedianSec\,s to finish.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{fig-timing.pdf}
-\caption{Expected agreement with fresh recall as a function of the cost of one recall job, under the timing model of Section~\ref{sec:timing}. Blocking retrieval always agrees but delays every reply by $c$. A never-wait agent delays nothing and pays in agreement. Bands are 95\% intervals.}
-\label{fig:timing}
-\end{figure}
-
-Figure~\ref{fig:timing} shows two regimes. If jobs start only at the ends of utterances, expected overlap stays near the lag-1 value of \OvLone{} for any cost up to about five seconds (\TimTurnFive{} at $c=5.4$\,s) and then falls as jobs slip to lag 3 and beyond (\TimTurnTwelve{} at 12\,s, \TimTurnTwentySeven{} at 27\,s). If jobs also start on partial transcripts, a fast job does much better (\TimStreamTenth{} at 0.1\,s, \TimStreamOne{} at 1.3\,s), and the advantage is gone once a job takes longer than the remainder of an utterance (\TimStreamFive{} at 5.4\,s). Faster speech moves both curves left (\TimStreamOneFast{} at 1.3\,s and \TimTurnTwelveFast{} at 12\,s).
-
-Within this model a never-wait agent has a ceiling. However cheap recall is, agreement stops near \OvPthreeq{} with partial transcripts, where the last job starts three quarters of the way through the utterance, and near \OvLone{} without. Blocking retrieval reaches full agreement at a price of $c$ seconds per reply, and when $c$ is a few tens of milliseconds that price is small.
-
-In short, recall computed one utterance early is half different from fresh recall, and only a job that starts inside the incoming utterance and finishes within it does much better.
+\emph{A slow job has to start early, and then it is stale.} Appendix~\ref{sec:timing} turns the cost $c$ of one recall job into the overlap a never-wait agent can expect, with a simple model of speaking time (Figure~\ref{fig:timing}). If jobs start only at the ends of utterances, expected overlap stays near the lag-1 value of \OvLone{} for any cost up to about five seconds and then falls towards the floor. If jobs also start on partial transcripts, they do better only while they finish within the rest of the utterance (\TimStreamOne{} at 1.3\,s, \TimStreamFive{} at 5.4\,s). However cheap recall is, a never-wait agent stops near \OvPthreeq{} with partial transcripts and near \OvLone{} without.
 
 \section{Experiment 2: does staleness change what the agent says?}
 \label{sec:e2}
@@ -202,7 +155,7 @@ In short, recall computed one utterance early is half different from fresh recal
 \item \emph{Must abstain.} The listener asks for a fact the store does not contain, in most cases with a nearby note that invites a guess.
 \end{itemize}
 
-\paragraph{Grading.} In the first three classes a trial passes if the reply contains one of a small set of strings that identify the remembered fact, for example a name or a year that appears in the target note and nowhere in the lead-in. The framework classes this as a text match. In the abstain class the agent returns its reply together with a flag that says whether it declined to answer, and a trial passes if the flag is set; this is a check on recorded state. Section~\ref{sec:audit} reports an audit of both.
+\paragraph{Grading.} In the first three classes a trial passes if the reply contains one of a small set of strings that identify the remembered fact, for example a name or a year that appears in the target note and nowhere in the lead-in. The framework classes this as a text match. In the abstain class the agent returns its reply together with a flag that says whether it declined to answer, and a trial passes if the flag is set; this is a check on recorded state. Section~\ref{sec:audit} reports an audit of both, and Section~\ref{sec:robust} two corrections that a later run made necessary.
 
 \paragraph{Conditions.} One agent is run six ways. The prompt, model, retriever, window ($w=3$) and number of memories shown ($k=4$) are the same throughout.
 
@@ -215,9 +168,9 @@ In short, recall computed one utterance early is half different from fresh recal
 \item \emph{Async lag 1 + search.} The lag-1 record is loaded and the search tool is also offered.
 \end{itemize}
 
-\paragraph{Model and runs.} The agent is \texttt{gemma4:e4b} (8 billion parameters, 4-bit quantised) served by Ollama 0.40 on one laptop, at temperature 0.7 with its reasoning mode switched off. Each case runs five times with fixed seeds: 200 trials per condition and \EtwoTrials{} in all. We debugged the harness on four cases before the full run, which led us to switch off the reasoning mode and to use the model's native tool calls. Cases and evaluators were not changed afterwards. This is the main run; Section~\ref{sec:robust} reports two further full runs of the same pack, and no other full run was made. Intervals are 95\% percentile intervals from a bootstrap over cases.
+\paragraph{Model and runs.} The agent is \texttt{gemma4:e4b} (8 billion parameters, 4-bit quantised) served by Ollama 0.40 on one laptop, at temperature 0.7 with its reasoning mode switched off. Each case runs five times with fixed seeds: 200 trials per condition and \EtwoTrials{} in all. We debugged the harness on four cases before the full run, which led us to switch off the reasoning mode and to use the model's native tool calls. Cases and evaluators were not changed afterwards. This is the main run; Section~\ref{sec:robust} reports three further full runs of the same pack, and no other full run was made. Intervals are 95\% percentile intervals from a bootstrap over cases.
 
-\paragraph{Latency.} We report the delay each condition adds between the end of the listener's utterance and the start of the final generation call. That call is the same in every condition, so this isolates what recall adds. Total time to a complete reply also depends on how long the reply is; it is in Table~\ref{tab:e2detail}.
+\paragraph{Latency.} We report the delay each condition adds before the final generation call, which is the same call in every condition. Time to a complete reply also depends on the length of the reply (Table~\ref{tab:e2detail}).
 
 \subsection{Results}
 
@@ -256,38 +209,33 @@ Table~\ref{tab:e2} and Figure~\ref{fig:classes} give the results.
 
 \emph{A search tool matches blocking retrieval and costs a model call.} The search tool passes \RecTool\% \RecToolCI{}, which we cannot distinguish from blocking retrieval (difference \DiffBlockTool{} points \DiffBlockToolCI{}). It is better when the topic shifts (\ShiftTool\% against \ShiftBlock\%), where the model writes a clean query, and worse on unprompted cases (\UnpTool\% against \UnpBlock\%), where it has to search for something nobody asked about. It adds a median of \PreToolMed\,ms before generation starts (90th percentile \PreToolPninety\,ms) on a local model. Blocking retrieval adds \PreBlockMed\,ms.
 
-\begin{figure}[t]
-\centering
-\includegraphics{fig-tradeoff.pdf}
-\caption{Recall trials passed against the mean delay each condition adds before the reply starts to generate. Bars are 95\% intervals over cases. Three conditions add no delay.}
-\label{fig:tradeoff}
-\end{figure}
-
 \emph{Stale memories suppress search.} We expected the combination of a lag-1 record and a search tool to recover what lag 1 loses. It passes \RecHyb\% \RecHybCI{}, far below the search tool alone. With stale notes already in context, the model searched in \SrchShiftHyb\% of the shifted-topic trials and \SrchUnpHyb\% of the unprompted ones; with nothing loaded it searched in \SrchShiftTool\% and \SrchUnpTool\%. It treated the loaded notes as the available evidence and declined to answer. In \RepairedHyb{} of 200 trials it also replied without the required structure and had to be asked again. Memories that are loaded and not relevant are not neutral. Section~\ref{sec:robust} finds the same effect in a second model, and finds that reasoning removes it.
 
-Figure~\ref{fig:tradeoff} puts quality and delay together. In this setup blocking retrieval dominates: it costs \PreBlockMed\,ms and passes almost four times as many recall trials as lag 1. Nothing in our data argues for moving a recall this cheap off the reply path.
+In this setup blocking retrieval dominates: it costs \PreBlockMed\,ms and passes almost four times as many recall trials as lag 1. Nothing in our data argues for moving a recall this cheap off the reply path. Section~\ref{sec:time} puts quality and delay together for all our set-ups.
 
 \paragraph{Audit.}
 \label{sec:audit}
 Text matches can be wrong in both directions, so we read a stratified random sample of 60 trials, ten per condition, against their grades. The grade matched the reply in all 60. The reading also showed two limits of the evaluators, described in Appendix~\ref{app:e2}: the text match is strict about which memory counts, and unsupported statements are graded only where the listener asks a direct question.
 
-\subsection{Reasoning mode and a second model}
+\subsection{Reasoning mode, a second model and a hosted model}
 \label{sec:robust}
 
-The main run uses one model with its reasoning mode off. We ran the pack twice more: with the reasoning mode of \texttt{gemma4:e4b} on, and with a second model of the same size, \texttt{qwen3:8b} (8.2 billion parameters, 4-bit quantised), reasoning off. Cases, evaluators, prompt, seeds and retriever are unchanged; the reasoning run has a larger output budget, to leave room for the reasoning tokens. Each run has \ThTrials{} trials and followed a four-case check that the harness worked with the new setting. Figure~\ref{fig:robust} gives the recall results and Table~\ref{tab:robust} the detail.
+The main run uses one model with its reasoning mode off. We ran the pack three more times: with the reasoning mode of \texttt{gemma4:e4b} on; with a second local model of the same size, \texttt{qwen3:8b} (8.2 billion parameters, 4-bit quantised), reasoning off; and with a hosted model, \texttt{claude-sonnet-5}, whose retriever also takes its embeddings from a hosted provider (\texttt{text-embedding-3-small}). Cases, evaluators, prompt and conditions are unchanged, and each run has \ThTrials{} trials. The local runs keep the seeds and the retriever; the reasoning run has a larger output budget, to leave room for the reasoning tokens. The hosted model accepts neither a temperature nor a seed and has no JSON output mode, so its replies come at the provider's default sampling and the reply format rests on the prompt alone. Figure~\ref{fig:robust} gives the recall results and Table~\ref{tab:robust} the detail.
+
+\emph{Two corrections to the grading.} The replies of the hosted run showed two weaknesses in our grading, which we corrected for every run (Appendix~\ref{app:e2}): a key must begin a word, since the key ``Mori'' had matched inside ``memories'', and a refusal in plain text counts as an abstention, since the hosted model often left out the JSON format that carries the flag. The corrections change \HsRegradedRecall{} recall grades and \HsRegradedAbstain{} abstention grades of the hosted run, and none of the local runs.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{fig-robust.pdf}
-\caption{Recall trials passed in the main run and in two further runs of the same pack. Dots are means over 30 cases with five trials each; bars are 95\% intervals from a bootstrap over cases. The three conditions that differ only in how fresh the loaded memories are (blocking, prefetch, lag 1) score alike in all three runs. The two conditions with a search tool do not.}
+\caption{Recall trials passed in the main run and in three further runs of the same pack. Dots are means over 30 cases with five trials each; bars are 95\% intervals from a bootstrap over cases. The three conditions that differ only in how fresh the loaded memories are (blocking, prefetch, lag 1) keep their order and their distance in all four runs. The two conditions with a search tool do not.}
 \label{fig:robust}
 \end{figure}
 
-\emph{What stayed the same: the cost of staleness.} The retriever is the same, so the conditions without a search tool show the model the same memories in all three runs. Blocking retrieval, half-utterance prefetch and lag 1 pass \ThRecBlock\%, \ThRecPre\% and \ThRecLag\% of recall trials with reasoning on, and \QwRecBlock\%, \QwRecPre\% and \QwRecLag\% with the second model, against \RecBlock\%, \RecPre\% and \RecLag\% in the main run. Reasoning cannot recover a note that is not there: over the three runs, \AllNoGoldPassed{} of the \AllNoGoldN{} recall trials without a target note in context passed.
+\emph{What stayed the same: the cost of staleness.} Blocking retrieval, half-utterance prefetch and lag 1 pass \ThRecBlock\%, \ThRecPre\% and \ThRecLag\% of recall trials with reasoning on, \QwRecBlock\%, \QwRecPre\% and \QwRecLag\% with the second model, and \HsRecBlock\%, \HsRecPre\% and \HsRecLag\% with the hosted model, against \RecBlock\%, \RecPre\% and \RecLag\% in the main run. The hosted model uses the notes it is given better than the local ones, and loses as much when they are stale: blocking retrieval is ahead of lag 1 by \HsDiffBlockLag{} points \HsDiffBlockLagCI{}, against \DiffBlockLag{} in the main run. No model recovers a note that is not there. Over the four runs, \AllNoGoldPassed{} of the \AllNoGoldN{} recall trials without a target note in context passed, and it did so by citing another note that names the same person.
 
-\emph{What changed: what the model does about a missing memory.} With reasoning on, the model searched in \ThSrchHyb\% of the trials that combine a lag-1 record with the search tool, against \SrchHyb\% in the main run, and that condition passed \ThRecHyb\% \ThRecHybCI{}. The price is time: its median complete reply took \ThReplyHyb\,s instead of \ReplyHyb\,s. A hosted model will reason faster than a laptop does, but the structure remains: two slow model calls on the reply path, which is what a never-wait design sets out to avoid. Without reasoning the second model behaved like the first and searched less beside stale notes (\QwSrchHyb\% of trials, against \QwSrchTool\% with the search tool alone). It differed in what it said when the memory was missing. With a lag-1 record, \QwOtherLag\% of its asked trials ended in neither the fact nor an abstention but in an invented detail, a flat denial or an unrelated memory, against \QwOtherBlock\% under blocking retrieval and \OtherLag\% for lag 1 in the main run; with no memory at all the share was \QwOtherNone\%. We read 40 of the failed replies of this run, and the failures were real, not grading errors. Abstention when evidence is missing is thus a property of the model. Staleness makes evidence go missing more often, so it raises the cost of a model that lacks that property.
+\emph{What changed: what the model does about a missing memory.} Two settings made the search tool work beside a stale record. With reasoning on, the local model searched in \ThSrchHyb\% of the trials that combine a lag-1 record with the search tool, against \SrchHyb\% in the main run, and passed \ThRecHyb\% \ThRecHybCI{}; the hosted model searched in \HsSrchHyb\% and passed \HsRecHyb\% \HsRecHybCI{}. The price is a second model call on the reply path, which is what a never-wait design sets out to avoid. The median complete reply took \ThReplyHyb\,s instead of \ReplyHyb\,s with reasoning on. For the hosted model it took \HsReplyHyb\,s, against \HsReplyBlock\,s for blocking retrieval, which passed as many trials (\HsRecBlock\%) at \HsCostBlock{} instead of \HsCostHyb{} US cents per reply. Without reasoning the second local model behaved like the first and searched less beside stale notes (\QwSrchHyb\% of trials, against \QwSrchTool\% with the search tool alone). It differed in what it said when the memory was missing. With a lag-1 record, \QwOtherLag\% of its asked trials ended in an invented detail, a flat denial or an unrelated memory, against \OtherLag\% for the first local model and \HsOtherLag\% for the hosted one; with no memory at all the share was \QwOtherNone\%. We read 40 of these replies, and the failures were real. Abstention when evidence is missing is thus a property of the model. Staleness makes evidence go missing more often, so it raises the cost of a model that lacks that property.
 
-In short, staleness decides whether the right memory is in context, the right memory in context decides the reply, and no model setting we tried changed either step.
+In short, staleness decides whether the right memory is in context, and the right memory in context decides the reply. A stronger model can buy the memory back with a search, at the price of the delay that the design was meant to remove.
 
 \section{Experiment 3: does it hold in the product?}
 \label{sec:e3}
@@ -300,7 +248,7 @@ In short, staleness decides whether the right memory is in context, the right me
 
 \paragraph{Runs.} The 48 notes became the product's memory store and the 40 cases of Experiment~2 ran unchanged. A trial opens a fresh session, posts the lead-in, waits for as long as the final utterance takes to say at 210 words per minute, and sends the final utterance as text. The model is \texttt{gemma4:e4b}, served locally, with five trials per case: \KTrials{} trials. The product sets no sampling temperature for the reply, so the model's default of 1.0 applies; its output checks run at temperature 0. Recall cases are graded by the text match of Experiment~2 on the reply that was delivered, with the spoken forms of numbers added to the keys of eight cases. The product signals abstention by a tool call, so we report that call and, separately, a match on a fixed list of phrases that decline.
 
-\paragraph{Two runs.} We report the second of two full runs. In the first, the model often wrote its citation as a line of text instead of calling the citation tool. The output check then withheld the statement, and \KfTemplated{} of 1,000 replies became the sentence of refusal, most of them correct answers; blocking retrieval passed \KfRecBlock\% of recall trials and lag 1 \KfRecLag\%. We changed the product to accept a written citation of a page that is loaded, fixed the two grading rules above before running again, and ran once more. Nothing else changed, and the bundles of the first run are in the supplementary material.
+\paragraph{Two runs.} We report the second of two full runs. In the first, the output check withheld many correct answers because the model cited its source in the wrong form. We changed the product to accept that form, fixed the two grading rules above, and ran once more; Appendix~\ref{app:e3} gives the first run.
 
 \subsection{Results}
 
@@ -327,56 +275,113 @@ Condition & (30 cases) & continues & shifts & prompted & context & (\%) & tool &
 
 \emph{Two results of Experiment~2 did not carry over.} A loaded lag-1 record did not make the model search less under the product's instructions: it searched in \KSrchHyb\% of trials with the record and \KSrchTool\% without. And abstention was weak in every condition. On the must-abstain cases the agent abstained by tool call or refusal sentence in \KAbstToolLag\% to \KAbstToolTool\% of trials and declined in words in \KAbstWordsTool\% to \KAbstWordsLag\%. Counting every way of declining, \KGuessMin\% to \KGuessMax\% of those trials still ended in a guess. We read a stratified sample of 50 trials against their grades. Of 35 recall grades, 33 matched the reply, and in the other two the agent used a relevant memory that the keys do not cover. The tool-call grade was recorded correctly in all 15 abstention trials, and in 8 of the 11 it failed the agent had declined in words or had written the tool call out as text.
 
-In short, the product behaves as the reference agent predicted: one utterance of lag costs \KDiffBlockLag{} points of recall, and blocking for a tenth of a second avoids it.
+\section{What waiting costs in time}
+\label{sec:time}
+
+The experiments above measure what a never-wait design loses in correctness. That loss depends on which memories are in context, not on the speed of the machine. What the design gains is time, and time does depend on the machine. Table~\ref{tab:deploy} collects the timings of our set-ups and Figure~\ref{fig:ontime} puts time and correctness in one picture. Times run to the complete text of the reply; none of the agents here speaks before its reply is complete.
+
+\begin{table}[t]
+\caption{What waiting costs in each set-up: the median wait for recall when it blocks the reply, and the median time from the end of the listener's utterance to a complete reply. Times of the hosted set-up include the network round trips to both providers.}
+\label{tab:deploy}
+\vspace{4pt}
+\centering
+\small
+\begin{tabular}{@{}lrcccc@{}}
+\toprule
+ & Wait for & \multicolumn{4}{c}{Complete reply (s)} \\
+\cmidrule(l){3-6}
+Set-up & recall (ms) & Async, lag 1 & Blocking & Search tool & Lag 1 + search \\
+\midrule
+\tabinput{tab-deploy.tex}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig-ontime.pdf}
+\caption{Correct answers by time. Each curve gives the share of the 150 recall trials of a condition that had received a correct reply by that time. Colour marks whether the loaded memories are fresh (blue) or one utterance old (orange); dashes mark a search on the reply path. A faster set-up moves the curves to the left. Where a curve ends is set by what the model was shown.}
+\label{fig:ontime}
+\end{figure}
+
+\emph{The wait is one embedding call.} Blocking retrieval embeds the ambience and searches the store. That took a median of \PreBlockMed\,ms with a local embedding model, \KBlockMs\,ms in the product and \HsRecallMs\,ms with a hosted embedding model, where most of it is the network round trip. This wait is all that moving recall off the reply path can save. The reply times of the two conditions in Table~\ref{tab:deploy} differ by more, because an answer takes longer to write than a refusal.
+
+\emph{The never-wait agent is never usefully ahead.} In every set-up the lag-1 curve leaves the axis together with the blocking curve and stops at about a quarter of the trials. Its largest lead is \OnTimeLeadMax{} points, \OnTimeLeadMaxAt\,s after the utterance in the hosted set-up; \OnTimeLeadMaxLost\,s later, blocking retrieval has answered more trials correctly than lag 1 ever does. A search reaches its ceiling one model call later than blocking retrieval. With the hosted model that ceiling is as high (\HsRecHyb\% against \HsRecBlock\%); with the local model beside a stale record it is not. The set-up moves the curves, not the order of their ceilings: the hosted model answers later than the small local model and answers more, and the product answers later still, because its output checks sit on the reply path.
 
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{When is asynchronous recall worth it?} The three experiments agree. The lag-1 overlap of \OvLone{} in Experiment~1 becomes a target note in context for \GoldLag\% of trials in Experiment~2 and \KGoldLag\% in the product, and the half-utterance overlap of \OvPhalf{} becomes \GoldPre\%. A never-wait design buys back the cost of recall, so its value depends on that cost. When recall is an index lookup of a few milliseconds there is nothing to buy back, and the agent should block. When recall takes seconds, because it rewrites queries, reranks with a model or walks a graph of associations, blocking is not an option for a voice turn and Figure~\ref{fig:timing} describes what remains: about half of the fresh context if jobs start at utterance ends, more if they start on partial transcripts and finish within the utterance.
+\paragraph{When is asynchronous recall worth it?} The three experiments agree. The lag-1 overlap of \OvLone{} in Experiment~1 becomes a target note in context for \GoldLag\% of trials in Experiment~2 and \KGoldLag\% in the product, and the half-utterance overlap of \OvPhalf{} becomes \GoldPre\%. A never-wait design buys back the cost of recall, so its value depends on that cost. When recall is an index lookup of a few milliseconds, or one embedding call to a hosted provider, there is little or nothing to buy back, and the agent should block. When recall takes seconds, because it rewrites queries, reranks with a model or walks a graph of associations, blocking is not an option for a voice turn and Figure~\ref{fig:timing} in the appendix describes what remains: about half of the fresh context if jobs start at utterance ends, more if they start on partial transcripts and finish within the utterance.
 
 \paragraph{Guidance.} For systems like ours we take four points from the results.
 
 \begin{enumerate}[leftmargin=*,itemsep=2pt,topsep=3pt]
-\item \emph{Keep cheap retrieval on the reply path.} The reply should always get a fresh, fast lookup on the complete utterance; in the product it took \KBlockMs\,ms. Background jobs should add to it, not replace it.
+\item \emph{Keep cheap retrieval on the reply path.} The reply should always get a fresh, fast lookup on the complete utterance; it took \KBlockMs\,ms in the product and \HsRecallMs\,ms with a hosted embedding model. Background jobs should add to it, not replace it.
 \item \emph{Start background recall on partial transcripts and expire it after one exchange.} Without streaming recognition a never-wait agent is limited to lag 1, and a job is useful only if it finishes within the rest of the utterance, a budget of a few seconds. A record shares \OvLtwo{} of its content with fresh recall at lag 2 and \OvLthree{} at lag 3, close to the floor, so we set $\lmax = 2$ utterances.
-\item \emph{Treat a loaded record as possibly stale, and test what the model does when it is.} In the reference agent, both models searched less without reasoning once memories were loaded, and one of them invented answers when the right memory was absent; in the product the model guessed on up to half of the questions that its memory could not answer. Records from background jobs should be marked as possibly out of date, and abstention should be tested on the model that will be deployed.
-\item \emph{Test with shifts and with unprompted cases.} Cases that continue a topic hide most of the difference between designs, and question-only cases hide the cost of search-based designs on remarks that contain no question.
+\item \emph{Treat a loaded record as possibly stale, and test what the model does when it is.} Both local models searched less once memories were loaded, and one invented answers when the right memory was absent; the hosted and the reasoning model searched past stale notes, at the price of a second model call. In the product the model guessed on up to half of the questions that its memory could not answer. Records from background jobs should be marked as possibly out of date, and abstention tested on the model that will be deployed.
+\item \emph{Test with shifts and with unprompted cases.} Cases that continue a topic hide most of the difference between designs, and question-only cases hide the cost of search-based designs on remarks that contain no question. On such remarks blocking retrieval on the ambience passed \UnpBlock\% and the search tool \UnpTool\%, which supports the argument of \citet{xiao2026memory} for recall driven by context, with one condition: the context has to include the latest utterance (\UnpLag\% at lag 1).
 \end{enumerate}
-
-\paragraph{Recall from ambience.} Blocking retrieval on the ambience passed \UnpBlock\% of unprompted cases and the search tool \UnpTool\%. This supports the argument of \citet{xiao2026memory} that recall driven by context reaches memories that a query-driven agent does not think to ask for. Our results add a condition: the context has to include the latest utterance. Ambience that stops one utterance short passed \UnpLag\%.
 
 \section{Limitations}
 \label{sec:limits}
 
-\emph{No audio.} Both experiments replay text. Durations in the timing model are derived from word counts in written chat at an assumed speaking rate, and recogniser delay and pauses are left out.
-
-\emph{Overlap is not relevance.} Experiment~1 measures departure from fresh retrieval, not usefulness. The hindsight check suggests that part of the departure does not matter, and Experiment~2 is the labelled test.
-
-\emph{Small local models.} We used two local models of about eight billion parameters, and one of them in the product. A larger or hosted model may reason faster, search more readily or use weakly related notes better, and the suppression of search by stale context may depend on the wording of the prompt. The two further runs of Section~\ref{sec:robust} were added after the main run had been read. They reuse its cases and evaluators unchanged, but they were not planned in advance. Experiment~3 was run twice, with a change to the product and to two grading rules in between (Section~\ref{sec:e3}); the second run is the one reported.
+\emph{Models and runs.} We used two local models of about eight billion parameters, one of them in the product, and one hosted model, whose run could not fix temperature or seed. The suppression of search by stale context may depend on the wording of the prompt. The three further runs of Section~\ref{sec:robust} were not planned in advance, and the last of them led to two corrections of the grading. Experiment~3 was run twice, with changes to the product and to the grading in between (Appendix~\ref{app:e3}).
 
 \emph{Small, authored test set.} The 40 cases and the 48 notes are fictional and were written for this study by the same people, with the same AI assistance, who built the harness. Intervals over ten cases per class are wide. The lead-in is two utterances long and only lag 1 was tested end to end.
 
-\emph{Evaluators.} The text match is strict about which memory counts and does not grade unsupported statements (Section~\ref{sec:audit}). The audit was a reading of 60 trials, not an independent annotation.
+\emph{Measures.} Overlap in Experiment~1 measures departure from fresh retrieval, not usefulness; Experiment~2 is the labelled test. Its text match is strict about which memory counts and does not grade unsupported statements (Section~\ref{sec:audit}). The audit was a reading of 60 trials, not an independent annotation.
 
-\emph{Latency.} Delays were measured on one laptop with a local model and a store of 48 notes. They show the structure of the cost, such as an extra model call for search, and their absolute values will differ in a hosted system.
+\emph{Time.} All three experiments replay text, and the timing model derives durations from word counts at an assumed speaking rate, without recogniser delay or pauses. Delays were measured from one laptop, with local or hosted models and a store of 48 notes. They show the structure of the cost: one embedding call for blocking retrieval, one more model call for search. Absolute values will differ on other hardware and with a larger store, and none of our agents streams its reply.
 
 \section{Conclusion}
 
-Moving recall off the reply path makes a voice agent reply on time, and makes its context stale. We measured the staleness. One utterance of lag replaces half of the retrieved memories; a partial transcript restores much of it; and in an end-to-end test a never-wait agent passed about a quarter as many recall trials as an agent that blocked for \PreBlockMed\,ms. The loss was the same with reasoning on, with a second model, and in the product the design was written for, where blocking retrieval cost a tenth of a second. What a missing memory led to was not: one model abstained and the other sometimes invented an answer, and only reasoning, at seconds per reply, made a model search past the stale notes in its context. Asynchronous recall is a tool for work that cannot block. It should start on partial transcripts, expire within one exchange, and sit beside a fast retrieval that the reply always waits for.
+Moving recall off the reply path makes a voice agent reply on time, and makes its context stale. One utterance of lag replaces half of the retrieved memories; a partial transcript restores much of it; and in an end-to-end test a never-wait agent passed about a quarter as many recall trials as an agent that blocked for \PreBlockMed\,ms. The loss was the same with reasoning on, with a second local model, with a hosted model, and in the product the design was written for. What a missing memory led to was not: one model sometimes invented an answer, and only a reasoning or a hosted model searched past stale notes, at the price of a second model call. Counted as correct answers by time, the never-wait agent was never more than \OnTimeLeadMax{} points ahead. Asynchronous recall is a tool for work that cannot block. It should start on partial transcripts, expire within one exchange, and sit beside a fast retrieval that the reply always waits for.
 
 \subsubsection*{Broader Impact Statement}
-Agents that speak from a store of personal memories can mislead people about someone's life if they recall the wrong thing or invent a detail. In our test one model abstained when stale context left the right memory out, and a second model of the same size sometimes invented an answer. Abstention has to be tested on the model that is deployed; the design does not provide it. All persons and facts in our test data are fictional.
+Agents that speak from a store of personal memories can mislead people about someone's life if they recall the wrong thing or invent a detail. In our test two models abstained when stale context left the right memory out, and a third sometimes invented an answer. Abstention has to be tested on the model that is deployed; the design does not provide it. All persons and facts in our test data are fictional.
 
 \subsubsection*{Reproducibility Statement}
-The experiment code, the pack with its 40 cases and 48 notes, the generated figures and tables, and the sealed result bundles with every trial's events are in the supplementary material: eighteen for Experiment~2 (six conditions in each of three runs) and ten for Experiment~3 (five conditions in each of two runs). Experiment~3 needs \product{} to run again; its bundles can be regraded and analysed without it. Every number in this paper is written into the manuscript by a script that reads those result files. LoCoMo is distributed by its authors under CC BY-NC 4.0 and is downloaded, not redistributed. The embedding model is \texttt{nomic-embed-text} and the chat models are \texttt{gemma4:e4b} and \texttt{qwen3:8b}, all served by Ollama 0.40.13. \framework{} is released under the Apache-2.0 licence.
+The experiment code, the pack with its 40 cases and 48 notes, the generated figures and tables, and the sealed result bundles with every trial's events are in the supplementary material: twenty-four for Experiment~2 (six conditions in each of four runs) and ten for Experiment~3 (five conditions in each of two runs). Experiment~3 needs \product{} to run again; its bundles can be regraded and analysed without it. Every number in this paper is written into the manuscript by a script that reads those result files. LoCoMo is distributed by its authors under CC BY-NC 4.0 and is downloaded, not redistributed. The local embedding model is \texttt{nomic-embed-text} and the local chat models are \texttt{gemma4:e4b} and \texttt{qwen3:8b}, all served by Ollama 0.40.13; the supplementary material gives the hashes of the model files, because a model tag can later point to other weights. The hosted run used \texttt{claude-sonnet-5} and \texttt{text-embedding-3-small}, cost \HsCostRun{} US dollars, and stores a trace of every trial with the token counts that the providers reported. \framework{} is released under the Apache-2.0 licence.
 
 \bibliography{refs}
 \bibliographystyle{tmlr}
 
 \appendix
 
+\section{Related systems}
+\label{app:related}
+
+\begin{table}[h]
+\caption{Systems that move retrieval or reasoning off the reply path, as described in the cited papers.}
+\label{tab:related}
+\vspace{4pt}
+\centering
+\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.6cm}YY>{\raggedright\arraybackslash}p{4.2cm}@{}}
+\toprule
+System & Background work is driven by & Does the reply wait? & Reported evaluation \\
+\midrule
+Talker--Reasoner & Reasoner plans and calls tools & No; talker reads shared memory & Discussion of a sleep-coaching agent \\
+\addlinespace[2pt]
+VoiceAgentRAG & Follow-up topics predicted by a model & Only on a cache miss & Cache hit rate, retrieval time \\
+\addlinespace[2pt]
+PMFR & Knowledge adequacy check & No; refinement follows & Latency; response quality on TopiOCQA \\
+\addlinespace[2pt]
+Stream RAG & Tool queries predicted during user speech & Partly & QA accuracy, tool latency on AudioCRAG \\
+\addlinespace[2pt]
+MoshiRAG & Model detects knowledge-demanding queries & No; retrieval finishes during the response & Factuality of spoken answers \\
+\addlinespace[2pt]
+Sleep-time compute & Anticipated queries, offline & No & Accuracy against test-time compute \\
+\midrule
+This work & Recent utterances and partial transcripts & Never & Divergence from fresh retrieval; task success by lag \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \section{Additional results for Experiment 1}
 \label{app:e1}
+
+\paragraph{Window size.} A longer window softens staleness but does not remove it. With $w=5$ the lag-1 overlap is \OvWfiveLone{}; with $w=1$, where the record is based on a single different utterance, it is \OvWoneLone{}, barely above the floor. The window only changes how much of the two ambiences is literally the same text.
 
 \paragraph{Topic shifts.} We split utterances into quartiles by the embedding distance between the incoming utterance and the three before it. Table~\ref{tab:e1shift} gives the overlap in each quartile.
 
@@ -411,6 +416,24 @@ Record & Q1 & Q2 & Q3 & Q4 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\subsection{From recall cost to staleness}
+\label{sec:timing}
+
+A slow recall job has to start early. We turn the cost $c$ of a job into the overlap a never-wait agent can expect, using the replayed utterances and a simple model of time. Let $n_j$ be the number of words in $u_j$ and $r$ the speaking rate, so that $u_j$ lasts $d_j = n_j / r$ seconds. We treat the incoming utterance $u_t$ as the listener's and $u_{t-1}$ as the agent's.
+
+A job that starts when the agent's reply $u_{t-1}$ exists as text finishes in time if $c \le d_{t-1} + d_t$, and gives lag 1. Jobs from the agent's earlier replies give lag 3 if $c \le d_{t-3} + \dots + d_t$ and lag 5 if $c \le d_{t-5} + \dots + d_t$. A job that starts on a partial transcript at fraction $p$ of the listener's utterance finishes in time if $c \le (1-p)\,d_t$. The assembler uses the freshest record that is ready and leaves the slot empty, with overlap 0, when none is. We use $r = 150$ words per minute and repeat the analysis at 210, the rate \citet{tauroza1990speech} report for conversation. The model ignores pauses between turns and the delay of the recogniser. LoCoMo is written chat, so its durations are estimates. At 150 words per minute the median utterance lasts \UttMedianSec\,s and the median lag-1 job has \SlackMedianSec\,s to finish.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig-timing.pdf}
+\caption{Expected agreement with fresh recall as a function of the cost of one recall job, under the timing model of Section~\ref{sec:timing}. Blocking retrieval always agrees but delays every reply by $c$. A never-wait agent delays nothing and pays in agreement. Bands are 95\% intervals.}
+\label{fig:timing}
+\end{figure}
+
+Figure~\ref{fig:timing} shows two regimes. If jobs start only at the ends of utterances, expected overlap stays near the lag-1 value of \OvLone{} for any cost up to about five seconds (\TimTurnFive{} at $c=5.4$\,s) and then falls as jobs slip to lag 3 and beyond (\TimTurnTwelve{} at 12\,s, \TimTurnTwentySeven{} at 27\,s). If jobs also start on partial transcripts, a fast job does much better (\TimStreamTenth{} at 0.1\,s, \TimStreamOne{} at 1.3\,s), and the advantage is gone once a job takes longer than the remainder of an utterance (\TimStreamFive{} at 5.4\,s). Faster speech moves both curves left (\TimStreamOneFast{} at 1.3\,s and \TimTurnTwelveFast{} at 12\,s).
+
+Within this model a never-wait agent has a ceiling. However cheap recall is, agreement stops near \OvPthreeq{} with partial transcripts, where the last job starts three quarters of the way through the utterance, and near \OvLone{} without. Blocking retrieval reaches full agreement at a price of $c$ seconds per reply, and when $c$ is a few tens of milliseconds that price is small.
 
 \section{Additional results for Experiment 2}
 \label{app:e2}
@@ -452,7 +475,7 @@ Condition & stated fact & declined & other & (\%) & memory (\%, $n$) & median & 
 \end{table}
 
 \begin{table}[H]
-\caption{The three runs of Experiment 2 side by side: percentage of trials passed, as in Table~\ref{tab:e2}; ``Other answer'' is the share of the 100 asked trials that ended in neither the remembered fact nor an abstention; ``Searched'' is the share of all trials in which the model called the search tool; ``Reply'' is the median time to a complete reply. $^{\dagger}$Part of the reasoning run shared the processor with another job. Its times are taken from the trials outside that period, which leaves none for blocking retrieval; pass rates are not affected.}
+\caption{The four runs of Experiment 2 side by side: percentage of trials passed, as in Table~\ref{tab:e2}; ``Other answer'' is the share of the 100 asked trials that ended in neither the remembered fact nor an abstention; ``Searched'' is the share of all trials in which the model called the search tool; ``Reply'' is the median time to a complete reply. Times of the hosted run include the network round trips. $^{\dagger}$Part of the reasoning run shared the processor with another job. Its times are taken from the trials outside that period, which leaves none for blocking retrieval; pass rates are not affected.}
 \label{tab:robust}
 \vspace{4pt}
 \centering
@@ -467,6 +490,13 @@ Condition & (30 cases) & continues & shifts & prompted & abstain & answer & (\%)
 \bottomrule
 \end{tabular}
 \end{table}
+
+\paragraph{Two corrections to the grading.} Both were found by reading the replies of the hosted run and are applied to all four runs by the analysis; the sealed bundles keep the original grades. First, the text match accepted a key anywhere in the reply, and the key ``Mori'', a surname, also occurs inside ``memories''. A key must now begin a word. This turned \HsRegradedRecall{} passes of the hosted run into failures, all of them refusals such as ``I don't have any memories about that'', and changed no trial of the local runs. Second, the abstention flag is a field of the JSON reply, and a reply in plain text has none. Such a reply is now read as text and counts as an abstention if it matches a list of phrases that decline. This turned \HsRegradedAbstain{} failures of the hosted run in the abstain class into passes. We read all 66 plain-text replies of that class: the 60 that matched were refusals, and the six that did not were five guesses and one empty reply. In the local runs \RegradedAbstain{} grades changed, since only one of their replies missed the format.
+
+\section{The first run of Experiment 3}
+\label{app:e3}
+
+In the first full run against the product, the model often wrote its citation as a line of text instead of calling the citation tool. The output check then withheld the statement, and \KfTemplated{} of 1,000 replies became the sentence of refusal, most of them correct answers; blocking retrieval passed \KfRecBlock\% of recall trials and lag 1 \KfRecLag\%. We changed the product to accept a written citation of a page that is loaded, added the spoken forms of numbers to the keys and the match on phrases that decline, and ran once more. Nothing else changed, and the bundles of the first run are in the supplementary material.
 
 \section{Agent instructions}
 \label{app:prompt}

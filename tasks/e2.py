@@ -41,7 +41,7 @@ def test(c):
     c.run(f"{PY} -m pytest -q tests", env=SRC_ENV, pty=False)
 
 
-RUNS = ("e2", "e2-think", "e2-qwen3")  # main run, reasoning on, second model
+RUNS = ("e2", "e2-think", "e2-qwen3", "e2-anthropic")  # main run, reasoning on, second model, hosted model
 
 
 @task

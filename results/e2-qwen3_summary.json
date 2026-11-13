@@ -5,6 +5,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 0,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 0
+   },
    "repaired": 0,
    "searched_rate": 0.0,
    "recall_pass": [
@@ -109,6 +113,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 0,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 0
+   },
    "repaired": 44,
    "searched_rate": 0.78,
    "recall_pass": [
@@ -213,6 +221,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 0,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 0
+   },
    "repaired": 0,
    "searched_rate": 0.0,
    "recall_pass": [
@@ -317,6 +329,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 0,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 0
+   },
    "repaired": 0,
    "searched_rate": 0.0,
    "recall_pass": [
@@ -421,6 +437,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 0,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 0
+   },
    "repaired": 0,
    "searched_rate": 0.0,
    "recall_pass": [
@@ -525,6 +545,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 0,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 0
+   },
    "repaired": 59,
    "searched_rate": 0.225,
    "recall_pass": [

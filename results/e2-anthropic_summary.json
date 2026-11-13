@@ -5,17 +5,21 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 86,
+   "regraded": {
+    "recall_to_fail": 6,
+    "abstain_to_pass": 13
+   },
    "repaired": 0,
    "searched_rate": 0.0,
    "recall_pass": [
-    0.04000000000000001,
     0.0,
-    0.10666666666666667
+    0.0,
+    0.0
    ],
    "overall_pass": [
-    0.21500000000000002,
-    0.11499999999999999,
-    0.32999999999999996
+    0.25,
+    0.125,
+    0.375
    ],
    "gold_in_context": [
     0.0,
@@ -34,30 +38,30 @@
    },
    "offpath_recall_ms_median": 0.0,
    "asked_outcomes": {
-    "stated_fact": 0.06,
-    "abstained": 0.49,
-    "other_answer": 0.45
+    "stated_fact": 0.0,
+    "abstained": 1.0,
+    "other_answer": 0.0
    },
    "by_class": {
     "asked-continuing": {
      "pass": [
-      0.04,
       0.0,
-      0.12000000000000002
+      0.0,
+      0.0
      ],
      "pass_all_5": 0.0,
-     "pass_any_5": 0.1,
+     "pass_any_5": 0.0,
      "gold_in_context": 0.0,
      "searched": 0.0
     },
     "asked-shift": {
      "pass": [
-      0.08,
       0.0,
-      0.24000000000000005
+      0.0,
+      0.0
      ],
      "pass_all_5": 0.0,
-     "pass_any_5": 0.1,
+     "pass_any_5": 0.0,
      "gold_in_context": 0.0,
      "searched": 0.0
     },
@@ -74,11 +78,11 @@
     },
     "abstain": {
      "pass": [
-      0.74,
-      0.58,
-      0.8800000000000001
+      1.0,
+      1.0,
+      1.0
      ],
-     "pass_all_5": 0.4,
+     "pass_all_5": 1.0,
      "pass_any_5": 1.0,
      "gold_in_context": 0.0,
      "searched": 0.0
@@ -87,18 +91,18 @@
    "by_continuity": {
     "continuing": {
      "pass": [
-      0.02666666666666667,
       0.0,
-      0.08000000000000002
+      0.0,
+      0.0
      ],
      "gold_in_context": 0.0,
      "n_cases": 15
     },
     "abrupt": {
      "pass": [
-      0.05333333333333334,
       0.0,
-      0.16000000000000003
+      0.0,
+      0.0
      ],
      "gold_in_context": 0.0,
      "n_cases": 15
@@ -109,6 +113,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 79,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 17
+   },
    "repaired": 1,
    "searched_rate": 0.995,
    "recall_pass": [
@@ -117,9 +125,9 @@
     0.9466666666666667
    ],
    "overall_pass": [
-    0.8099999999999999,
-    0.705,
-    0.9
+    0.8950000000000001,
+    0.8149999999999998,
+    0.9600000000000002
    ],
    "gold_in_context": [
     0.8733333333333333,
@@ -178,12 +186,12 @@
     },
     "abstain": {
      "pass": [
-      0.6599999999999999,
-      0.42000000000000004,
-      0.8800000000000001
+      1.0,
+      1.0,
+      1.0
      ],
-     "pass_all_5": 0.4,
-     "pass_any_5": 0.9,
+     "pass_all_5": 1.0,
+     "pass_any_5": 1.0,
      "gold_in_context": 0.0,
      "searched": 1.0
     }
@@ -213,6 +221,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 47,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 9
+   },
    "repaired": 0,
    "searched_rate": 0.0,
    "recall_pass": [
@@ -221,9 +233,9 @@
     1.0
    ],
    "overall_pass": [
-    0.9,
-    0.805,
-    0.975
+    0.945,
+    0.8699999999999999,
+    1.0
    ],
    "gold_in_context": [
     0.9333333333333333,
@@ -282,12 +294,12 @@
     },
     "abstain": {
      "pass": [
-      0.82,
-      0.56,
+      1.0,
+      1.0,
       1.0
      ],
-     "pass_all_5": 0.8,
-     "pass_any_5": 0.9,
+     "pass_all_5": 1.0,
+     "pass_any_5": 1.0,
      "gold_in_context": 0.0,
      "searched": 0.0
     }
@@ -317,16 +329,20 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 33,
+   "regraded": {
+    "recall_to_fail": 4,
+    "abstain_to_pass": 4
+   },
    "repaired": 0,
    "searched_rate": 0.0,
    "recall_pass": [
-    0.3266666666666667,
-    0.1733333333333333,
-    0.49333333333333335
+    0.3,
+    0.13333333333333333,
+    0.4666666666666667
    ],
    "overall_pass": [
     0.45999999999999996,
-    0.315,
+    0.31,
     0.61
    ],
    "gold_in_context": [
@@ -346,30 +362,30 @@
    },
    "offpath_recall_ms_median": 330.4159380495548,
    "asked_outcomes": {
-    "stated_fact": 0.19,
-    "abstained": 0.73,
-    "other_answer": 0.08
+    "stated_fact": 0.15,
+    "abstained": 0.85,
+    "other_answer": 0.0
    },
    "by_class": {
     "asked-continuing": {
      "pass": [
-      0.33999999999999997,
-      0.1,
-      0.64
+      0.3,
+      0.0,
+      0.6
      ],
      "pass_all_5": 0.3,
-     "pass_any_5": 0.4,
+     "pass_any_5": 0.3,
      "gold_in_context": 0.3,
      "searched": 0.0
     },
     "asked-shift": {
      "pass": [
-      0.04,
       0.0,
-      0.12000000000000002
+      0.0,
+      0.0
      ],
      "pass_all_5": 0.0,
-     "pass_any_5": 0.1,
+     "pass_any_5": 0.0,
      "gold_in_context": 0.0,
      "searched": 0.0
     },
@@ -386,12 +402,12 @@
     },
     "abstain": {
      "pass": [
-      0.86,
-      0.64,
+      0.9400000000000001,
+      0.82,
       1.0
      ],
-     "pass_all_5": 0.8,
-     "pass_any_5": 0.9,
+     "pass_all_5": 0.9,
+     "pass_any_5": 1.0,
      "gold_in_context": 0.0,
      "searched": 0.0
     }
@@ -399,8 +415,8 @@
    "by_continuity": {
     "continuing": {
      "pass": [
-      0.49333333333333335,
-      0.2533333333333333,
+      0.4666666666666667,
+      0.2,
       0.7333333333333333
      ],
      "gold_in_context": 0.4666666666666667,
@@ -408,9 +424,9 @@
     },
     "abrupt": {
      "pass": [
-      0.16,
+      0.13333333333333333,
       0.0,
-      0.36000000000000004
+      0.3333333333333333
      ],
      "gold_in_context": 0.13333333333333333,
      "n_cases": 15
@@ -421,6 +437,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 39,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 9
+   },
    "repaired": 0,
    "searched_rate": 0.0,
    "recall_pass": [
@@ -429,9 +449,9 @@
     0.6666666666666666
    ],
    "overall_pass": [
-    0.5650000000000001,
-    0.41500000000000004,
-    0.71
+    0.61,
+    0.45999999999999996,
+    0.7550000000000001
    ],
    "gold_in_context": [
     0.5,
@@ -451,8 +471,8 @@
    "offpath_recall_ms_median": 323.9879789762199,
    "asked_outcomes": {
     "stated_fact": 0.4,
-    "abstained": 0.55,
-    "other_answer": 0.05
+    "abstained": 0.6,
+    "other_answer": 0.0
    },
    "by_class": {
     "asked-continuing": {
@@ -490,12 +510,12 @@
     },
     "abstain": {
      "pass": [
-      0.76,
-      0.52,
-      0.9400000000000001
+      0.9400000000000001,
+      0.82,
+      1.0
      ],
-     "pass_all_5": 0.5,
-     "pass_any_5": 0.9,
+     "pass_all_5": 0.9,
+     "pass_any_5": 1.0,
      "gold_in_context": 0.0,
      "searched": 0.0
     }
@@ -525,6 +545,10 @@
    "trials": 200,
    "errors": 0,
    "format_errors": 30,
+   "regraded": {
+    "recall_to_fail": 0,
+    "abstain_to_pass": 8
+   },
    "repaired": 9,
    "searched_rate": 0.855,
    "recall_pass": [
@@ -533,9 +557,9 @@
     0.98
    ],
    "overall_pass": [
-    0.8950000000000001,
-    0.8149999999999998,
-    0.9649999999999999
+    0.9350000000000002,
+    0.875,
+    0.985
    ],
    "gold_in_context": [
     0.92,
@@ -594,12 +618,12 @@
     },
     "abstain": {
      "pass": [
-      0.8400000000000001,
-      0.6,
+      1.0,
+      1.0,
       1.0
      ],
-     "pass_all_5": 0.8,
-     "pass_any_5": 0.9,
+     "pass_all_5": 1.0,
+     "pass_any_5": 1.0,
      "gold_in_context": 0.0,
      "searched": 0.98
     }
@@ -628,9 +652,9 @@
  },
  "paired_recall_diff": {
   "blocking-lag1": [
-   0.6,
-   0.43333333333333335,
-   0.7666666666666667
+   0.6266666666666667,
+   0.46,
+   0.7933333333333333
   ],
   "blocking-prefetch50": [
    0.4266666666666667,
@@ -643,19 +667,19 @@
    0.18666666666666668
   ],
   "prefetch50-lag1": [
-   0.1733333333333333,
-   0.026666666666666665,
+   0.2,
+   0.06666666666666667,
    0.3333333333333333
   ],
   "tool-lag1": [
-   0.5333333333333333,
-   0.35333333333333333,
-   0.7066666666666668
+   0.56,
+   0.3733333333333333,
+   0.7333333333333335
   ],
   "hybrid-lag1": [
-   0.5866666666666667,
-   0.4266666666666667,
-   0.7333333333333335
+   0.6133333333333333,
+   0.4533333333333333,
+   0.7666666666666667
   ],
   "blocking-hybrid": [
    0.01333333333333333,

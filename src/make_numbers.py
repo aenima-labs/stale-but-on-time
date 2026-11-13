@@ -152,11 +152,11 @@ put("SrchUnpTool", rate("tool", "unprompted", "searched"))
 put("SrchUnpHyb", rate("hybrid", "unprompted", "searched"))
 put("SrchContHyb", rate("hybrid", "asked-continuing", "searched"))
 
-# ------------------------------------------------- robustness runs (Section 6.4)
+# ------------------------------------------------- robustness runs (Section 6.3)
 # Same pack, same seeds, a different model setting. The reasoning run shared the
 # GPU with another process for part of its duration (results/e2-think_NOTES.md);
 # latency is taken only from trials that started outside that window.
-ROBUST = {"e2-think": "Th", "e2-qwen3": "Qw"}
+ROBUST = {"e2-think": "Th", "e2-qwen3": "Qw", "e2-anthropic": "Hs"}  # Hs: hosted model
 DIRTY = {"e2-think": ("2026-11-11T12:44", "2026-11-11T13:20")}
 MIN_CLEAN = 100  # trials needed to report a latency
 
@@ -223,8 +223,23 @@ for run, prefix in ROBUST.items():
     put(f"{prefix}RunErrors", str(sum(rb[c]["errors"] for c in rb)))
     put(f"{prefix}PreHybMed", f"{rb['hybrid']['pre_generation_ms']['median'] / 1000:.1f}")
     put(f"{prefix}PreToolMed", f"{rb['tool']['pre_generation_ms']['median'] / 1000:.1f}")
+    put(f"{prefix}RegradedRecall", str(sum(rb[c]["regraded"]["recall_to_fail"] for c in rb)))
+    put(f"{prefix}RegradedAbstain", str(sum(rb[c]["regraded"]["abstain_to_pass"] for c in rb)))
 for cond, tag in TAG.items():
     put(f"Reply{tag}", f"{reply_seconds('e2', trials, cond):.1f}")
+put("RegradedRecall", str(sum(bc[c]["regraded"]["recall_to_fail"] for c in bc)))
+put("RegradedAbstain", str(sum(bc[c]["regraded"]["abstain_to_pass"] for c in bc)))
+put("RobustRuns", str(len(ROBUST)))
+
+# The hosted run: time and money from its telemetry (exact token counts of the providers).
+hs_tel = json.loads((ROOT / "results" / "e2-anthropic" / "telemetry_summary.json").read_text())
+hs_c = hs_tel["conditions"]
+put("HsRecallMs", f"{hs_c['blocking']['latency_ms']['recall:reply_path']['median']:.0f}")
+put("HsRecallMsPninety", f"{hs_c['blocking']['latency_ms']['recall:reply_path']['p90']:.0f}")
+for cond, tag in TAG.items():
+    put(f"HsCost{tag}", f"{100 * hs_c[cond]['per_trial']['cost_usd']['mean']:.2f}")  # US cents per trial
+put("HsCostRun", f"{sum(hs_c[c]['totals']['cost_usd'] for c in hs_c):.2f}")
+put("HsCallsHyb", f"{hs_c['hybrid']['per_trial']['chat_calls']['mean']:.1f}")
 no_gold = [json.loads((ROOT / "results" / f"{run}_extra.json").read_text())["pooled"]["pass_given_no_gold"]
            for run in robust]
 put("AllNoGoldN", f"{sum(n for _, n in no_gold):,}")
@@ -269,6 +284,60 @@ put("KBlockMs", f"{k2['by_condition']['c-blocking']['blocking_ms_median']:.0f}")
 put("KOffpathMs", f"{k2['by_condition']['b-backthought']['offpath_recall_ms_median']:.0f}")
 put("KLlmTool", f"{k2['by_condition']['a-tool']['llm_ms_median'] / 1000:.1f}")
 put("KLlmBlock", f"{k2['by_condition']['c-blocking']['llm_ms_median'] / 1000:.1f}")
+
+# ------------------------------------ what waiting costs in time (Section 8)
+# One row per set-up: the wait for recall on the reply path, and the median time
+# to a complete reply in the four conditions that load or search memories.
+import figures  # noqa: E402  (the set-ups and the curve of Figure "correct by time")
+
+CLOUD = "e2-cloudrun-l4-timing"  # one trial per case on a cloud GPU; timing only
+deploy = [
+    ("Agent, local models, laptop", bc["blocking"]["pre_generation_ms"]["median"],
+     [reply_seconds("e2", trials, c) for c in ("lag1", "blocking", "tool", "hybrid")]),
+]
+if (ROOT / "results" / f"{CLOUD}_summary.json").exists():
+    cloud_summary, cloud_rows = load_run(CLOUD)
+    cb = cloud_summary["by_condition"]
+    cloud_reply = [float(np.median([float(r["total_ms"]) for r in cloud_rows if r["condition"] == c])) / 1000
+                   for c in ("lag1", "blocking", "tool", "hybrid")]
+    deploy.append(("Agent, local models, cloud GPU",
+                   cb["blocking"]["pre_generation_ms"]["median"], cloud_reply))
+    put("CloudRecallMs", f"{cb['blocking']['pre_generation_ms']['median']:.0f}")
+    put("CloudTrials", str(cloud_summary["n_trials"]))
+    for c, tag in (("lag1", "Lag"), ("blocking", "Block"), ("tool", "Tool"), ("hybrid", "Hyb")):
+        put(f"CloudReply{tag}", f"{cloud_reply[('lag1', 'blocking', 'tool', 'hybrid').index(c)]:.1f}")
+hs_rows = robust["e2-anthropic"][1]
+deploy.append(("Agent, hosted models",
+               hs_c["blocking"]["latency_ms"]["recall:reply_path"]["median"],
+               [reply_seconds("e2-anthropic", hs_rows, c) for c in ("lag1", "blocking", "tool", "hybrid")]))
+deploy.append(("Product, local models, laptop", k2["by_condition"]["c-blocking"]["blocking_ms_median"],
+               [k2["by_condition"][c]["path_ms"]["median"] / 1000
+                for c in ("b-backthought", "c-blocking", "a-tool", "e-backthought-tool")]))
+(PAPER / "tab-deploy.tex").write_text(
+    "\n".join(" & ".join([name, f"{wait:.0f}", *[f"{x:.1f}" for x in secs]]) + r" \\"
+              for name, wait, secs in deploy) + "\n")
+put("DeploySetups", str(len(deploy)))
+
+# Correct by time: how far the never-wait agent is ever ahead of blocking retrieval.
+csv.field_size_limit(10**9)
+grid = np.linspace(0, 30, 6001)
+lead_best = (-1.0, 0.0, 0.0, "")
+for (title, path, field, conds), tag in zip(figures.ONTIME_SETUPS, ("Lap", "Hs", "K"), strict=True):
+    with open(ROOT / "results" / path, newline="") as handle:
+        ot_rows = list(csv.DictReader(handle))
+    lag_curve = figures.correct_by_time(ot_rows, conds["lag1"], field, grid)
+    block_curve = figures.correct_by_time(ot_rows, conds["blocking"], field, grid)
+    lead = lag_curve - block_curve
+    i = int(np.argmax(lead))
+    passed_at = float(grid[np.argmax(block_curve > lag_curve[-1])])
+    put(f"OnTimeLead{tag}", f"{lead[i]:.0f}")
+    put(f"OnTimePassed{tag}", f"{passed_at:.1f}")
+    if lead[i] > lead_best[0]:
+        lead_best = (float(lead[i]), float(grid[i]), passed_at, tag)
+put("OnTimeLeadMax", f"{lead_best[0]:.0f}")
+put("OnTimeLeadMaxAt", f"{lead_best[1]:.1f}")
+put("OnTimeLeadMaxLost", f"{lead_best[2] - lead_best[1]:.1f}")
+assert lead_best[3] == "Hs", lead_best  # the text names the hosted set-up
 
 (PAPER / "numbers.tex").write_text(
     "% Generated by src/make_numbers.py. Do not edit.\n"
@@ -331,7 +400,8 @@ for cond in ORDER:
 
 RUN_NAMES = {"e2": r"\texttt{gemma4:e4b}, reasoning off (main run)",
              "e2-think": r"\texttt{gemma4:e4b}, reasoning on",
-             "e2-qwen3": r"\texttt{qwen3:8b}, reasoning off"}
+             "e2-qwen3": r"\texttt{qwen3:8b}, reasoning off",
+             "e2-anthropic": r"\texttt{claude-sonnet-5}, hosted, with hosted embeddings"}
 rows = []
 for run, (summary, run_rows) in robust.items():
     if rows:

@@ -7,6 +7,7 @@ ordinal ramp; text stays in ink, never in a series colour.
 
 from __future__ import annotations
 
+import csv
 import json
 import sys
 from pathlib import Path
@@ -178,34 +179,11 @@ def fig_classes(e2: dict) -> None:
     save(fig, "fig-classes")
 
 
-def fig_tradeoff(e2: dict) -> None:
-    fig, ax = plt.subplots(figsize=(WIDTH * 0.66, 2.5))
-    offsets = {
-        "none": (7, 5), "tool": (-7, 0), "blocking": (7, 0),
-        "prefetch50": (7, 0), "lag1": (7, 0), "hybrid": (-7, 0),
-    }
-    for c in ORDER:
-        e = e2["by_condition"][c]
-        xval = e["pre_generation_ms"]["mean"]
-        mean, lo, hi = (100 * v for v in e["recall_pass"])
-        ax.vlines(xval, lo, hi, color=BLUE, linewidth=1.1, alpha=0.55)
-        ax.plot(xval, mean, "o", color=BLUE, markersize=5, markeredgecolor="white",
-                markeredgewidth=0.7, zorder=3)
-        dx, dy = offsets[c]
-        ax.annotate(NAMES[c], (xval, mean), (dx, dy), textcoords="offset points",
-                    fontsize=8.5, ha="left" if dx > 0 else "right", va="center")
-    ax.set_xlim(-25, 540)
-    ax.set_ylim(-5, 104)
-    ax.set_yticks([0, 25, 50, 75, 100])
-    ax.set_xlabel("mean delay added before the reply starts to generate (ms)")
-    ax.set_ylabel("recall trials passed (%)")
-    save(fig, "fig-tradeoff")
-
-
 RUN_TITLES = {
-    "e2": "gemma4, reasoning off\n(main run)",
-    "e2-think": "gemma4, reasoning on",
-    "e2-qwen3": "qwen3, reasoning off",
+    "e2": "gemma4, reasoning\noff (main run)",
+    "e2-think": "gemma4,\nreasoning on",
+    "e2-qwen3": "qwen3,\nreasoning off",
+    "e2-anthropic": "claude-sonnet-5,\nhosted",
 }
 
 
@@ -238,6 +216,56 @@ def fig_robust(runs: dict[str, dict]) -> None:
     save(fig, "fig-robust")
 
 
+# Correct by time: three set-ups, the four conditions that load or search memories.
+ONTIME_SETUPS = (
+    ("Reference agent,\nlocal model on a laptop", "e2_trials.csv", "total_ms",
+     {"blocking": "blocking", "lag1": "lag1", "tool": "tool", "hybrid": "hybrid"}),
+    ("Reference agent,\nhosted model and embeddings", "e2-anthropic_trials.csv", "total_ms",
+     {"blocking": "blocking", "lag1": "lag1", "tool": "tool", "hybrid": "hybrid"}),
+    ("The product,\nlocal model on a laptop", "e3-kodama/trials.csv", "path_ms",
+     {"blocking": "c-blocking", "lag1": "b-backthought", "tool": "a-tool", "hybrid": "e-backthought-tool"}),
+)
+ONTIME_STYLE = {  # colour: is the loaded record fresh; dashes: a search on the reply path
+    "blocking": (BLUE, "-", "Blocking retrieval"),
+    "tool": (BLUE, (0, (4, 2)), "Search tool"),
+    "lag1": (ORANGE, "-", "Async, lag 1"),
+    "hybrid": (ORANGE, (0, (4, 2)), "Async lag 1 + search"),
+}
+ONTIME_MAX_S = 10.0
+
+
+def correct_by_time(rows: list[dict], condition: str, field: str, grid: np.ndarray) -> np.ndarray:
+    """Share of recall trials (%) that had a correct reply by each time on the grid."""
+    sub = [r for r in rows if r["condition"] == condition and r["class"] != "abstain"]
+    done = np.array([float(r[field]) / 1000 if r["passed"] == "True" else np.inf for r in sub])
+    return np.array([100 * np.mean(done <= t) for t in grid])
+
+
+def fig_ontime() -> None:
+    csv.field_size_limit(10**9)
+    grid = np.linspace(0, ONTIME_MAX_S, 1001)
+    fig, axes = plt.subplots(1, len(ONTIME_SETUPS), figsize=(WIDTH, 2.25), sharey=True)
+    for ax, (title, path, field, conds) in zip(axes, ONTIME_SETUPS, strict=True):
+        with open(ROOT / "results" / path, newline="") as handle:
+            rows = list(csv.DictReader(handle))
+        for key, (colour, dashes, _) in ONTIME_STYLE.items():
+            ax.plot(grid, correct_by_time(rows, conds[key], field, grid), color=colour,
+                    linestyle=dashes, linewidth=1.5)
+        ax.set_title(title, pad=4)
+        ax.set_xlim(0, ONTIME_MAX_S)
+        ax.set_xticks([0, 2, 4, 6, 8, 10])
+        ax.set_ylim(0, 100)
+        ax.set_yticks([0, 25, 50, 75, 100])
+    axes[0].set_ylabel("recall trials answered\ncorrectly by this time (%)")
+    handles = [plt.Line2D([], [], color=c, linestyle=d, linewidth=1.5, label=label)
+               for c, d, label in ONTIME_STYLE.values()]
+    fig.legend(handles=handles, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.17),
+               handlelength=2.6, columnspacing=1.6)
+    fig.supxlabel("seconds after the listener's utterance ends", fontsize=9, y=-0.05)
+    fig.subplots_adjust(wspace=0.10)
+    save(fig, "fig-ontime")
+
+
 def main() -> None:
     which = sys.argv[1:] or ["e1", "e2"]
     if "e1" in which:
@@ -247,7 +275,6 @@ def main() -> None:
     if "e2" in which:
         e2 = json.loads((ROOT / "results" / "e2_summary.json").read_text())
         fig_classes(e2)
-        fig_tradeoff(e2)
         runs = {
             run: json.loads((ROOT / "results" / f"{run}_summary.json").read_text())
             for run in RUN_TITLES
@@ -255,6 +282,7 @@ def main() -> None:
         }
         if len(runs) > 1:
             fig_robust(runs)
+        fig_ontime()
 
 
 if __name__ == "__main__":
