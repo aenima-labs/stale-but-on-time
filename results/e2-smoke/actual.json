@@ -1,0 +1,20 @@
+{
+  "tool": {
+    "trials": 10,
+    "chat_calls": 20,
+    "input_tokens": 7455,
+    "output_tokens": 527,
+    "embed_tokens": 108,
+    "cost_usd": 0.0,
+    "duration_s": 276.678835
+  },
+  "blocking": {
+    "trials": 10,
+    "chat_calls": 10,
+    "input_tokens": 3930,
+    "output_tokens": 328,
+    "embed_tokens": 525,
+    "cost_usd": 0.0,
+    "duration_s": 192.088874
+  }
+}
