@@ -1,0 +1,35 @@
+id: abstain-when-silent/abs-car
+title: Random question, but what kind of car did she drive?
+description: abstain after a abrupt lead-in.
+targets:
+- abstain-when-silent
+polarity: negative
+actors:
+  user: grandchild
+fixture:
+  type: asyncrecall.memorome
+  version: '1'
+  digest: sha256:0a91e52430ada86f04a875cccf2e7e6e18f09485bb8c6342c9204645d1af6089
+  privacy: public
+  config:
+    memorome: tessaly-v1
+    history:
+    - role: user
+      content: She listened to the shipping forecast every night, Mum says.
+    - role: assistant
+      content: Every night before sleeping. She called it the only poetry she knew by heart.
+actions:
+- kind: message
+  role: user
+  content: Random question, but what kind of car did she drive?
+expected_outcomes:
+- Say that the memories do not contain the answer.
+evaluators: []
+selftests: []
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:abstain
+- continuity:abrupt

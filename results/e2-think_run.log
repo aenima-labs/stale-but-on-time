@@ -1,0 +1,6 @@
+{"condition": "none", "trials": 200, "passed": 50, "seconds": 993, "bundle": "results/e2-think/none/9ffde39980e548d0bd5c4b4b86e5bcc1", "seal_problems": []}
+{"condition": "tool", "trials": 200, "passed": 176, "seconds": 2024, "bundle": "results/e2-think/tool/aeb3780df50244e5ab9a9756a44b3a6b", "seal_problems": []}
+{"condition": "blocking", "trials": 200, "passed": 165, "seconds": 1615, "bundle": "results/e2-think/blocking/484b3a2f622a4017987c88e45f478d50", "seal_problems": []}
+{"condition": "lag1", "trials": 200, "passed": 81, "seconds": 1330, "bundle": "results/e2-think/lag1/d1866954fc21499ba83c827040ff8dd4", "seal_problems": []}
+{"condition": "prefetch50", "trials": 200, "passed": 121, "seconds": 1300, "bundle": "results/e2-think/prefetch50/acc6b260328c4d5db7f2b91d4ea5d5d4", "seal_problems": []}
+{"condition": "hybrid", "trials": 200, "passed": 178, "seconds": 2402, "bundle": "results/e2-think/hybrid/12bf68da27354735b3a136330c4ad6d2", "seal_problems": []}

@@ -1,5 +1,7 @@
-"""Experiment 2 analysis. Reads the sealed bundles under ``results/e2`` and
-writes ``results/e2_summary.json`` plus ``results/e2_trials.csv``.
+"""Experiment 2 analysis. Reads the sealed bundles under ``results/<run>`` and
+writes ``results/<run>_summary.json``, ``results/<run>_trials.csv`` and
+``results/<run>_extra.json``. ``<run>`` defaults to ``e2`` (the main run); the
+robustness runs are ``e2-think`` and ``e2-qwen3``.
 
 Confidence intervals are 95% percentile intervals from a bootstrap that
 resamples cases (the unit of authoring); the five trials of a case stay
@@ -8,6 +10,7 @@ together.
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 from collections import defaultdict
@@ -25,12 +28,12 @@ BOOT = 10000
 SEED = 20261110
 
 
-def load() -> list[dict]:
+def load(run: str) -> list[dict]:
     source = yaml.safe_load((ROOT / "pack-src" / "tessaly.yaml").read_text())
     meta = {c["id"]: c for c in source["cases"]}
     rows: list[dict] = []
     for condition in CONDITIONS:
-        bundles = sorted((ROOT / "results" / "e2" / condition).iterdir())
+        bundles = sorted((ROOT / "results" / run / condition).iterdir())
         assert len(bundles) == 1, condition
         assert verify_bundle(bundles[0]) == [], condition
         for path in sorted((bundles[0] / "trials").glob("*.json")):
@@ -57,6 +60,8 @@ def load() -> list[dict]:
                     "searched": any(e["kind"] == "tool_call" for e in events),
                     "gold_in_context": bool(case["gold"]) and any(g in ctx[-1] for g in case["gold"]) if ctx else False,
                     "error": trial["trajectory"]["error"] or "",
+                    "started_at": trial["trajectory"]["started_at"],
+                    "llm_calls": met.get("path.llm_calls", float("nan")),
                     "pre_generation_ms": met.get("path.pre_generation_ms", float("nan")),
                     "total_ms": met.get("path.total_ms", float("nan")),
                     "offpath_recall_ms": met.get("offpath.recall_ms", float("nan")),
@@ -90,9 +95,12 @@ def paired_diff(rows: list[dict], a: str, b: str, rng: np.random.Generator) -> l
 
 
 def main() -> None:
-    rows = load()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--run", default="e2", help="run directory name under results/")
+    run = parser.parse_args().run
+    rows = load(run)
     rng = np.random.default_rng(SEED)
-    with open(ROOT / "results" / "e2_trials.csv", "w", newline="") as handle:
+    with open(ROOT / "results" / f"{run}_trials.csv", "w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
@@ -167,7 +175,7 @@ def main() -> None:
             ("blocking", "hybrid"),
         )
     }
-    (ROOT / "results" / "e2_summary.json").write_text(json.dumps(out, indent=1))
+    (ROOT / "results" / f"{run}_summary.json").write_text(json.dumps(out, indent=1))
 
     # Mediation: pass rate of recall trials given whether a target note was in context.
     def given(sub: list[dict], present: bool) -> list:
@@ -186,7 +194,7 @@ def main() -> None:
         "pass_given_gold": given(with_memory, True),
         "pass_given_no_gold": given(with_memory, False),
     }
-    (ROOT / "results" / "e2_extra.json").write_text(json.dumps(extra, indent=1))
+    (ROOT / "results" / f"{run}_extra.json").write_text(json.dumps(extra, indent=1))
 
     def pct(triple: list[float]) -> str:
         return f"{100 * triple[0]:5.1f} [{100 * triple[1]:4.0f},{100 * triple[2]:4.0f}]"

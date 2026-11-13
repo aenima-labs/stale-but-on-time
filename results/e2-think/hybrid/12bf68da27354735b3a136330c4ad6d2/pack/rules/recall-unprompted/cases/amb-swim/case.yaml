@@ -1,0 +1,58 @@
+id: recall-unprompted/amb-swim
+title: My friends want me to do a New Year's Day sea swim with them. I think they're mad.
+description: unprompted after a abrupt lead-in.
+targets:
+- recall-unprompted
+polarity: normal
+actors:
+  user: grandchild
+fixture:
+  type: asyncrecall.memorome
+  version: '1'
+  digest: sha256:0a91e52430ada86f04a875cccf2e7e6e18f09485bb8c6342c9204645d1af6089
+  privacy: public
+  config:
+    memorome: tessaly-v1
+    history:
+    - role: user
+      content: I've had a cold all week.
+    - role: assistant
+      content: I hope you're feeling better soon.
+actions:
+- kind: message
+  role: user
+  content: My friends want me to do a New Year's Day sea swim with them. I think they're mad.
+expected_outcomes:
+- 'Mention a fact from: s-swim.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - seventy
+    - reset the year
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Every New Year's Day she swam in the harbour, a habit she kept until she was seventy. She
+      said the cold reset the year.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:unprompted
+- continuity:abrupt
+- gold:s-swim
