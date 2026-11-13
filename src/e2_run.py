@@ -126,8 +126,9 @@ def select_cases(pack, cases: list[str] | None, max_cases: int | None) -> list[s
     return ids
 
 
-def default_profile(provider: str, model: str, think: bool) -> str:
-    """The newest run with telemetry of the same provider and model, else a stored run."""
+def default_profile(provider: str, model: str, think: bool, conditions: list[str]) -> str:
+    """The newest run with telemetry of the same provider and model that covers
+    every planned condition, else the stored run of that model (its bundles)."""
     runs = sorted(
         (d for d in (ROOT / "results").iterdir()
          if d.is_dir() and any((d / "telemetry").glob("*.spans.jsonl"))),
@@ -135,7 +136,8 @@ def default_profile(provider: str, model: str, think: bool) -> str:
     )
     for d in runs:
         p = est_mod.profile_from_telemetry(d)
-        if p["provider"] == provider and p["model"] == model and bool(p["think"]) == think:
+        if (p["provider"] == provider and p["model"] == model and bool(p["think"]) == think
+                and set(conditions) <= set(p["conditions"])):
             return d.name
     return "e2-think" if think else "e2-qwen3" if model == "qwen3:8b" else "e2"
 
@@ -194,7 +196,7 @@ def main() -> None:
         provider=args.provider, model=model, embed_provider=args.embed_provider,
         embed_model=embed_model, think=args.think, machine=machine,
     )
-    profile_name = args.profile or default_profile(args.provider, model, args.think)
+    profile_name = args.profile or default_profile(args.provider, model, args.think, list(args.conditions))
     estimate = est_mod.estimate(plan, est_mod.load_profile(profile_name))
 
     def make_clients():
