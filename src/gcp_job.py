@@ -240,6 +240,8 @@ def main() -> None:
     if "execute" not in stages:
         return
     upload_manifests(bucket, a.models)
+    # A previous execution of the same run name may have left status markers.
+    sh(["gcloud", "storage", "rm", "-r", f"gs://{bucket}/results/{a.run}/"], check=False, quiet=True)
     if current_image() != image:
         raise SystemExit(f"The job runs {current_image()}, not {image}; run the image stage first.")
 
