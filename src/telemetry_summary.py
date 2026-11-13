@@ -38,12 +38,15 @@ CONDITION_ORDER = ("none", "tool", "blocking", "lag1", "prefetch50", "hybrid")
 PROVIDER_FROM_SEMCONV = {"gcp.vertex_ai": "vertex"}
 
 
+CHAT_OPS = ("chat", "generate_content", "text_completion")
+
+
 def span_kind(span: dict) -> str:
     a = span.get("attributes", {})
     op = a.get("gen_ai.operation.name")
     if span["name"] == "trial":
         return "trial"
-    if op == "chat":
+    if op in CHAT_OPS:
         return f"chat:{a.get('e2.call.purpose', '')}"
     if op == "embeddings":
         return f"embeddings:{a.get('e2.call.purpose', '')}"
@@ -105,7 +108,7 @@ def trial_records(spans: list[dict], prices: PriceTable, missing: set[str]) -> t
             if s.get("status", {}).get("code") == "error":
                 rec["errors"] += 1
             op = a.get("gen_ai.operation.name")
-            if op == "chat":
+            if op in CHAT_OPS:
                 rec["chat_calls"] += 1
                 if "gen_ai.usage.input_tokens" not in a:
                     rec["tokens_missing"] += 1
@@ -150,7 +153,7 @@ def summarise_condition(spans: list[dict], prices: PriceTable) -> dict:
         latency[span_kind(span)].append(duration_ms(span))
     models = sorted({
         f"{_provider(s)}/{s['attributes'].get('gen_ai.request.model', '')}"
-        for s in spans if s.get("attributes", {}).get("gen_ai.operation.name") in ("chat", "embeddings")
+        for s in spans if s.get("attributes", {}).get("gen_ai.operation.name") in (*CHAT_OPS, "embeddings")
     })
     ollama_calls = [s for s in spans if "ollama.total_duration_ms" in s.get("attributes", {})]
     reloads = [s for s in ollama_calls if s["attributes"].get("ollama.load_duration_ms", 0) > RELOAD_MS]
@@ -187,10 +190,67 @@ def summarise_condition(spans: list[dict], prices: PriceTable) -> dict:
     }
 
 
+def kodama_spans(path: Path, provider: str = "ollama") -> list[dict]:
+    """Spans of a product run (Experiment 3) in this module's schema.
+
+    ``path`` is a ``<condition>.kodama-traces.jsonl`` written by Kodama's eval
+    plugin: one line per trial with the session's span dumps
+    (``GET /v1/sessions/{id}/traces``). All turns of a trial get one trace id,
+    and a ``trial`` root span spans them, so a trial is one trace as in
+    Experiment 2. A model call's purpose is the name of its nearest
+    ``kodama.*`` ancestor (``kodama.turn``, ``kodama.classifier.advice``, ...).
+    ``provider`` fills ``gen_ai.provider.name`` when Kodama did not record it.
+    """
+    import hashlib
+
+    out: list[dict] = []
+    for line in path.read_text().splitlines():
+        if not line.strip():
+            continue
+        record = json.loads(line)
+        trace_id = hashlib.sha256(record["trial_id"].encode()).hexdigest()[:32]
+        spans = [dict(s) for t in record.get("traces", []) for s in (t.get("spans") or [])]
+        by_id = {s.get("span_id"): s for s in spans}
+        for s in spans:
+            a = dict(s.get("attributes") or {})
+            if a.get("gen_ai.operation.name") in (*CHAT_OPS, "embeddings"):
+                a.setdefault("gen_ai.provider.name", provider)
+                parent, purpose = by_id.get(s.get("parent_span_id")), ""
+                while parent is not None and not purpose:
+                    if str(parent.get("name", "")).startswith("kodama."):
+                        purpose = parent["name"]
+                    parent = by_id.get(parent.get("parent_span_id"))
+                a.setdefault("e2.call.purpose", purpose)
+            out.append({
+                "trace_id": trace_id, "span_id": s.get("span_id", ""),
+                "parent_span_id": s.get("parent_span_id", ""), "name": s.get("name", ""),
+                "kind": "internal", "start_unix_nano": int(s["start_unix_nano"]),
+                "end_unix_nano": int(s["end_unix_nano"]),
+                "status": {"code": str((s.get("status") or {}).get("code", "unset")).lower()},
+                "attributes": a, "events": [],
+            })
+        if spans:
+            out.append({
+                "trace_id": trace_id, "span_id": f"trial-{trace_id[:12]}", "parent_span_id": "",
+                "name": "trial", "kind": "internal",
+                "start_unix_nano": min(int(s["start_unix_nano"]) for s in spans),
+                "end_unix_nano": max(int(s["end_unix_nano"]) for s in spans),
+                "status": {"code": "unset"},
+                "attributes": {"circumstances.trial_id": record["trial_id"],
+                               "circumstances.case_id": record.get("case_id", ""),
+                               "circumstances.trial.attempt": record.get("attempt", 0),
+                               "circumstances.trial.seed": record.get("seed", 0)},
+                "events": [],
+            })
+    return out
+
+
 def load_run(run_dir: Path) -> dict[str, list[dict]]:
     files = sorted((run_dir / "telemetry").glob("*.spans.jsonl"))
     out = {f.name.removesuffix(".spans.jsonl"): read_spans(f) for f in files}
-    return {c: out[c] for c in sorted(out, key=lambda c: (CONDITION_ORDER + (c,)).index(c))}
+    for f in sorted((run_dir / "telemetry").glob("*.kodama-traces.jsonl")):
+        out[f.name.removesuffix(".kodama-traces.jsonl")] = kodama_spans(f)
+    return {c: out[c] for c in sorted(out, key=lambda c: ((CONDITION_ORDER + (c,)).index(c), c))}
 
 
 def summarise_run(run_dir: Path, prices: PriceTable | None = None) -> dict:

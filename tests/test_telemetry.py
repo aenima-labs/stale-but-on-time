@@ -160,3 +160,33 @@ def test_key_from_kodama_secrets(tmp_path, monkeypatch):
     f = tmp_path / "secrets.yaml"
     f.write_text("models:\n  openai_api_key: \"sk-from-file\"\n")
     assert providers.resolve_key("openai", f) == "sk-from-file"
+
+
+def test_kodama_traces_become_one_trace_per_trial(tmp_path):
+    from telemetry_summary import kodama_spans, summarise_condition
+
+    def dump(sid, parent, name, start, end, **attrs):
+        return {"span_id": sid, "parent_span_id": parent, "name": name,
+                "start_unix_nano": int(1.8e18 + start * 1e6), "end_unix_nano": int(1.8e18 + end * 1e6),
+                "attributes": attrs, "status": {"code": "Unset"}}
+
+    record = {"trial_id": "rule/c--1--x", "case_id": "rule/c", "attempt": 1, "seed": 3, "session_id": "s",
+              "traces": [{"turn_id": "t1", "trace_id": "a" * 32, "spans": [
+                  dump("1", "", "kodama.turn", 0, 3000),
+                  dump("2", "1", "kodama.classifier.advice", 10, 600),
+                  dump("3", "2", "generate_content gemma4:e4b", 20, 590, **{
+                      "gen_ai.operation.name": "generate_content", "gen_ai.request.model": "gemma4:e4b",
+                      "gen_ai.usage.input_tokens": 300, "gen_ai.usage.output_tokens": 4}),
+                  dump("4", "1", "generate_content gemma4:e4b", 700, 2900, **{
+                      "gen_ai.operation.name": "generate_content", "gen_ai.request.model": "gemma4:e4b",
+                      "gen_ai.usage.input_tokens": 900, "gen_ai.usage.output_tokens": 60}),
+              ]}]}
+    path = tmp_path / "c-blocking.kodama-traces.jsonl"
+    path.write_text(json.dumps(record) + "\n")
+    spans = kodama_spans(path)
+    assert len({s["trace_id"] for s in spans}) == 1
+    s = summarise_condition(spans, PriceTable())
+    assert s["trials"] == 1 and s["totals"]["chat_calls"] == 2
+    assert s["totals"]["input_tokens"] == 1200 and s["totals"]["cost_usd"] == 0.0  # local model
+    assert set(s["latency_ms"]) >= {"chat:kodama.classifier.advice", "chat:kodama.turn", "trial"}
+    assert s["latency_ms"]["trial"]["median"] == pytest.approx(3000)
