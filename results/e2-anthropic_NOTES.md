@@ -36,3 +36,13 @@ Different from the main run (disclose if reported):
 
 Spans: `telemetry/<condition>.spans.jsonl` (one trace per trial; exact token
 counts from the provider's usage fields; no prompt, reply or key recorded).
+
+Grading findings (from the paper session's check, 2026-11-13; the grading is
+in `src/e2_analyze.py` on the paper branch, which is changing it):
+- The key "Mori" also matches inside "memories", so 10 refusals were counted
+  as recalls (6 in `none`, 4 in `lag1`); a whole-word match fixes it.
+- Sonnet ignored the JSON reply format in 314 trials, so refusals it spoke in
+  words were recorded as "other answer" or as failed abstentions; counting
+  refusals in words fixes it.
+The pass counts in `results/e2-anthropic_run.log` are from the grading at run
+time and include both effects.

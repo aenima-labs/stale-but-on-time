@@ -155,6 +155,13 @@ def summarise_condition(spans: list[dict], prices: PriceTable) -> dict:
         f"{_provider(s)}/{s['attributes'].get('gen_ai.request.model', '')}"
         for s in spans if s.get("attributes", {}).get("gen_ai.operation.name") in (*CHAT_OPS, "embeddings")
     })
+    # Calls far slower than the median of their kind (first-use costs, stalls).
+    slow = []
+    for kind, values in latency.items():
+        if not kind.startswith(("chat:", "embeddings:query")) or len(values) < 5:
+            continue
+        median = float(np.median(values))
+        slow += [v for v in values if v > max(5 * median, median + 1000)]
     ollama_calls = [s for s in spans if "ollama.total_duration_ms" in s.get("attributes", {})]
     reloads = [s for s in ollama_calls if s["attributes"].get("ollama.load_duration_ms", 0) > RELOAD_MS]
     per_trial_keys = ("chat_calls", "input_tokens", "output_tokens", "cached_input_tokens",
@@ -180,6 +187,8 @@ def summarise_condition(spans: list[dict], prices: PriceTable) -> dict:
             "chat_calls_without_tokens": int(sum(t["tokens_missing"] for t in trials)),
         },
         "overhead_index": overhead,
+        "slow_calls": {"count": len(slow), "max_ms": max(slow) if slow else 0.0,
+                       "rule": "chat and query-embedding calls slower than max(5x median, median + 1 s) of their kind"},
         "ollama_model_loads": {
             "calls": len(ollama_calls),
             "calls_with_load": len(reloads),
@@ -323,6 +332,9 @@ def markdown(summary: dict) -> str:
             notes.append(f"- {n}: **{loads['calls_with_load']} of {loads['calls']} Ollama calls loaded a model** "
                          f"(load > {loads['threshold_ms']:.0f} ms) in {loads['trials_affected']} trials; their "
                          "latencies include model loading and are not comparable with the stored runs.")
+        if c["slow_calls"]["count"]:
+            notes.append(f"- {n}: {c['slow_calls']['count']} model or embedding call(s) took over 5× the median of "
+                         f"their kind (longest {c['slow_calls']['max_ms']:,.0f} ms).")
         oh = c["overhead_index"]
         if oh["calls"]:
             notes.append(f"- {n}: indexing the memorome took {oh['calls']} embedding call(s), "

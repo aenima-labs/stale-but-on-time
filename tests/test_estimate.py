@@ -78,3 +78,20 @@ def test_bundle_profile_covers_stored_run():
     assert set(p["conditions"]) == set(e.MAX_CALLS)
     assert all(len(v) == 200 for v in p["conditions"].values())
     assert all(1 <= r["chat_calls"] <= e.MAX_CALLS[c] for c, v in p["conditions"].items() for r in v)
+
+
+def test_seeds_for_fewer_trials_match_the_full_run():
+    from pathlib import Path
+
+    from circumstances.pack import load_pack
+
+    import e2_run
+
+    pack = load_pack(e2_run.ROOT / "pack")
+    full = [e2_run.BASE_SEED + n for n in range(sum(c.trials for c in pack.cases.values()))]
+    ids = list(pack.cases)
+    one = e2_run.seeds_for(pack, None, 1)
+    assert len(one) == len(ids)
+    assert one == [full[sum(pack.case(c).trials for c in ids[:i])] for i in range(len(ids))]
+    assert e2_run.seeds_for(pack, [ids[3]], 2) == full[15:17]
+    del Path

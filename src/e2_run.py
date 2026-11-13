@@ -61,8 +61,14 @@ async def run_condition(
     make_clients=None,
     trace_file: Path | None = None,
     resource: dict[str, str] | None = None,
+    trials_per_case: int | None = None,
 ) -> dict:
     pack = load_pack(ROOT / "pack")
+    seeds = None
+    if trials_per_case:
+        seeds = seeds_for(pack, cases, trials_per_case)
+        for cid, case in list(pack.cases.items()):
+            pack.cases[cid] = case.model_copy(update={"trials": min(case.trials, trials_per_case)})
     chat, embed = make_clients() if make_clients else (None, None)
     provider = telemetry.install(trace_file, resource or {}) if trace_file else None
     subject = RecallSubject(
@@ -84,7 +90,7 @@ async def run_condition(
                 case_ids=cases,
                 subject=subject.descriptor.id,
                 repetitions=1,
-                seeds=[BASE_SEED + n for n in range(jobs)],
+                seeds=seeds or [BASE_SEED + n for n in range(jobs)],
                 concurrency=1,
                 retention="artifacts",
             ),
@@ -116,6 +122,40 @@ async def run_condition(
     }
     print(json.dumps(line), flush=True)
     return line
+
+
+def seeds_for(pack, cases: list[str] | None, trials_per_case: int) -> list[int]:
+    """Seeds for a run with fewer trials per case, equal to the seeds the same
+    case and attempt got in a full run (job n of a full run has BASE_SEED + n)."""
+    offset, first = 0, {}
+    for cid, case in pack.cases.items():
+        first[cid] = offset
+        offset += case.trials
+    order = cases or list(pack.cases)
+    return [BASE_SEED + first[cid] + attempt
+            for cid in order for attempt in range(min(pack.case(cid).trials, trials_per_case))]
+
+
+async def warm_up(cases: list[str], make_clients, think: bool) -> None:
+    """Run every case once through the hybrid path (two model calls, a tool
+    search, embeddings) with nothing recorded, so the GPU's first-use costs
+    (kernel set-up for new input shapes) fall outside the timed trials."""
+    from circumstances.models import TrialSpec
+
+    pack = load_pack(ROOT / "pack")
+    chat, embed = make_clients() if make_clients else (None, None)
+    subject = RecallSubject("hybrid", think=think, chat_client=chat, embed_client=embed)
+    started = time.time()
+    for n, cid in enumerate(cases):
+        case = pack.case(cid)
+        trial = TrialSpec(run_id="warm-up", trial_id=f"{cid}--warm-up", pack_id=pack.manifest.id,
+                          pack_version=pack.manifest.version, case=case, attempt=1, seed=BASE_SEED + n)
+        session = await subject.prepare(trial)
+        try:
+            await session.execute(case.actions[0], timeout_s=case.timeout_s)
+        finally:
+            await session.close()
+    print(json.dumps({"warm_up": len(cases), "seconds": round(time.time() - started)}), flush=True)
 
 
 def select_cases(pack, cases: list[str] | None, max_cases: int | None) -> list[str]:
@@ -162,6 +202,10 @@ def main() -> None:
     parser.add_argument("--case", action="append", help="run only this case (repeatable)")
     parser.add_argument("--max-cases", type=int, default=None,
                         help="run only this many cases, spread evenly over the pack (pilots)")
+    parser.add_argument("--trials-per-case", type=int, default=None,
+                        help="run at most this many trials per case (seeds as in a full run); the pack says 5")
+    parser.add_argument("--warmup", action="store_true",
+                        help="run every selected case once, unrecorded, before the timed conditions")
     parser.add_argument("--think", action="store_true", help="enable the model's reasoning mode")
     parser.add_argument("--out", default=str(ROOT / "results" / "e2"))
     parser.add_argument("--profile", default=None,
@@ -190,7 +234,9 @@ def main() -> None:
     pack = load_pack(ROOT / "pack")
     cases = select_cases(pack, args.case, args.max_cases)
     selected = None if (args.case is None and args.max_cases is None) else cases
-    trials_per_condition = sum(pack.case(c).trials for c in cases)
+    per_case = (lambda c: min(pack.case(c).trials, args.trials_per_case)) if args.trials_per_case else (
+        lambda c: pack.case(c).trials)
+    trials_per_condition = sum(per_case(c) for c in cases)
 
     machine = None
     if args.machine_json:
@@ -245,6 +291,8 @@ def main() -> None:
         "e2.embed_provider": args.embed_provider,
         "e2.embed_model": embed_model,
     }
+    if args.warmup:
+        asyncio.run(warm_up(cases, make_clients, args.think))
     for condition in args.conditions:
         trace_file = None
         if not args.no_telemetry:
@@ -253,6 +301,7 @@ def main() -> None:
         asyncio.run(run_condition(
             condition, selected, out, think=args.think, make_clients=make_clients,
             trace_file=trace_file, resource={**resource, "e2.condition": condition},
+            trials_per_case=args.trials_per_case,
         ))
     if not args.no_telemetry:
         summary = telemetry_summary.write(out)
