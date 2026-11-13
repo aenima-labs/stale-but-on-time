@@ -87,7 +87,10 @@ uv run inv e2.run --args="--provider anthropic --embed-provider openai --out res
 The reasoning run takes about 2.7 hours on a laptop, the second-model run about 20
 minutes, and the hosted run about 50 minutes and 3.5 US dollars (it prints an estimate
 and asks before it starts; `results/e2-anthropic_NOTES.md` lists how it differs from
-the local runs). `e2.analyze` analyses all four runs (`src/e2_analyze.py --run <name>`).
+the local runs). `e2.analyze` analyses all four runs and the cloud timing pass
+(`src/e2_analyze.py --run <name>`). `results/e2-cloudrun-l4-timing` is that pass: one
+trial per case on a Cloud Run job with an NVIDIA L4, used only for the timings of
+Section 8 (`results/e2-cloudrun-l4-timing_NOTES.md`).
 
 The analysis applies two corrections to the sealed grades, to every run alike: a key
 must begin a word (the key "Mori" had matched inside "memories"), and a reply that

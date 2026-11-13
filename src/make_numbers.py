@@ -304,6 +304,8 @@ if (ROOT / "results" / f"{CLOUD}_summary.json").exists():
                    cb["blocking"]["pre_generation_ms"]["median"], cloud_reply))
     put("CloudRecallMs", f"{cb['blocking']['pre_generation_ms']['median']:.0f}")
     put("CloudTrials", str(cloud_summary["n_trials"]))
+    cloud_machine = json.loads((ROOT / "results" / CLOUD / "machine.json").read_text())
+    put("CloudCost", f"{cloud_machine['cost_usd']:.2f}")
     for c, tag in (("lag1", "Lag"), ("blocking", "Block"), ("tool", "Tool"), ("hybrid", "Hyb")):
         put(f"CloudReply{tag}", f"{cloud_reply[('lag1', 'blocking', 'tool', 'hybrid').index(c)]:.1f}")
 hs_rows = robust["e2-anthropic"][1]
@@ -313,6 +315,8 @@ deploy.append(("Agent, hosted models",
 deploy.append(("Product, local models, laptop", k2["by_condition"]["c-blocking"]["blocking_ms_median"],
                [k2["by_condition"][c]["path_ms"]["median"] / 1000
                 for c in ("b-backthought", "c-blocking", "a-tool", "e-backthought-tool")]))
+put("RecallWaitMin", f"{min(wait for _, wait, _ in deploy):.0f}")
+put("RecallWaitMax", f"{max(wait for _, wait, _ in deploy):.0f}")
 (PAPER / "tab-deploy.tex").write_text(
     "\n".join(" & ".join([name, f"{wait:.0f}", *[f"{x:.1f}" for x in secs]]) + r" \\"
               for name, wait, secs in deploy) + "\n")

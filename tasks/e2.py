@@ -42,12 +42,13 @@ def test(c):
 
 
 RUNS = ("e2", "e2-think", "e2-qwen3", "e2-anthropic")  # main run, reasoning on, second model, hosted model
+TIMING_RUNS = ("e2-cloudrun-l4-timing",)  # one trial per case on a cloud GPU; reported for timing only
 
 
 @task
 def analyze(c):
-    """Analysis of the main run and of the two robustness runs."""
-    for name in RUNS:
+    """Analysis of the main run, the three further runs and the cloud timing pass."""
+    for name in RUNS + TIMING_RUNS:
         run_src(c, "e2_analyze.py", f"--run {name}")
 
 
