@@ -195,7 +195,8 @@ def main() -> None:
     p.add_argument("--cpu", type=int, default=6)
     p.add_argument("--memory-gib", type=int, default=24)
     p.add_argument("--max-hours", type=int, default=1, help="task timeout: Cloud Run stops the job here")
-    p.add_argument("--startup-min", type=float, default=5.0, help="estimate: image pull, model copy, model load")
+    p.add_argument("--startup-min", type=float, default=10.0,
+                   help="estimate: image import, model download or copy and hash check, model load (first run: ~10 min)")
     p.add_argument("--duration-factor", type=float, nargs=3, default=(0.5, 1.0, 2.0),
                    help="estimate: job run time relative to the laptop's stored run (low expected high)")
     p.add_argument("--poll-s", type=int, default=30)
