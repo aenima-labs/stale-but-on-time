@@ -230,7 +230,20 @@ class OpenAIChat(ChatClient):
     def temperature_supported(self) -> bool:
         return self.model not in OPENAI_FIXED_TEMPERATURE
 
+    def count_tokens(self, request: ChatRequest) -> int:
+        """Exact input tokens from OpenAI's input-token counting endpoint."""
+        body = self._body(request)
+        for key in ("max_output_tokens", "store", "temperature"):
+            body.pop(key, None)
+        raw, _ = _http(f"{self.base}/responses/input_tokens", body,
+                       {"Authorization": f"Bearer {self._key}"}, retries=HOSTED_RETRIES)
+        return int(raw["input_tokens"])
+
     def chat(self, request: ChatRequest) -> ChatResult:
+        body = self._body(request)
+        return self._call(body)
+
+    def _body(self, request: ChatRequest) -> dict:
         body: dict = {
             "model": self.model,
             # The system prompt is the first input message, as in the Ollama request;
@@ -248,6 +261,9 @@ class OpenAIChat(ChatClient):
                               "description": fn["description"], "parameters": fn["parameters"]}]
         else:
             body["text"] = {"format": {"type": "json_object"}}
+        return body
+
+    def _call(self, body: dict) -> ChatResult:
         raw, attempts = _http(
             f"{self.base}/responses", body, {"Authorization": f"Bearer {self._key}"},
             retries=HOSTED_RETRIES,
@@ -388,7 +404,18 @@ class AnthropicChat(ChatClient):
     def temperature_supported(self) -> bool:
         return self.model not in ANTHROPIC_FIXED_TEMPERATURE
 
+    def count_tokens(self, request: ChatRequest) -> int:
+        """Exact input tokens from Anthropic's free count_tokens endpoint (system and tools included)."""
+        body = {k: v for k, v in self._body(request).items() if k not in ("max_tokens", "temperature")}
+        raw, _ = _http(f"{self.base}/v1/messages/count_tokens", body,
+                       {"x-api-key": self._key, "anthropic-version": "2023-06-01"}, retries=HOSTED_RETRIES)
+        return int(raw["input_tokens"])
+
     def chat(self, request: ChatRequest) -> ChatResult:
+        body = self._body(request)
+        return self._call(body)
+
+    def _body(self, request: ChatRequest) -> dict:
         # No JSON mode: the reply format is asked for in the prompt, as for every provider.
         body: dict = {
             "model": self.model,
@@ -402,6 +429,9 @@ class AnthropicChat(ChatClient):
             fn = request.tool["function"]
             body["tools"] = [{"name": fn["name"], "description": fn["description"],
                               "input_schema": fn["parameters"]}]
+        return body
+
+    def _call(self, body: dict) -> ChatResult:
         raw, attempts = _http(
             f"{self.base}/v1/messages", body,
             {"x-api-key": self._key, "anthropic-version": "2023-06-01"},

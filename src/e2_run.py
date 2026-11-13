@@ -172,6 +172,8 @@ def main() -> None:
     parser.add_argument("--yes", action="store_true", help="start a run that spends money without asking")
     parser.add_argument("--estimate-only", action="store_true", help="print the estimate and stop")
     parser.add_argument("--no-telemetry", action="store_true", help="do not write spans")
+    parser.add_argument("--no-count", action="store_true",
+                        help="estimate input tokens as characters / 4 instead of the provider's free token counter")
     parser.add_argument("--allow-reloads", action="store_true",
                         help="run even if Ollama cannot keep the chat and embedding models loaded together")
     parser.add_argument("--machine-json", type=Path, default=None,
@@ -200,7 +202,13 @@ def main() -> None:
         embed_model=embed_model, think=args.think, machine=machine,
     )
     profile_name = args.profile or default_profile(args.provider, model, args.think, list(args.conditions))
-    estimate = est_mod.estimate(plan, est_mod.load_profile(profile_name))
+    profile = est_mod.load_profile(profile_name)
+    if profile["token_method"] == "chars/4" and args.provider in ("openai", "anthropic") and not args.no_count:
+        # Count the rebuilt prompts with the provider's own free counting endpoint.
+        client = chat_client(args.provider, model, kodama_secrets=args.kodama_secrets)
+        run_dir = Path(profile_name) if "/" in profile_name else ROOT / "results" / profile_name
+        profile = est_mod.profile_from_bundles(run_dir, client.count_tokens, f"{args.provider}/{model}")
+    estimate = est_mod.estimate(plan, profile)
 
     def make_clients():
         return (

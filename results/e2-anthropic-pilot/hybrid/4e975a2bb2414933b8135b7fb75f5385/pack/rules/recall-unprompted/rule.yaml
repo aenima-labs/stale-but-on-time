@@ -1,0 +1,12 @@
+id: recall-unprompted
+title: Bring up a relevant memory without being asked
+description: When the listener's remark relates to a memory and no question is asked, the reply brings
+  that memory up (proactive recall).
+severity: low
+tags:
+- recall
+- proactive
+provenance:
+- Written for this study; fictional
+evaluators: []
+selftests: []

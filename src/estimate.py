@@ -106,13 +106,30 @@ def profile_from_telemetry(run_dir: Path) -> dict:
     }
 
 
-def profile_from_bundles(run_dir: Path) -> dict:
-    """Rebuild every call's prompt from a sealed run and count characters / 4."""
+def profile_from_bundles(run_dir: Path, counter=None, counter_name: str = "") -> dict:
+    """Rebuild every call's prompt from a sealed run and count its tokens.
+
+    Without ``counter``, input tokens are characters / 4. With ``counter`` (a
+    function from a ``providers.ChatRequest`` to the provider's exact input-token
+    count, e.g. Anthropic's free count_tokens endpoint), every distinct prompt is
+    counted exactly, system prompt and tool definitions included. Output tokens
+    stay characters / 4 of the stored replies: what a different model writes is
+    not known before it runs.
+    """
+    from providers import ChatRequest
     from circumstances.pack import load_pack
     from subject import (
         NO_MEMORIES_SEARCH, REPLY_FORMAT, RULES, SEARCH_TOOL, STALE_MEMORIES_SEARCH,
         ambience, first_half,
     )
+
+    cache: dict[str, int] = {}
+
+    def count(request) -> int:
+        key = json.dumps([request.system, request.messages, bool(request.tool)])
+        if key not in cache:
+            cache[key] = int(counter(request))
+        return cache[key]
 
     pack = load_pack(ROOT / "pack")
     fixture = json.loads((ROOT / "fixtures" / "tessaly-v1.json").read_text())
@@ -145,16 +162,23 @@ def profile_from_bundles(run_dir: Path) -> dict:
             calls_made = int(met.get("path.llm_calls", 1))
             searches = [e["arguments"].get("query", "") for e in events if e["kind"] == "tool_call"]
             base = sum(len(t) for t in said) + len(user) + msg_overhead
-            in_chars, out_chars, calls = 0, 0, 0
+            messages = [*history, {"role": "user", "content": user}]
+            in_chars, out_chars, calls, counted = 0, 0, 0, 0
             name = cdir.name
             reply_out = len(json.dumps({"reply": reply, "abstained": False}))
             if name in ("tool", "hybrid"):
                 offer = NO_MEMORIES_SEARCH if name == "tool" else block(pages) + "\n\n" + STALE_MEMORIES_SEARCH
-                in_chars += len(rules) + 1 + len(offer) + 2 + len(REPLY_FORMAT) + tool_chars + base
+                system = rules + "\n" + offer + "\n\n" + REPLY_FORMAT
+                in_chars += len(system) + tool_chars + base
+                if counter:
+                    counted += count(ChatRequest(system, messages, SEARCH_TOOL, 0.7, 0, 220, False))
                 calls += 1
                 out_chars += (len(searches[0]) + 40) if searches else (reply_out if calls_made == 1 else 40)
             if not (name in ("tool", "hybrid") and calls_made == 1):
-                in_chars += len(rules) + 1 + len(block(pages)) + 2 + len(REPLY_FORMAT) + base
+                system = rules + "\n" + block(pages) + "\n\n" + REPLY_FORMAT
+                in_chars += len(system) + base
+                if counter:
+                    counted += count(ChatRequest(system, messages, None, 0.7, 0, 220, False))
                 out_chars += reply_out
                 calls += 1
             queries = {
@@ -168,7 +192,7 @@ def profile_from_bundles(run_dir: Path) -> dict:
             finished = dt.datetime.fromisoformat(trial["trajectory"]["finished_at"])
             records.append({
                 "chat_calls": calls,
-                "input_tokens": in_chars / CHARS_PER_TOKEN,
+                "input_tokens": counted if counter else in_chars / CHARS_PER_TOKEN,
                 "output_tokens": out_chars / CHARS_PER_TOKEN,
                 "cached_input_tokens": 0,
                 "embed_calls": len(queries),
@@ -177,9 +201,13 @@ def profile_from_bundles(run_dir: Path) -> dict:
             })
         conditions[cdir.name] = records
     lock = run_meta.get("lock", {}) if isinstance(run_meta, dict) else {}
+    if counter:
+        print(f"counted {len(cache)} distinct prompts with {counter_name}", flush=True)
     return {
-        "source": f"sealed bundles of results/{run_dir.name} (prompts rebuilt, tokens = characters / 4)",
-        "token_method": "chars/4",
+        "source": (f"sealed bundles of results/{run_dir.name} (prompts rebuilt; input tokens counted by "
+                   f"{counter_name}, output tokens = characters / 4)" if counter else
+                   f"sealed bundles of results/{run_dir.name} (prompts rebuilt, tokens = characters / 4)"),
+        "token_method": f"counted:{counter_name}" if counter else "chars/4",
         "provider": "ollama",
         "model": (lock.get("models") or {}).get("chat", ""),
         "think": False,
@@ -229,6 +257,7 @@ def estimate(plan: Plan, profile: dict, prices: PriceTable | None = None) -> dic
             f"profile of {plan.provider}/{plan.model}: the range is wide and its top assumes every trial makes "
             f"the most calls its condition allows and every call writes all {plan.max_tokens} output tokens."
         )
+    counted_for_plan = profile["token_method"] == f"counted:{plan.provider}/{plan.model}"
     all_records = [r for recs in profile["conditions"].values() for r in recs]
     rows, totals = {}, {k: [0.0, 0.0, 0.0] for k in
                         ("chat_calls", "input_tokens", "output_tokens", "embed_tokens", "cost_usd", "duration_s")}
@@ -251,7 +280,11 @@ def estimate(plan: Plan, profile: dict, prices: PriceTable | None = None) -> dic
         else:
             calls = (n * 1.0, n * calls_m, n * MAX_CALLS[condition])
             per_call_in = in_m / calls_m if calls_m else 0.0
-            tin = (0.75 * per_call_in * calls[0], n * in_m, 1.33 * per_call_in * calls[2])
+            if counted_for_plan:
+                # Exact per prompt; the spread is only in how many calls the model makes.
+                tin = (0.95 * per_call_in * calls[0], n * in_m, 1.05 * per_call_in * calls[2])
+            else:
+                tin = (0.75 * per_call_in * calls[0], n * in_m, 1.33 * per_call_in * calls[2])
             tout = (0.5 * n * out_m, n * out_m, calls[2] * plan.max_tokens)
             emb_per = emb_m / max(_mean_sd(records, "embed_calls")[0], 1e-9) if emb_m else 0.0
             emb = (0.75 * n * emb_m, n * emb_m, 1.33 * emb_per * n * RECALLS_MAX[condition])

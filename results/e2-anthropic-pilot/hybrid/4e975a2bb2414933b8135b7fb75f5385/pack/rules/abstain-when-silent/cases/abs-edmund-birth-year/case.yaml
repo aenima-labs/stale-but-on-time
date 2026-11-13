@@ -1,0 +1,35 @@
+id: abstain-when-silent/abs-edmund-birth-year
+title: What year was he born?
+description: abstain after a continuing lead-in.
+targets:
+- abstain-when-silent
+polarity: negative
+actors:
+  user: grandchild
+fixture:
+  type: asyncrecall.memorome
+  version: '1'
+  digest: sha256:0a91e52430ada86f04a875cccf2e7e6e18f09485bb8c6342c9204645d1af6089
+  privacy: public
+  config:
+    memorome: tessaly-v1
+    history:
+    - role: user
+      content: Grandpa Edmund was a clockmaker, wasn't he?
+    - role: assistant
+      content: Yes, with a workshop behind the house.
+actions:
+- kind: message
+  role: user
+  content: What year was he born?
+expected_outcomes:
+- Say that the memories do not contain the answer.
+evaluators: []
+selftests: []
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:abstain
+- continuity:continuing
