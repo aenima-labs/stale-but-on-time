@@ -441,6 +441,7 @@ class AnthropicChat(ChatClient):
 class EmbedClient:
     provider = ""
     model = ""
+    last_extra: dict = {}  # provider timings of the last call, put on its span
 
     def embed(self, inputs: list[str]) -> tuple[np.ndarray, Usage, int]:  # pragma: no cover
         raise NotImplementedError
@@ -454,6 +455,11 @@ class OllamaEmbed(EmbedClient):
 
     def embed(self, inputs: list[str]) -> tuple[np.ndarray, Usage, int]:
         raw, attempts = _http(f"{OLLAMA_URL}/api/embed", {"model": self.model, "input": inputs}, {})
+        self.last_extra = {
+            f"ollama.{k}_ms": raw[k] * 1e-6
+            for k in ("total_duration", "load_duration")
+            if isinstance(raw.get(k), int | float)
+        }
         return np.asarray(raw["embeddings"], dtype=np.float32), Usage(raw.get("prompt_eval_count")), attempts
 
 
@@ -569,6 +575,36 @@ def traced_embed(tracer: trace.Tracer, client: EmbedClient, inputs: list[str], p
             span.set_status(Status(StatusCode.ERROR, str(exc)[:200]))
             raise
         _set_usage(span, usage)
+        for key, value in client.last_extra.items():
+            span.set_attribute(key, value)
         span.set_attribute("gen_ai.embeddings.dimension.count", int(vectors.shape[1]))
         span.set_attribute("e2.http.attempts", attempts)
         return vectors
+
+
+# ------------------------------------------------------- Ollama residency -----
+
+RELOAD_MS = 1000.0  # a call whose ollama.load_duration_ms exceeds this loaded a model
+
+
+def ollama_preflight(chat_model: str | None, embed_model: str | None) -> list[str]:
+    """Load the run's Ollama models as a run would and report any not resident after.
+
+    The stored runs had the chat and embedding models loaded side by side for the
+    whole run. When the machine has too little free memory, Ollama evicts one to
+    load the other on every call, and each call then includes a model load.
+    Returns the models that were not resident (empty when all are).
+    """
+    if chat_model:
+        _http(f"{OLLAMA_URL}/api/chat", {
+            "model": chat_model, "stream": False, "keep_alive": "30m", "think": False,
+            "options": {"num_ctx": 4096, "num_predict": 1},
+            "messages": [{"role": "user", "content": "hi"}],
+        }, {})
+    if embed_model:
+        _http(f"{OLLAMA_URL}/api/embed", {"model": embed_model, "input": ["hi"], "keep_alive": "30m"}, {})
+    request = urllib.request.Request(f"{OLLAMA_URL}/api/ps")
+    with urllib.request.urlopen(request, timeout=30) as response:
+        loaded = {m["name"] for m in json.loads(response.read()).get("models", [])}
+    wanted = [m for m in (chat_model, embed_model) if m]
+    return [m for m in wanted if m not in loaded and f"{m}:latest" not in loaded]

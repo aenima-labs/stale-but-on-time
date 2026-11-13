@@ -43,6 +43,7 @@ from providers import (
     PROVIDERS,
     chat_client,
     embed_client,
+    ollama_preflight,
 )
 from scrub_paths import scrub_bundle
 from subject import CONDITIONS, RecallSubject
@@ -171,6 +172,8 @@ def main() -> None:
     parser.add_argument("--yes", action="store_true", help="start a run that spends money without asking")
     parser.add_argument("--estimate-only", action="store_true", help="print the estimate and stop")
     parser.add_argument("--no-telemetry", action="store_true", help="do not write spans")
+    parser.add_argument("--allow-reloads", action="store_true",
+                        help="run even if Ollama cannot keep the chat and embedding models loaded together")
     parser.add_argument("--machine-json", type=Path, default=None,
                         help="(GCP job) a machine spec for the estimate; see tasks/gcp.py")
     args = parser.parse_args()
@@ -208,6 +211,18 @@ def main() -> None:
 
     if not args.estimate_only:
         make_clients()  # a missing key stops here, before anything runs
+        local = [args.provider == "ollama", args.embed_provider == "ollama"]
+        if any(local):
+            missing = ollama_preflight(model if local[0] else None, embed_model if local[1] else None)
+            if missing:
+                message = (
+                    f"Ollama could not keep {', '.join(missing)} loaded beside the other model "
+                    "(too little free memory; see /api/ps and the Ollama log). Every call would "
+                    "include a model load and the latencies would be unusable."
+                )
+                if not args.allow_reloads:
+                    raise SystemExit(message + " Free memory, or pass --allow-reloads to run anyway.")
+                print("WARNING: " + message, flush=True)
     est_mod.write_estimate(estimate, out)
     if not est_mod.confirm(estimate, yes=args.yes, estimate_only=args.estimate_only):
         return

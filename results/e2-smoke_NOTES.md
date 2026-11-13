@@ -10,11 +10,15 @@ uv run inv e2.run --args="--conditions blocking tool --max-cases 2 --out results
 ```
 
 **Its latencies are not representative and must not be reported.** During the
-window, the shared Ollama held `gemma4:e4b` with a 32,768-token context (loaded
-by another client on the machine) while the agent asks for 4,096, so Ollama
-reloaded the model on most calls: the spans record `ollama.load_duration_ms` of
-10–35 s against 0.3 s of generation (`ollama.eval_duration_ms`). The stored
-runs (`results/e2*`) did not have this; their trials took about 0.7 s.
+window, the laptop had 4.7–11 GiB of its 36 GiB free (the Docker Desktop VM held
+about 23 GiB), so Ollama could not keep `gemma4:e4b` (9.4 GiB at a 4,096-token
+context) and `nomic-embed-text` loaded together: it evicted one to load the
+other on almost every call (77 model loads in 8 minutes in the Ollama log). The
+spans record `ollama.load_duration_ms` of 10–35 s against 0.3 s of generation
+(`ollama.eval_duration_ms`); `telemetry_summary.md` flags every such call. The
+stored runs (`results/e2*`) did not have this; their trials took about 0.7 s.
+Since then, `e2_run.py` loads both models before a local run and refuses to
+start if they are not both resident (`--allow-reloads` overrides).
 
 What the smoke does show: every trial has one trace; token counts come from
 Ollama's `prompt_eval_count` and `eval_count`; the bundle-based estimate

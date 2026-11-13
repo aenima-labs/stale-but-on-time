@@ -130,6 +130,12 @@
         "cost_usd": 0.0,
         "calls": 1
       },
+      "ollama_model_loads": {
+        "calls": 20,
+        "calls_with_load": 18,
+        "trials_affected": 10,
+        "threshold_ms": 1000.0
+      },
       "prices_missing": []
     },
     "blocking": {
@@ -250,6 +256,12 @@
         "embed_tokens": 1868,
         "cost_usd": 0.0,
         "calls": 1
+      },
+      "ollama_model_loads": {
+        "calls": 10,
+        "calls_with_load": 10,
+        "trials_affected": 10,
+        "threshold_ms": 1000.0
       },
       "prices_missing": []
     }

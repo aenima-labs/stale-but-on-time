@@ -25,7 +25,9 @@ Run: 20 trials, 30 model calls, 11,385 tokens in, 855 tokens out, 4,369 embeddin
 
 ## Notes
 
+- tool: **18 of 20 Ollama calls loaded a model** (load > 1000 ms) in 10 trials; their latencies include model loading and are not comparable with the stored runs.
 - tool: indexing the memorome took 1 embedding call(s), 1,868 tokens, $0.0000 (in the run cost, not per trial).
+- blocking: **10 of 10 Ollama calls loaded a model** (load > 1000 ms) in 10 trials; their latencies include model loading and are not comparable with the stored runs.
 - blocking: indexing the memorome took 1 embedding call(s), 1,868 tokens, $0.0000 (in the run cost, not per trial).
 
 Prices: `pricing/prices.yaml` (each entry has its source and the date it was read).

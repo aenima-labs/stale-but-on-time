@@ -30,6 +30,7 @@ from pathlib import Path
 import numpy as np
 
 from pricing import PriceTable, token_cost
+from providers import RELOAD_MS
 from telemetry import read_spans
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -151,6 +152,8 @@ def summarise_condition(spans: list[dict], prices: PriceTable) -> dict:
         f"{_provider(s)}/{s['attributes'].get('gen_ai.request.model', '')}"
         for s in spans if s.get("attributes", {}).get("gen_ai.operation.name") in ("chat", "embeddings")
     })
+    ollama_calls = [s for s in spans if "ollama.total_duration_ms" in s.get("attributes", {})]
+    reloads = [s for s in ollama_calls if s["attributes"].get("ollama.load_duration_ms", 0) > RELOAD_MS]
     per_trial_keys = ("chat_calls", "input_tokens", "output_tokens", "cached_input_tokens",
                       "reasoning_tokens", "embed_tokens", "cost_usd", "wall_ms", "path_total_ms")
     total = lambda k: float(sum(t[k] for t in trials))  # noqa: E731
@@ -174,6 +177,12 @@ def summarise_condition(spans: list[dict], prices: PriceTable) -> dict:
             "chat_calls_without_tokens": int(sum(t["tokens_missing"] for t in trials)),
         },
         "overhead_index": overhead,
+        "ollama_model_loads": {
+            "calls": len(ollama_calls),
+            "calls_with_load": len(reloads),
+            "trials_affected": len({s["trace_id"] for s in reloads}),
+            "threshold_ms": RELOAD_MS,
+        },
         "prices_missing": sorted(missing),
     }
 
@@ -249,6 +258,11 @@ def markdown(summary: dict) -> str:
             notes.append(f"- {n}: {c['totals']['chat_calls_without_tokens']} model calls returned no token counts.")
         if c["totals"]["errors"]:
             notes.append(f"- {n}: {c['totals']['errors']} spans ended with an error.")
+        loads = c["ollama_model_loads"]
+        if loads["calls_with_load"] > len(c["models"]):  # more than the first load of each model
+            notes.append(f"- {n}: **{loads['calls_with_load']} of {loads['calls']} Ollama calls loaded a model** "
+                         f"(load > {loads['threshold_ms']:.0f} ms) in {loads['trials_affected']} trials; their "
+                         "latencies include model loading and are not comparable with the stored runs.")
         oh = c["overhead_index"]
         if oh["calls"]:
             notes.append(f"- {n}: indexing the memorome took {oh['calls']} embedding call(s), "
