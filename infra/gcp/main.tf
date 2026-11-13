@@ -85,6 +85,8 @@ resource "google_cloud_run_v2_job" "e2" {
   location            = var.region
   deletion_protection = false
   labels              = local.labels
+  # GPU jobs longer than one hour are a Beta feature of Cloud Run.
+  launch_stage = var.task_timeout_hours > 1 ? "BETA" : "GA"
 
   template {
     task_count = 1

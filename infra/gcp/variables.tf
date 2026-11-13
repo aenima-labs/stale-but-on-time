@@ -23,9 +23,9 @@ variable "gpu" {
 }
 
 variable "cpu" {
-  description = "vCPUs (an L4 needs at least 4)"
+  description = "vCPUs (an L4 needs at least 4; 24 GiB of memory needs 6)"
   type        = number
-  default     = 4
+  default     = 6
 }
 
 variable "memory_gib" {
@@ -35,9 +35,9 @@ variable "memory_gib" {
 }
 
 variable "task_timeout_hours" {
-  description = "Hard limit on one execution; Cloud Run stops the task here (at most 12 with a GPU)"
+  description = "Hard limit on one execution; Cloud Run stops the task here (at most 12 with a GPU; more than 1 is a Beta feature)"
   type        = number
-  default     = 2
+  default     = 1
   validation {
     condition     = var.task_timeout_hours >= 1 && var.task_timeout_hours <= 12
     error_message = "task_timeout_hours must be between 1 and 12."

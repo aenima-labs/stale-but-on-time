@@ -23,24 +23,27 @@ HELP = {
 
 
 @task(help=HELP)
-def estimate(c, run, args="", max_hours=2, models="", gpu="nvidia-l4", cpu=4, memory=24):
+def estimate(c, run, args="", max_hours=1, models="", gpu="nvidia-l4", cpu=6, memory=24):
     """Estimate a Cloud Run run (job time and cost, worst case at the task timeout). Creates nothing."""
     run_src(c, "gcp_job.py", _opts(run, args, max_hours, models, gpu, cpu, memory) + " --estimate-only")
 
 
 @task(help=HELP)
-def plan(c, run, args="", max_hours=2, models="", gpu="nvidia-l4", cpu=4, memory=24):
+def plan(c, run, args="", max_hours=1, models="", gpu="nvidia-l4", cpu=6, memory=24):
     """terraform plan of infra/gcp. Creates nothing."""
     run_src(c, "gcp_job.py", _opts(run, args, max_hours, models, gpu, cpu, memory) + " --plan-only")
 
 
 @task(help={**HELP, "yes": "skip the confirmation"})
-def run(c, run, args="", max_hours=2, models="", gpu="nvidia-l4", cpu=4, memory=24, yes=False):
+def run(c, run, args="", max_hours=1, models="", gpu="nvidia-l4", cpu=6, memory=24, yes=False, stages=""):
     """Apply the infrastructure, build and push the image, run the job, copy the results back.
 
     uv run inv gcp.run --run e2-cloudrun-l4-subset --args="--max-cases 2"
     """
-    run_src(c, "gcp_job.py", _opts(run, args, max_hours, models, gpu, cpu, memory) + (" --yes" if yes else ""))
+    o = _opts(run, args, max_hours, models, gpu, cpu, memory) + (" --yes" if yes else "")
+    if stages:
+        o += " --stages " + " ".join(stages.split(","))
+    run_src(c, "gcp_job.py", o)
 
 
 @task

@@ -19,10 +19,10 @@ uv run inv gcp.destroy                                                       # r
 | Artifact Registry repository `stale-but-on-time` (images tagged by commit; 5 kept) | storage, ≈ $0.10 per GiB-month (image ≈ 4–5 GiB) |
 | Bucket `kodama-500509-stale-but-on-time`: `models/` (the exact Ollama blobs of the local runs, ≈ 10 GB) and `results/<run>/` | ≈ $0.02 per GiB-month |
 | Service account `sbot-e2-job` (object admin on that bucket only) | — |
-| Cloud Run job `sbot-e2`: 1× L4, 4 vCPU, 24 GiB, no retries, task timeout 2 h | per second while running: ≈ $1.10/h |
+| Cloud Run job `sbot-e2`: 1× L4, 6 vCPU, 24 GiB (24 GiB needs 6 vCPU), no retries, task timeout 1 h (longer is a Beta feature) | per second while running: ≈ $1.23/h |
 
 The job bills only while an execution runs, and Cloud Run stops it at the task
-timeout (`--max-hours`, at most 12 h for GPU jobs), so a hung run cannot keep
+timeout (`--max-hours`, default 1; up to 12 h for GPU jobs, but more than 1 h is a Beta feature), so a hung run cannot keep
 billing past that. Ctrl-C in the task cancels the execution.
 
 ## What a run does
@@ -53,7 +53,7 @@ billing past that. Ctrl-C in the task cancels the execution.
 | GPU | GB10 (Blackwell) | L4 (Ada) | RTX PRO 6000 Blackwell |
 | GPU memory | 128 GB unified (shared with CPU) | 24 GB GDDR6 | 96 GB GDDR7 |
 | Memory bandwidth | 273 GB/s | 300 GB/s | 1,597 GB/s |
-| europe-west1 | — | yes, ≈ $1.10/h at 4 vCPU / 24 GiB | not offered for jobs (europe-west4 is) |
+| europe-west1 | — | yes, ≈ $1.23/h at 6 vCPU / 24 GiB | not offered for jobs (europe-west4 is) |
 
 The L4 is the cheaper option and has about the Spark's memory bandwidth, which
 bounds token generation, so its decode speed on `gemma4:e4b` is a fair stand-in

@@ -107,6 +107,21 @@ def build_image(registry: str, commit: str) -> str:
     return image
 
 
+def apply(a: argparse.Namespace, image: str | None = None) -> None:
+    """terraform plan to a file, print it, and apply exactly that plan."""
+    plan = TF / "job.tfplan"
+    sh(["terraform", "plan", "-input=false", "-no-color", f"-out={plan}", *tf_vars(a, image)], cwd=TF)
+    try:
+        sh(["terraform", "apply", "-input=false", str(plan)], cwd=TF)
+    finally:
+        plan.unlink(missing_ok=True)
+
+
+def current_image() -> str:
+    return sh(["gcloud", "run", "jobs", "describe", JOB, f"--region={REGION}", f"--project={PROJECT}",
+               "--format=value(template.template.containers[0].image)"], capture=True, quiet=True).strip()
+
+
 def build_estimate(a: argparse.Namespace, out: Path) -> dict:
     spec = {"machine_type": "", "region": REGION, "kind": "cloud_run", "gpu": a.gpu, "vcpus": a.cpu,
             "memory_gib": a.memory_gib, "startup_min": a.startup_min, "teardown_min": 1.0,
@@ -139,9 +154,9 @@ def main() -> None:
     p.add_argument("--args", default="", help="extra e2_run.py arguments for the job, e.g. '--max-cases 2'")
     p.add_argument("--models", nargs="+", default=["gemma4:e4b", "nomic-embed-text"])
     p.add_argument("--gpu", default="nvidia-l4")
-    p.add_argument("--cpu", type=int, default=4)
+    p.add_argument("--cpu", type=int, default=6)
     p.add_argument("--memory-gib", type=int, default=24)
-    p.add_argument("--max-hours", type=int, default=2, help="task timeout: Cloud Run stops the job here")
+    p.add_argument("--max-hours", type=int, default=1, help="task timeout: Cloud Run stops the job here")
     p.add_argument("--startup-min", type=float, default=5.0, help="estimate: image pull, model copy, model load")
     p.add_argument("--duration-factor", type=float, nargs=3, default=(0.5, 1.0, 2.0),
                    help="estimate: job run time relative to the laptop's stored run (low expected high)")
@@ -149,6 +164,8 @@ def main() -> None:
     p.add_argument("--yes", action="store_true")
     p.add_argument("--estimate-only", action="store_true")
     p.add_argument("--plan-only", action="store_true", help="terraform plan and stop (creates nothing)")
+    p.add_argument("--stages", nargs="+", default=["infra", "image", "models", "execute"],
+                   choices=["infra", "image", "models", "execute"], help="steps to run (default: all)")
     a = p.parse_args()
 
     out = ROOT / "results" / a.run
@@ -168,14 +185,24 @@ def main() -> None:
         raise SystemExit("The working tree has changes; commit them so the job runs a commit.")
     commit = sh(["git", "rev-parse", "--short", "HEAD"], capture=True, cwd=ROOT, quiet=True).strip()
 
-    # Infrastructure first, then the image, then point the job at it.
+    # Stages: infrastructure, image, models, then the execution. Each can be run alone.
+    stages = set(a.stages)
     sh(["terraform", "init", "-input=false"], cwd=TF, quiet=True)
-    sh(["terraform", "apply", "-input=false", "-auto-approve", *tf_vars(a)], cwd=TF)
+    if "infra" in stages:
+        apply(a, current_image() or None)
     registry = sh(["terraform", "output", "-raw", "registry"], capture=True, cwd=TF, quiet=True).strip()
     bucket = sh(["terraform", "output", "-raw", "bucket"], capture=True, cwd=TF, quiet=True).strip()
-    image = build_image(registry, commit)
-    sh(["terraform", "apply", "-input=false", "-auto-approve", *tf_vars(a, image)], cwd=TF)
-    upload_models(bucket, a.models)
+    image = f"{registry}/e2-job:{commit}"
+    if "image" in stages:
+        image = build_image(registry, commit)
+        if current_image() != image:
+            apply(a, image)
+    if "models" in stages:
+        upload_models(bucket, a.models)
+    if "execute" not in stages:
+        return
+    if current_image() != image:
+        raise SystemExit(f"The job runs {current_image()}, not {image}; run the image stage first.")
 
     execution, outcome, info = "", "failed to start", {}
     try:
