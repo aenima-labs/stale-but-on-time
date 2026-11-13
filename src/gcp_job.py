@@ -10,9 +10,10 @@
 3. Build ``infra/gcp/Dockerfile`` from ``git archive HEAD`` (tracked files must
    have no uncommitted changes) with Cloud Build and push it tagged with the
    commit. Skipped when that tag exists.
-4. The job gets the SHA-256 of each local model manifest; it takes the models
-   from the bucket or pulls them from Ollama's registry inside GCP, and stops
-   unless every manifest matches, so the weights are those of the local runs.
+4. The local model manifests (about 1 KB each) go to the bucket with their
+   SHA-256; the job takes each blob they name from the bucket or downloads it
+   by digest from Ollama's registry inside GCP, and checks every hash, so the
+   weights are those of the local runs even after a registry tag moved.
 5. Point the job at the image, execute it with the run's name and arguments
    and a hard task timeout, and wait. Ctrl-C cancels the execution.
 6. Copy ``gs://<bucket>/results/<run>/`` to ``results/<run>/`` and write
@@ -89,6 +90,14 @@ def manifest_hashes(models: list[str]) -> str:
             raise SystemExit(f"{model} is not in {OLLAMA_MODELS}; run `ollama pull {model}` first.")
         pairs.append(f"{model}={hashlib.sha256(manifest.read_bytes()).hexdigest()}")
     return ",".join(pairs)
+
+
+def upload_manifests(bucket: str, models: list[str]) -> None:
+    """The local manifests (about 1 KB each); the job fetches the blobs they name."""
+    for model in models:
+        rel = model_files([model])[0]
+        sh(["gcloud", "storage", "cp", str(OLLAMA_MODELS / rel), f"gs://{bucket}/models/{rel.as_posix()}"],
+           quiet=True)
 
 
 def upload_models(bucket: str, models: list[str]) -> None:
@@ -230,6 +239,7 @@ def main() -> None:
         upload_models(bucket, a.models)  # only when asked: the job fetches and checks them itself
     if "execute" not in stages:
         return
+    upload_manifests(bucket, a.models)
     if current_image() != image:
         raise SystemExit(f"The job runs {current_image()}, not {image}; run the image stage first.")
 

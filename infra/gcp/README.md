@@ -36,12 +36,16 @@ billing past that. Ctrl-C in the task cancels the execution.
    no uncommitted changes. Skipped when the tag exists. Kodama builds locally
    with `docker buildx`; over a home connection the 3 GB base image and the push
    took too long.
-4. The models: the task passes the SHA-256 of each local manifest
-   (`~/.ollama/models/manifests/...`; `ollama list` shows its first 12
-   characters). The job takes the models from the bucket, or pulls them from
-   Ollama's registry and saves them to the bucket, and stops unless every
-   manifest matches: the weights are byte-identical to the local runs
-   (`machine/models.txt`). `--stages models` uploads the local blobs instead.
+4. The models: the task uploads the local manifests
+   (`~/.ollama/models/manifests/...`, about 1 KB each) and passes their SHA-256
+   (`ollama list` shows its first 12 characters). The job takes each blob a
+   manifest names from the bucket, or downloads it by digest from Ollama's
+   registry and saves it to the bucket, and checks every hash: the weights are
+   byte-identical to the local runs (`machine/models.txt`). Pulling by tag
+   would not do: on 2026-11-13 the registry's `gemma4:e4b` tag pointed at
+   different weights (manifest `ccd2e5…`, ~6.6 GB) from those of the stored
+   runs (`c6eb39…`, 9.6 GB); the old blobs are still served by digest.
+   `--stages models` uploads the local blobs instead.
 5. `gcloud run jobs execute` with `RUN_NAME` and `RUN_ARGS`. The entrypoint
    (`job.sh`) starts Ollama with the
    laptop's settings (flash attention, q8_0 KV cache), runs `inv e2.run`, and

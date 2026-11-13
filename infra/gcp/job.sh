@@ -33,44 +33,35 @@ OLLAMA_HOST=127.0.0.1:11434 OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q8_0 O
 for _ in $(seq 90); do curl -fs http://127.0.0.1:11434/api/version > "$LOCAL/machine/ollama-version.json" && break; sleep 2; done
 mark OLLAMA_STARTED
 
-# The models, byte-identical to the local runs. MODEL_MANIFESTS lists
-# name=sha256-of-manifest as on the machine that started the job (the id
-# `ollama list` shows is its first 12 characters). A model is taken from the
-# bucket if it is there (every blob's hash checked), else pulled from Ollama's
-# registry (which checks every blob's digest) and saved to the bucket for the
-# next run. The job stops if a manifest's hash differs.
+# The models, byte-identical to the local runs. The task uploads the local
+# manifests to gs://<bucket>/models/manifests/ and passes their SHA-256 in
+# MODEL_MANIFESTS (name=sha256; `ollama list` shows its first 12 characters).
+# Each blob the manifest names is taken from the bucket, or downloaded by its
+# digest from Ollama's registry (a tag there may since point at other weights,
+# but a digest cannot) and saved to the bucket. Every blob's SHA-256 is checked.
 MODELS=/root/.ollama/models
+REGISTRY=https://registry.ollama.ai/v2/library
 for entry in ${MODEL_MANIFESTS//,/ }; do
   model="${entry%%=*}"; want="${entry#*=}"
   name="${model%%:*}"; tag="${model#*:}"; [ "$tag" = "$model" ] && tag=latest
   rel="manifests/registry.ollama.ai/library/$name/$tag"
-  if [ -f "/gcs/models/$rel" ]; then
-    mkdir -p "$MODELS/$(dirname "$rel")" "$MODELS/blobs"
-    cp "/gcs/models/$rel" "$MODELS/$rel"
-    for digest in $(grep -o 'sha256:[0-9a-f]*' "$MODELS/$rel" | sort -u); do
-      blob="sha256-${digest#sha256:}"
-      cp "/gcs/models/blobs/$blob" "$MODELS/blobs/$blob"
-      [ "$(sha256sum "$MODELS/blobs/$blob" | cut -d' ' -f1)" = "${digest#sha256:}" ] || { echo "blob $blob corrupt"; exit 4; }
-    done
-    source=bucket
-  else
-    ollama pull "$model"
-    source=registry
-  fi
-  got="$(sha256sum "$MODELS/$rel" | cut -d' ' -f1)"
-  if [ "$got" != "$want" ]; then
-    echo "$model: manifest $got, expected $want (the weights differ from the local runs)"
-    exit 5
-  fi
-  echo "$model $got from $source" >> "$LOCAL/machine/models.txt"
-  if [ "$source" = registry ]; then
-    mkdir -p "/gcs/models/$(dirname "$rel")" /gcs/models/blobs
-    for digest in $(grep -o 'sha256:[0-9a-f]*' "$MODELS/$rel" | sort -u); do
-      blob="sha256-${digest#sha256:}"
-      [ -f "/gcs/models/blobs/$blob" ] || cp "$MODELS/blobs/$blob" "/gcs/models/blobs/$blob"
-    done
-    cp "$MODELS/$rel" "/gcs/models/$rel"
-  fi
+  [ -f "/gcs/models/$rel" ] || { echo "$model: no manifest in the bucket"; exit 5; }
+  got="$(sha256sum "/gcs/models/$rel" | cut -d' ' -f1)"
+  [ "$got" = "$want" ] || { echo "$model: manifest $got in the bucket, expected $want"; exit 5; }
+  mkdir -p "$MODELS/$(dirname "$rel")" "$MODELS/blobs" /gcs/models/blobs
+  sources=""
+  for digest in $(grep -o 'sha256:[0-9a-f]*' "/gcs/models/$rel" | sort -u); do
+    blob="sha256-${digest#sha256:}"
+    if [ -f "/gcs/models/blobs/$blob" ]; then
+      cp "/gcs/models/blobs/$blob" "$MODELS/blobs/$blob"; sources="$sources bucket"
+    else
+      curl -fsSL --retry 3 -o "$MODELS/blobs/$blob" "$REGISTRY/$name/blobs/$digest"; sources="$sources registry"
+    fi
+    [ "$(sha256sum "$MODELS/blobs/$blob" | cut -d' ' -f1)" = "${digest#sha256:}" ] || { echo "$model: blob $blob does not match its digest"; exit 4; }
+    [ -f "/gcs/models/blobs/$blob" ] || cp "$MODELS/blobs/$blob" "/gcs/models/blobs/$blob"
+  done
+  cp "/gcs/models/$rel" "$MODELS/$rel"
+  echo "$model manifest $got; blobs from:$sources" >> "$LOCAL/machine/models.txt"
 done
 ollama list > "$LOCAL/machine/ollama-list.txt"
 mark MODELS_READY
