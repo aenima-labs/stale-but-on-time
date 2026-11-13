@@ -181,7 +181,7 @@ def main() -> None:
         return
     if not est_mod.confirm(est, yes=a.yes, estimate_only=a.estimate_only):
         return
-    if subprocess.run(["git", "status", "--porcelain"], cwd=ROOT, capture_output=True, text=True).stdout.strip():
+    if subprocess.run(["git", "status", "--porcelain", "--untracked-files=no"], cwd=ROOT, capture_output=True, text=True).stdout.strip():
         raise SystemExit("The working tree has changes; commit them so the job runs a commit.")
     commit = sh(["git", "rev-parse", "--short", "HEAD"], capture=True, cwd=ROOT, quiet=True).strip()
 
