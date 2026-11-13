@@ -17,7 +17,7 @@ uv run inv gcp.destroy                                                       # r
 | Resource | Bills |
 |---|---|
 | Artifact Registry repository `stale-but-on-time` (images tagged by commit; 5 kept) | storage, ≈ $0.10 per GiB-month (image ≈ 4–5 GiB) |
-| Bucket `kodama-500509-stale-but-on-time`: `models/` (the exact Ollama blobs of the local runs, ≈ 10 GB) and `results/<run>/` | ≈ $0.02 per GiB-month |
+| Bucket `kodama-500509-stale-but-on-time`: `models/` (the Ollama blobs, ≈ 10 GB, checked against the local runs) and `results/<run>/` | ≈ $0.02 per GiB-month |
 | Service account `sbot-e2-job` (object admin on that bucket only) | — |
 | Cloud Run job `sbot-e2`: 1× L4, 6 vCPU, 24 GiB (24 GiB needs 6 vCPU), no retries, task timeout 1 h (longer is a Beta feature) | per second while running: ≈ $1.23/h |
 
@@ -30,18 +30,23 @@ billing past that. Ctrl-C in the task cancels the execution.
 1. Estimate and confirmation (`--yes` skips it, `--estimate-only` stops).
 2. `terraform apply` (idempotent).
 3. Image (`Dockerfile`): `ollama/ollama:0.40.13` (the release of the stored
-   runs) + uv 0.13.6 + `git archive HEAD` + `uv sync --frozen`, built for
-   linux/amd64 with `docker buildx` and pushed tagged with the commit, as
-   Kodama's `deploy.build` does. The working tree must be clean. Skipped when
-   the tag exists.
-4. The models' manifests and blobs are copied from `~/.ollama/models` to the
-   bucket once, so the job uses byte-identical weights (`machine/ollama-list.txt`
-   shows the same ids as `ollama list` here).
+   runs) + uv 0.13.6 + `git archive HEAD` + `uv sync --frozen`, built by Cloud
+   Build in GCP and tagged with the commit (only the ~25 MB source is uploaded;
+   $0.006 per build-minute, 2,500 free minutes a month). Tracked files must have
+   no uncommitted changes. Skipped when the tag exists. Kodama builds locally
+   with `docker buildx`; over a home connection the 3 GB base image and the push
+   took too long.
+4. The models: the task passes the SHA-256 of each local manifest
+   (`~/.ollama/models/manifests/...`; `ollama list` shows its first 12
+   characters). The job takes the models from the bucket, or pulls them from
+   Ollama's registry and saves them to the bucket, and stops unless every
+   manifest matches: the weights are byte-identical to the local runs
+   (`machine/models.txt`). `--stages models` uploads the local blobs instead.
 5. `gcloud run jobs execute` with `RUN_NAME` and `RUN_ARGS`. The entrypoint
-   (`job.sh`) copies the models into the container, starts Ollama with the
+   (`job.sh`) starts Ollama with the
    laptop's settings (flash attention, q8_0 KV cache), runs `inv e2.run`, and
    copies `results/<run>` to the bucket on exit, success or not, with status
-   markers (STARTED, MODELS_COPIED, OLLAMA_READY, DONE or FAILED).
+   markers (STARTED, OLLAMA_STARTED, MODELS_READY, DONE or FAILED).
 6. Results are copied to `results/<run>/` with `machine.json` (billed seconds
    from the execution's start and completion, and their cost), the telemetry
    summary and `estimate_vs_actual.md`.

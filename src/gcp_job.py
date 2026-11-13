@@ -7,11 +7,12 @@
 2. ``terraform apply`` of ``infra/gcp`` (Artifact Registry repository, bucket,
    service account, the job). Idempotent; nothing there bills while idle except
    storage.
-3. Build ``infra/gcp/Dockerfile`` from ``git archive HEAD`` (the working tree
-   must be clean) for linux/amd64 and push it tagged with the commit, as
-   Kodama's ``deploy.build`` does. Skipped when that tag exists.
-4. Upload the exact Ollama blobs of the run's models from this machine to
-   ``gs://<bucket>/models/`` (once; skipped when present).
+3. Build ``infra/gcp/Dockerfile`` from ``git archive HEAD`` (tracked files must
+   have no uncommitted changes) with Cloud Build and push it tagged with the
+   commit. Skipped when that tag exists.
+4. The job gets the SHA-256 of each local model manifest; it takes the models
+   from the bucket or pulls them from Ollama's registry inside GCP, and stops
+   unless every manifest matches, so the weights are those of the local runs.
 5. Point the job at the image, execute it with the run's name and arguments
    and a hard task timeout, and wait. Ctrl-C cancels the execution.
 6. Copy ``gs://<bucket>/results/<run>/`` to ``results/<run>/`` and write
@@ -76,7 +77,23 @@ def model_files(models: list[str]) -> list[Path]:
     return files
 
 
+def manifest_hashes(models: list[str]) -> str:
+    """name=sha256 of each local manifest, as the job checks them."""
+    import hashlib
+
+    pairs = []
+    for model in models:
+        name, _, tag = model.partition(":")
+        manifest = OLLAMA_MODELS / "manifests" / "registry.ollama.ai" / "library" / name / (tag or "latest")
+        if not manifest.is_file():
+            raise SystemExit(f"{model} is not in {OLLAMA_MODELS}; run `ollama pull {model}` first.")
+        pairs.append(f"{model}={hashlib.sha256(manifest.read_bytes()).hexdigest()}")
+    return ",".join(pairs)
+
+
 def upload_models(bucket: str, models: list[str]) -> None:
+    """Optional (--stages models): copy the local blobs to the bucket. Slow over a
+    home connection; by default the job pulls them in GCP and checks the manifests."""
     listed = sh(["gcloud", "storage", "ls", "-r", f"gs://{bucket}/models/**"], check=False, capture=True, quiet=True)
     present = {line.split(f"gs://{bucket}/models/", 1)[1] for line in listed.split() if "/models/" in line}
     missing = [f for f in model_files(models) if f.as_posix() not in present]
@@ -93,17 +110,17 @@ def build_image(registry: str, commit: str) -> str:
                       capture_output=True, text=True).returncode == 0:
         print(f"image exists: {image}")
         return image
-    token = sh(["gcloud", "auth", "application-default", "print-access-token"], capture=True, quiet=True).strip()
-    subprocess.run(["docker", "login", "-u", "oauth2accesstoken", "--password-stdin", f"https://{REGION}-docker.pkg.dev"],
-                   input=token, text=True, check=True, capture_output=True)
+    # Built by Cloud Build in GCP: only the source (~25 MB) leaves this machine;
+    # the 3 GB base image and the push stay inside Google's network.
     with tempfile.TemporaryDirectory(prefix="sbot-build-") as tmp:
         archive = Path(tmp) / "source.tar"
         sh(["git", "archive", "--format=tar", "-o", str(archive), "HEAD"], cwd=ROOT)
         context = Path(tmp) / "context"
         with tarfile.open(archive) as t:
             t.extractall(context, filter="data")
-        sh(["docker", "buildx", "build", "--platform", "linux/amd64", "--file", str(context / "infra/gcp/Dockerfile"),
-            "--tag", image, "--push", str(context)])
+        (context / "Dockerfile").write_bytes((context / "infra/gcp/Dockerfile").read_bytes())
+        sh(["gcloud", "builds", "submit", str(context), f"--tag={image}", f"--project={PROJECT}",
+            "--timeout=1800s", "--quiet"])
     return image
 
 
@@ -164,7 +181,7 @@ def main() -> None:
     p.add_argument("--yes", action="store_true")
     p.add_argument("--estimate-only", action="store_true")
     p.add_argument("--plan-only", action="store_true", help="terraform plan and stop (creates nothing)")
-    p.add_argument("--stages", nargs="+", default=["infra", "image", "models", "execute"],
+    p.add_argument("--stages", nargs="+", default=["infra", "image", "execute"],
                    choices=["infra", "image", "models", "execute"], help="steps to run (default: all)")
     a = p.parse_args()
 
@@ -198,7 +215,7 @@ def main() -> None:
         if current_image() != image:
             apply(a, image)
     if "models" in stages:
-        upload_models(bucket, a.models)
+        upload_models(bucket, a.models)  # only when asked: the job fetches and checks them itself
     if "execute" not in stages:
         return
     if current_image() != image:
@@ -207,7 +224,8 @@ def main() -> None:
     execution, outcome, info = "", "failed to start", {}
     try:
         started = sh(["gcloud", "run", "jobs", "execute", JOB, f"--region={REGION}", f"--project={PROJECT}",
-                      f"--update-env-vars=^@^RUN_NAME={a.run}@RUN_ARGS={a.args}",
+                      f"--update-env-vars=^@^RUN_NAME={a.run}@RUN_ARGS={a.args}"
+                      f"@MODEL_MANIFESTS={manifest_hashes(a.models)}",
                       f"--task-timeout={a.max_hours * 3600}s", "--async", "--format=json"], capture=True)
         execution = json.loads(started)["metadata"]["name"]
         print(f"execution {execution} started; waiting (Ctrl-C cancels it)", flush=True)
