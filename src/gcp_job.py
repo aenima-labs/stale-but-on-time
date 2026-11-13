@@ -135,8 +135,20 @@ def apply(a: argparse.Namespace, image: str | None = None) -> None:
 
 
 def current_image() -> str:
-    return sh(["gcloud", "run", "jobs", "describe", JOB, f"--region={REGION}", f"--project={PROJECT}",
-               "--format=value(template.template.containers[0].image)"], capture=True, quiet=True).strip()
+    """The job's container image ('' if the job does not exist yet)."""
+    raw = sh(["gcloud", "run", "jobs", "describe", JOB, f"--region={REGION}", f"--project={PROJECT}",
+              "--format=json"], capture=True, quiet=True, check=False)
+
+    def find(node: object) -> str:
+        if isinstance(node, dict):
+            if isinstance(node.get("image"), str):
+                return node["image"]
+            return next((x for x in map(find, node.values()) if x), "")
+        if isinstance(node, list):
+            return next((x for x in map(find, node) if x), "")
+        return ""
+
+    return find(json.loads(raw)) if raw.strip() else ""
 
 
 def build_estimate(a: argparse.Namespace, out: Path) -> dict:
