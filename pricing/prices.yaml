@@ -1,0 +1,150 @@
+# Prices used for run estimates and run costs (src/pricing.py).
+#
+# Every entry carries the page it was read from and the date it was read.
+# Prices are USD. Token prices are per one million tokens, standard tier
+# (not batch, flex or priority), default (global, non-regional) endpoints,
+# short-context tier. Machine prices are per hour for the whole machine
+# (GPU, vCPUs and memory) as Google lists it. Prices change: re-read the
+# source before a run whose cost matters, and add a new entry with
+# valid_from rather than editing an old one, so past runs keep their prices.
+#
+# An entry applies on dates from valid_from (inclusive) to valid_until
+# (inclusive); either may be omitted.
+
+models:
+  # Local models: no per-token charge (the machine is priced separately).
+  - provider: ollama
+    model: "*"
+    input_per_mtok: 0
+    cached_input_per_mtok: 0
+    output_per_mtok: 0
+    source: local inference, no per-token charge
+    read_on: 2026-11-13
+
+  - provider: openai
+    model: gpt-5.6-luna
+    input_per_mtok: 0.20
+    cached_input_per_mtok: 0.02
+    output_per_mtok: 1.20
+    source: https://developers.openai.com/api/docs/pricing
+    read_on: 2026-11-13
+    note: Standard, short context (<=272K input). Kodama's hosted default chat model.
+  - provider: openai
+    model: gpt-5.6-terra
+    input_per_mtok: 2.00
+    cached_input_per_mtok: 0.20
+    output_per_mtok: 12.00
+    source: https://developers.openai.com/api/docs/pricing
+    read_on: 2026-11-13
+  - provider: openai
+    model: gpt-5.6-sol
+    input_per_mtok: 4.00
+    cached_input_per_mtok: 0.40
+    output_per_mtok: 20.00
+    source: https://developers.openai.com/api/docs/pricing
+    read_on: 2026-11-13
+    valid_until: 2026-11-30
+    note: The page marks this price as promotional until 2026-11-30 and gives no later price.
+  - provider: openai
+    model: text-embedding-3-small
+    input_per_mtok: 0.02
+    cached_input_per_mtok: 0.02
+    output_per_mtok: 0
+    source: https://developers.openai.com/api/docs/pricing
+    read_on: 2026-11-13
+    note: Kodama's hosted embedding model.
+
+  - provider: vertex
+    model: gemini-3.8-flash
+    input_per_mtok: 0.75
+    cached_input_per_mtok: 0.075
+    output_per_mtok: 3.75
+    source: https://cloud.google.com/vertex-ai/generative-ai/pricing
+    read_on: 2026-11-13
+    valid_until: 2026-12-31
+    note: >-
+      Global endpoint, introductory price through 2026-12-31. The page footnote
+      says the promotion is given as 50% credits back on net spend, so the
+      invoice may show the standard price with a later credit.
+  - provider: vertex
+    model: gemini-3.8-flash
+    input_per_mtok: 1.50
+    cached_input_per_mtok: 0.15
+    output_per_mtok: 7.50
+    source: https://cloud.google.com/vertex-ai/generative-ai/pricing
+    read_on: 2026-11-13
+    valid_from: 2027-01-01
+    note: Global endpoint, standard price from 2027-01-01. Non-global endpoints cost 10% more.
+  - provider: vertex
+    model: gemini-3.5-flash-lite
+    input_per_mtok: 0.30
+    cached_input_per_mtok: 0.03
+    output_per_mtok: 2.50
+    source: https://cloud.google.com/vertex-ai/generative-ai/pricing
+    read_on: 2026-11-13
+    note: Global endpoint.
+
+  - provider: anthropic
+    model: claude-sonnet-5
+    input_per_mtok: 2.00
+    cached_input_per_mtok: 0.20
+    output_per_mtok: 10.00
+    source: https://platform.claude.com/docs/en/about-claude/pricing
+    read_on: 2026-11-13
+    note: Cache writes (not used by the agent) cost 2.50 (5 min) or 4.00 (1 h).
+  - provider: anthropic
+    model: claude-haiku-5-5
+    input_per_mtok: 0.10
+    cached_input_per_mtok: 0.01
+    output_per_mtok: 0.50
+    source: https://platform.claude.com/docs/en/about-claude/pricing
+    read_on: 2026-11-13
+    note: Prompts up to 100,000 tokens.
+
+machines:
+  - provider: gcp
+    machine_type: g4-standard-48
+    region: europe-west1
+    gpu: 1x NVIDIA RTX PRO 6000 Blackwell Server Edition (96 GB GDDR7, 1597 GB/s)
+    vcpus: 48
+    memory_gib: 180
+    on_demand_per_hour: 4.949923
+    spot_per_hour: 2.22244
+    source: https://cloud.google.com/products/compute/pricing/accelerator-optimized
+    read_on: 2026-11-13
+    note: Region selector set to Belgium (europe-west1). Spot is the "current spot pricing" column and changes.
+  - provider: gcp
+    machine_type: g2-standard-8
+    region: europe-west1
+    gpu: 1x NVIDIA L4 (24 GB GDDR6, 300 GB/s)
+    vcpus: 8
+    memory_gib: 32
+    on_demand_per_hour: 0.939925708
+    spot_per_hour: 0.563968
+    source: https://cloud.google.com/products/compute/pricing/accelerator-optimized
+    read_on: 2026-11-13
+  - provider: gcp
+    machine_type: g2-standard-16
+    region: europe-west1
+    gpu: 1x NVIDIA L4 (24 GB GDDR6, 300 GB/s)
+    vcpus: 16
+    memory_gib: 64
+    on_demand_per_hour: 1.263191116
+    spot_per_hour: 0.757936
+    source: https://cloud.google.com/products/compute/pricing/accelerator-optimized
+    read_on: 2026-11-13
+
+disks:
+  - provider: gcp
+    disk_type: hyperdisk-balanced
+    region: europe-west1
+    per_gib_hour: 0.000109589
+    source: https://cloud.google.com/compute/disks-image-pricing
+    read_on: 2026-11-13
+    note: Provisioned space only; the baseline IOPS and throughput are included, more costs extra.
+  - provider: gcp
+    disk_type: pd-balanced
+    region: europe-west1
+    per_gib_hour: 0.000136986
+    source: https://cloud.google.com/compute/disks-image-pricing
+    read_on: 2026-11-13
