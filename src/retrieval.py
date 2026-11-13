@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import re
 import urllib.request
 from collections import Counter
@@ -18,7 +19,8 @@ from pathlib import Path
 
 import numpy as np
 
-OLLAMA_URL = "http://127.0.0.1:11434"
+# OLLAMA_URL overrides the address (the GCP job runs Ollama on the same machine).
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434").rstrip("/")
 EMBED_MODEL = "nomic-embed-text"
 RRF_K = 60
 _TOKEN = re.compile(r"[a-z0-9]+")
