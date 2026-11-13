@@ -38,6 +38,12 @@ def test_table_lookup_by_date_and_wildcard():
 
 def test_every_entry_has_source_and_date():
     data = PriceTable().data
-    for section in ("models", "machines", "disks"):
+    for section in ("models", "machines", "disks", "cloud_run", "storage"):
         for e in data[section]:
             assert e["source"] and e["read_on"], e
+
+
+def test_cloud_run_job_price_per_hour():
+    m = PriceTable().cloud_run_price("europe-west1", "nvidia-l4", 4, 24)
+    assert m.on_demand_per_hour == pytest.approx(3600 * (0.0001867 + 4 * 0.000018 + 24 * 0.000002))
+    assert PriceTable().cloud_run_price("europe-west1", "nvidia-h100", 4, 24) is None

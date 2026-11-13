@@ -79,6 +79,15 @@ class PriceTable:
                 )
         return None
 
+    def cloud_run_price(self, region: str, gpu: str, vcpus: float, memory_gib: float) -> MachinePrice | None:
+        """A Cloud Run job's per-hour price as a MachinePrice (no spot price exists)."""
+        for e in self.data.get("cloud_run", []):
+            if e["region"] == region and gpu in e["gpu_per_second"]:
+                per_s = e["gpu_per_second"][gpu] + vcpus * e["vcpu_per_second"] + memory_gib * e["gib_per_second"]
+                return MachinePrice(f"cloud-run {gpu} {vcpus:g} vCPU {memory_gib:g} GiB", region,
+                                    per_s * 3600, per_s * 3600, e["source"], str(e["read_on"]))
+        return None
+
     def disk_price_per_gib_hour(self, disk_type: str, region: str) -> float | None:
         for e in self.data.get("disks", []):
             if e["disk_type"] == disk_type and e["region"] == region:

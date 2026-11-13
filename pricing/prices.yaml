@@ -148,3 +148,37 @@ disks:
     per_gib_hour: 0.000136986
     source: https://cloud.google.com/compute/disks-image-pricing
     read_on: 2026-11-13
+
+# Cloud Run jobs, billed per second while a task runs. GPU jobs run without
+# zonal redundancy. The monthly free tier (240,000 vCPU-seconds and 450,000
+# GiB-seconds per billing account, shared with everything else on it) is not
+# subtracted in estimates.
+cloud_run:
+  - region: europe-west1
+    vcpu_per_second: 0.000018
+    gib_per_second: 0.000002
+    gpu_per_second:
+      nvidia-l4: 0.0001867
+      nvidia-rtx-pro-6000: 0.00036522  # listed, but not offered for jobs in europe-west1
+    source: https://cloud.google.com/run/pricing
+    read_on: 2026-11-13
+    note: Jobs table, region selector set to Belgium (europe-west1), default (no CUD) prices.
+
+# Standing storage of the Cloud Run setup (bills while idle).
+storage:
+  - provider: gcp
+    kind: artifact-registry
+    region: europe-west1
+    per_gib_hour: 0.000136986
+    free_gib_month: 0.5
+    source: https://cloud.google.com/artifact-registry/pricing
+    read_on: 2026-11-13
+    note: The same for regional and multi-regional repositories; ≈ $0.10 per GiB-month.
+  - provider: gcp
+    kind: cloud-storage-standard
+    region: europe-west1
+    per_gib_hour: 0.000027397
+    free_gib_month: 5
+    source: https://cloud.google.com/storage/pricing
+    read_on: 2026-11-13
+    note: Standard storage, regional bucket, region selector Belgium; ≈ $0.02 per GiB-month.

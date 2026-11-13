@@ -20,7 +20,7 @@ real-time conversational agent. Target venue: TMLR.
 | `src/providers.py`, `src/hosted_check.py` | Model providers behind one interface (local Ollama; hosted OpenAI, Gemini on Vertex, Anthropic) and a one-trial connectivity check |
 | `src/telemetry.py`, `src/telemetry_summary.py` | OpenTelemetry tracing of every trial; per-condition summary of latency, tokens, calls and cost |
 | `pricing/prices.yaml`, `src/pricing.py`, `src/estimate.py` | Dated price table with sources; run estimate, confirmation, estimate-vs-actual |
-| `infra/gcp/`, `src/gcp_job.py` | Terraform and job for running Experiment 2 on a GPU machine in GCP |
+| `infra/gcp/`, `src/gcp_job.py` | Terraform, image and task for running Experiment 2 as a Cloud Run GPU job |
 | `tests/` | Unit tests (`uv run inv e2.test`) |
 | `src/e3_analyze.py` | Experiment 3: analysis of the pack run against the product (bundles in `results/e3-kodama`, first run in `results/e3-kodama-run1`) |
 | `src/figures.py`, `src/make_numbers.py` | Figures, table bodies and number macros for the paper |
@@ -60,7 +60,7 @@ uv run inv reproduce
 
 Tasks are grouped by experiment: `data.fetch`; `e1.replay`, `e1.analyze`; `e2.build-pack`,
 `e2.run`, `e2.estimate`, `e2.summary`, `e2.analyze`, `e2.scrub-paths`, `e2.test`;
-`gcp.estimate`, `gcp.plan`, `gcp.run`; `paper.figures`, `paper.numbers`, `paper.build`,
+`gcp.estimate`, `gcp.plan`, `gcp.run`, `gcp.destroy`; `paper.figures`, `paper.numbers`, `paper.build`,
 `paper.anon`. `reproduce` runs them in that order, and each can be run alone.
 Extra options go through `--args`, for example
 `uv run inv e2.run --args="--think --out results/e2-think"`.
@@ -105,7 +105,7 @@ format is unchanged):
 | `telemetry_summary.{json,md}` | Per condition: latency median and p90 per span kind, tokens in and out, model calls and cost per trial and per run |
 | `estimate.{json,md}` | The estimate printed before the run |
 | `actual.json`, `estimate_vs_actual.md` | What the run used, beside the estimate |
-| `machine.json`, `machine/` | GCP runs only: machine, hours, cost, GPU and CPU description, job log |
+| `machine.json`, `machine/` | Cloud Run runs only: execution, billed seconds, cost, GPU and CPU description, Ollama log |
 
 Spans follow the OpenTelemetry GenAI semantic conventions where they exist
 (`gen_ai.operation.name`, `gen_ai.provider.name`, `gen_ai.request.model`,
@@ -153,9 +153,9 @@ provider with one trial (no bundle, a fraction of a cent):
 uv run python src/hosted_check.py --provider openai --embed-provider openai --kodama-secrets ../kodama/config/secrets.yaml
 ```
 
-**A GPU machine in GCP**: `uv run inv gcp.run --run e2-gcp-g4` creates the
-machine, runs Experiment 2 on it with telemetry, copies the results back and
-destroys everything; see `infra/gcp/README.md`.
+**On a GPU in GCP**: `uv run inv gcp.run --run <name>` runs Experiment 2 as a
+Cloud Run job with an NVIDIA L4 (built from the current commit, with the exact
+local model files) and copies the results back; see `infra/gcp/README.md`.
 
 `results/e2-smoke` is the telemetry smoke (20 trials); its latencies are not
 representative (`results/e2-smoke_NOTES.md`).

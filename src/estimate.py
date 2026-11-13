@@ -54,6 +54,10 @@ class MachineSpec:
     max_lifetime_h: float = 4.0  # the machine deletes itself after this, whatever happens
     # Run duration on the machine relative to the profile's wall time (low, expected, high).
     duration_factor: tuple[float, float, float] = (0.25, 0.5, 1.0)
+    kind: str = "gce"  # "gce" (a VM, machine_type) or "cloud_run" (a job: gpu, vcpus, memory_gib)
+    gpu: str = ""
+    vcpus: float = 0
+    memory_gib: float = 0
 
 
 @dataclass
@@ -327,19 +331,24 @@ def estimate(plan: Plan, profile: dict, prices: PriceTable | None = None) -> dic
     machine = None
     if plan.machine is not None:
         m = plan.machine
-        mprice = prices.machine_price(m.machine_type, m.region)
-        disk = prices.disk_price_per_gib_hour(m.disk_type, m.region) or 0.0
+        if m.kind == "cloud_run":
+            mprice = prices.cloud_run_price(m.region, m.gpu, m.vcpus, m.memory_gib)
+            disk = 0.0  # no disk: the container file system is in memory
+        else:
+            mprice = prices.machine_price(m.machine_type, m.region)
+            disk = prices.disk_price_per_gib_hour(m.disk_type, m.region) or 0.0
         if mprice is None:
             notes.append(f"No price for machine {m.machine_type} in {m.region}.")
         else:
             overhead_h = (m.startup_min + m.teardown_min) / 60
             hours = [overhead_h + totals["duration_s"][i] / 3600 for i in range(3)]
-            cost = [machine_cost(mprice, h, spot=m.spot, disk_gib=m.disk_gib, disk_per_gib_hour=disk) for h in hours]
-            worst = machine_cost(mprice, m.max_lifetime_h, spot=m.spot, disk_gib=m.disk_gib, disk_per_gib_hour=disk)
+            gib = 0 if m.kind == "cloud_run" else m.disk_gib
+            cost = [machine_cost(mprice, h, spot=m.spot, disk_gib=gib, disk_per_gib_hour=disk) for h in hours]
+            worst = machine_cost(mprice, m.max_lifetime_h, spot=m.spot, disk_gib=gib, disk_per_gib_hour=disk)
             machine = {
-                "machine_type": m.machine_type, "region": m.region, "spot": m.spot,
+                "machine_type": mprice.machine_type, "region": m.region, "spot": m.spot,
                 "hourly_usd": mprice.spot_per_hour if m.spot else mprice.on_demand_per_hour,
-                "disk": f"{m.disk_gib} GiB {m.disk_type}",
+                "disk": "in-memory file system" if m.kind == "cloud_run" else f"{m.disk_gib} GiB {m.disk_type}",
                 "startup_min": m.startup_min, "teardown_min": m.teardown_min,
                 "hours": tuple(hours), "cost_usd": tuple(cost),
                 "max_lifetime_h": m.max_lifetime_h, "worst_case_usd": worst,

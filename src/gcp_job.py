@@ -1,20 +1,22 @@
-"""Run Experiment 2 on a GPU machine in GCP, from start to teardown.
+"""Run Experiment 2 as a Cloud Run job with a GPU, from estimate to results.
 
-    python src/gcp_job.py --run e2-gcp-g4 [--machine-type g4-standard-48] [--yes | --estimate-only | --plan-only]
+    python src/gcp_job.py --run e2-cloudrun-l4-subset --args "--max-cases 2" [--yes | --estimate-only | --plan-only]
 
-1. Estimate (trials, tokens, run time, machine cost for start-up + run +
-   teardown, worst case at the hard lifetime) and confirmation, as for any run.
-2. ``git archive`` of HEAD (the working tree must be clean), so the machine runs
-   exactly a commit; nothing is pushed.
-3. ``terraform apply`` of ``infra/gcp``: bucket, service account, network,
-   machine. The machine installs Ollama and the models, runs ``inv e2.run``,
-   uploads ``results/<run>`` and deletes itself.
-4. Follow the machine's status markers in the bucket; copy the results back.
-5. ``terraform destroy`` in a ``finally`` block: on success, failure, timeout
-   or Ctrl-C. Compute Engine's ``max_run_duration`` deletes the machine even if
-   this process dies.
-6. ``machine.json`` (billed hours and cost), telemetry summary and
-   ``estimate_vs_actual.md`` beside the bundles.
+1. Estimate (trials, run time, job cost for start-up and run, worst case at the
+   task timeout) and confirmation, as for any run.
+2. ``terraform apply`` of ``infra/gcp`` (Artifact Registry repository, bucket,
+   service account, the job). Idempotent; nothing there bills while idle except
+   storage.
+3. Build ``infra/gcp/Dockerfile`` from ``git archive HEAD`` (the working tree
+   must be clean) for linux/amd64 and push it tagged with the commit, as
+   Kodama's ``deploy.build`` does. Skipped when that tag exists.
+4. Upload the exact Ollama blobs of the run's models from this machine to
+   ``gs://<bucket>/models/`` (once; skipped when present).
+5. Point the job at the image, execute it with the run's name and arguments
+   and a hard task timeout, and wait. Ctrl-C cancels the execution.
+6. Copy ``gs://<bucket>/results/<run>/`` to ``results/<run>/`` and write
+   ``machine.json`` (billed seconds from the execution's start and completion
+   times, and their cost), the telemetry summary and ``estimate_vs_actual.md``.
 """
 
 from __future__ import annotations
@@ -22,179 +24,211 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
-import re
-import shutil
+import os
 import subprocess
 import sys
+import tarfile
 import tempfile
 import time
 from pathlib import Path
 
 import estimate as est_mod
 import telemetry_summary
-from pricing import PriceTable, machine_cost
+from pricing import PriceTable
 
 ROOT = Path(__file__).resolve().parents[1]
 TF = ROOT / "infra" / "gcp"
-MARKERS = ("BOOTED", "MODELS_READY", "RUN_STARTED", "RUN_FINISHED", "DONE", "FAILED", "DELETING")
+PROJECT = "kodama-500509"
+REGION = "europe-west1"
+JOB = "sbot-e2"
+OLLAMA_MODELS = Path(os.environ.get("OLLAMA_MODELS", Path.home() / ".ollama" / "models"))
 
 
-def sh(cmd: list[str], *, check: bool = True, capture: bool = False, cwd: Path | None = None) -> str:
-    print("+ " + " ".join(cmd), flush=True)
-    done = subprocess.run(cmd, cwd=cwd, check=check, text=True,
-                          capture_output=capture)
+def sh(cmd: list[str], *, check: bool = True, capture: bool = False, cwd: Path | None = None,
+       quiet: bool = False) -> str:
+    if not quiet:
+        print("+ " + " ".join(cmd), flush=True)
+    done = subprocess.run(cmd, cwd=cwd, check=check, text=True, capture_output=capture)
     return done.stdout if capture else ""
 
 
-def tf_vars(a: argparse.Namespace, tarball: Path) -> list[str]:
-    pairs = {
-        "run_id": a.run_id, "run_name": a.run, "run_args": a.args, "machine_type": a.machine_type,
-        "zone": a.zone, "region": a.region, "spot": str(a.spot).lower(),
-        "max_lifetime_hours": str(a.max_hours), "disk_gib": str(a.disk_gib),
-        "models": json.dumps(a.models), "source_tarball": str(tarball),
-    }
-    out = []
-    for k, v in pairs.items():
-        out += ["-var", f"{k}={v}"]
-    return out
+def tf_vars(a: argparse.Namespace, image: str | None = None) -> list[str]:
+    pairs = {"cpu": a.cpu, "memory_gib": a.memory_gib, "gpu": a.gpu, "task_timeout_hours": a.max_hours}
+    if image:
+        pairs["image"] = image
+    return [x for k, v in pairs.items() for x in ("-var", f"{k}={v}")]
 
 
-def run_id_from(run: str) -> str:
-    rid = re.sub(r"[^a-z0-9-]", "-", run.lower()).strip("-")[:20].rstrip("-")
-    return rid if rid[:1].isalpha() else f"r{rid}"[:20]
+def model_files(models: list[str]) -> list[Path]:
+    """Manifests and blobs of the given Ollama models, relative to the models dir."""
+    files: list[Path] = []
+    for model in models:
+        name, _, tag = model.partition(":")
+        manifest = OLLAMA_MODELS / "manifests" / "registry.ollama.ai" / "library" / name / (tag or "latest")
+        if not manifest.is_file():
+            raise SystemExit(f"{model} is not in {OLLAMA_MODELS}; run `ollama pull {model}` first.")
+        files.append(manifest.relative_to(OLLAMA_MODELS))
+        data = json.loads(manifest.read_text())
+        for layer in [data.get("config", {}), *data.get("layers", [])]:
+            digest = layer.get("digest", "")
+            if digest:
+                files.append(Path("blobs") / digest.replace(":", "-"))
+    return files
 
 
-def markers(bucket: str) -> dict[str, str]:
-    out = subprocess.run(["gcloud", "storage", "ls", f"gs://{bucket}/status/"],
-                         capture_output=True, text=True, check=False).stdout
-    found = {}
-    for line in out.split():
-        name = line.rstrip("/").rsplit("/", 1)[-1]
-        if name in MARKERS:
-            text = subprocess.run(["gcloud", "storage", "cat", line], capture_output=True,
-                                  text=True, check=False).stdout.strip()
-            found[name] = text
-    return found
+def upload_models(bucket: str, models: list[str]) -> None:
+    listed = sh(["gcloud", "storage", "ls", "-r", f"gs://{bucket}/models/**"], check=False, capture=True, quiet=True)
+    present = {line.split(f"gs://{bucket}/models/", 1)[1] for line in listed.split() if "/models/" in line}
+    missing = [f for f in model_files(models) if f.as_posix() not in present]
+    if not missing:
+        print(f"models already in gs://{bucket}/models/: {', '.join(models)}")
+        return
+    for f in missing:
+        sh(["gcloud", "storage", "cp", str(OLLAMA_MODELS / f), f"gs://{bucket}/models/{f.as_posix()}"])
+
+
+def build_image(registry: str, commit: str) -> str:
+    image = f"{registry}/e2-job:{commit}"
+    if subprocess.run(["gcloud", "artifacts", "docker", "images", "describe", image],
+                      capture_output=True, text=True).returncode == 0:
+        print(f"image exists: {image}")
+        return image
+    token = sh(["gcloud", "auth", "application-default", "print-access-token"], capture=True, quiet=True).strip()
+    subprocess.run(["docker", "login", "-u", "oauth2accesstoken", "--password-stdin", f"https://{REGION}-docker.pkg.dev"],
+                   input=token, text=True, check=True, capture_output=True)
+    with tempfile.TemporaryDirectory(prefix="sbot-build-") as tmp:
+        archive = Path(tmp) / "source.tar"
+        sh(["git", "archive", "--format=tar", "-o", str(archive), "HEAD"], cwd=ROOT)
+        context = Path(tmp) / "context"
+        with tarfile.open(archive) as t:
+            t.extractall(context, filter="data")
+        sh(["docker", "buildx", "build", "--platform", "linux/amd64", "--file", str(context / "infra/gcp/Dockerfile"),
+            "--tag", image, "--push", str(context)])
+    return image
 
 
 def build_estimate(a: argparse.Namespace, out: Path) -> dict:
-    spec = {"machine_type": a.machine_type, "region": a.region, "spot": a.spot,
-            "disk_gib": a.disk_gib,
-            "disk_type": "hyperdisk-balanced" if a.machine_type.startswith("g4-") else "pd-balanced",
-            "startup_min": a.startup_min,
-            "teardown_min": a.teardown_min, "max_lifetime_h": a.max_hours}
+    spec = {"machine_type": "", "region": REGION, "kind": "cloud_run", "gpu": a.gpu, "vcpus": a.cpu,
+            "memory_gib": a.memory_gib, "startup_min": a.startup_min, "teardown_min": 1.0,
+            "max_lifetime_h": a.max_hours, "duration_factor": list(a.duration_factor)}
     with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
         json.dump(spec, f)
-    subprocess.run(
+    done = subprocess.run(
         [sys.executable, str(ROOT / "src" / "e2_run.py"), "--estimate-only", "--out", str(out),
          "--machine-json", f.name, *a.args.split()],
-        check=True, capture_output=True, text=True,
+        capture_output=True, text=True,
     )
+    if done.returncode != 0:
+        raise SystemExit(done.stdout + done.stderr)
     return json.loads((out / "estimate.json").read_text())
+
+
+def _time(value: str) -> dt.datetime:
+    return dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+
+
+def describe(execution: str) -> dict:
+    raw = sh(["gcloud", "run", "jobs", "executions", "describe", execution, f"--region={REGION}",
+              f"--project={PROJECT}", "--format=json"], capture=True, check=False, quiet=True)
+    return json.loads(raw or "{}")
 
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    p.add_argument("--run", required=True, help="results/<run> to create (must not exist)")
-    p.add_argument("--args", default="", help="extra e2_run.py arguments for the machine, e.g. '--model gemma4:26b'")
-    p.add_argument("--machine-type", default="g4-standard-48")
-    p.add_argument("--region", default="europe-west1")
-    p.add_argument("--zone", default="europe-west1-b")
-    p.add_argument("--spot", action="store_true")
-    p.add_argument("--max-hours", type=int, default=4, help="hard machine lifetime")
-    p.add_argument("--disk-gib", type=int, default=200)
+    p.add_argument("--run", required=True, help="results/<run> to create")
+    p.add_argument("--args", default="", help="extra e2_run.py arguments for the job, e.g. '--max-cases 2'")
     p.add_argument("--models", nargs="+", default=["gemma4:e4b", "nomic-embed-text"])
-    p.add_argument("--startup-min", type=float, default=20.0)
-    p.add_argument("--teardown-min", type=float, default=5.0)
-    p.add_argument("--poll-s", type=int, default=60)
+    p.add_argument("--gpu", default="nvidia-l4")
+    p.add_argument("--cpu", type=int, default=4)
+    p.add_argument("--memory-gib", type=int, default=24)
+    p.add_argument("--max-hours", type=int, default=2, help="task timeout: Cloud Run stops the job here")
+    p.add_argument("--startup-min", type=float, default=5.0, help="estimate: image pull, model copy, model load")
+    p.add_argument("--duration-factor", type=float, nargs=3, default=(0.5, 1.0, 2.0),
+                   help="estimate: job run time relative to the laptop's stored run (low expected high)")
+    p.add_argument("--poll-s", type=int, default=30)
     p.add_argument("--yes", action="store_true")
     p.add_argument("--estimate-only", action="store_true")
     p.add_argument("--plan-only", action="store_true", help="terraform plan and stop (creates nothing)")
     a = p.parse_args()
-    a.run_id = run_id_from(a.run)
 
     out = ROOT / "results" / a.run
     leftovers = {f.name for f in out.iterdir()} - {"estimate.json", "estimate.md"} if out.exists() else set()
     if leftovers and not (a.estimate_only or a.plan_only):
         raise SystemExit(f"{out} already holds a run; choose another --run.")
     est = build_estimate(a, out)
-    saved_estimate = (out / "estimate.json").read_text(), (out / "estimate.md").read_text()
+    saved = (out / "estimate.json").read_text(), (out / "estimate.md").read_text()
     if a.plan_only:
         print(est_mod.markdown(est))
-    elif not est_mod.confirm(est, yes=a.yes, estimate_only=a.estimate_only):
+        sh(["terraform", "init", "-input=false"], cwd=TF, quiet=True)
+        sh(["terraform", "plan", "-input=false", *tf_vars(a)], cwd=TF)
         return
-
-    if not a.plan_only and subprocess.run(["git", "status", "--porcelain"], cwd=ROOT, capture_output=True,
-                                          text=True).stdout.strip():
-        raise SystemExit("The working tree has changes; commit them so the machine runs a commit.")
-    commit = sh(["git", "rev-parse", "--short", "HEAD"], capture=True, cwd=ROOT).strip()
-    workdir = Path(tempfile.mkdtemp(prefix="sbot-gcp-"))
-    tarball = workdir / f"source-{commit}.tgz"
-    sh(["git", "archive", "--format=tar.gz", "-o", str(tarball), "HEAD"], cwd=ROOT)
-    tfv = tf_vars(a, tarball)
-    sh(["terraform", "init", "-input=false"], cwd=TF)
-    if a.plan_only:
-        try:
-            sh(["terraform", "plan", "-input=false", *tfv], cwd=TF)
-        finally:
-            shutil.rmtree(workdir, ignore_errors=True)
+    if not est_mod.confirm(est, yes=a.yes, estimate_only=a.estimate_only):
         return
+    if subprocess.run(["git", "status", "--porcelain"], cwd=ROOT, capture_output=True, text=True).stdout.strip():
+        raise SystemExit("The working tree has changes; commit them so the job runs a commit.")
+    commit = sh(["git", "rev-parse", "--short", "HEAD"], capture=True, cwd=ROOT, quiet=True).strip()
 
-    started = time.time()
-    status: dict[str, str] = {}
-    outcome = "not started"
+    # Infrastructure first, then the image, then point the job at it.
+    sh(["terraform", "init", "-input=false"], cwd=TF, quiet=True)
+    sh(["terraform", "apply", "-input=false", "-auto-approve", *tf_vars(a)], cwd=TF)
+    registry = sh(["terraform", "output", "-raw", "registry"], capture=True, cwd=TF, quiet=True).strip()
+    bucket = sh(["terraform", "output", "-raw", "bucket"], capture=True, cwd=TF, quiet=True).strip()
+    image = build_image(registry, commit)
+    sh(["terraform", "apply", "-input=false", "-auto-approve", *tf_vars(a, image)], cwd=TF)
+    upload_models(bucket, a.models)
+
+    execution, outcome, info = "", "failed to start", {}
     try:
-        sh(["terraform", "apply", "-input=false", "-auto-approve", *tfv], cwd=TF)
-        bucket = sh(["terraform", "output", "-raw", "bucket"], capture=True, cwd=TF).strip()
-        deadline = started + a.max_hours * 3600 + 600
+        started = sh(["gcloud", "run", "jobs", "execute", JOB, f"--region={REGION}", f"--project={PROJECT}",
+                      f"--update-env-vars=^@^RUN_NAME={a.run}@RUN_ARGS={a.args}",
+                      f"--task-timeout={a.max_hours * 3600}s", "--async", "--format=json"], capture=True)
+        execution = json.loads(started)["metadata"]["name"]
+        print(f"execution {execution} started; waiting (Ctrl-C cancels it)", flush=True)
+        deadline = time.time() + a.max_hours * 3600 + 900
         seen: set[str] = set()
         while time.time() < deadline:
-            status = markers(bucket)
-            for name in MARKERS:
-                if name in status and name not in seen:
-                    seen.add(name)
-                    print(f"[{dt.datetime.now(dt.UTC):%H:%M:%S}Z] {name}: {status[name]}", flush=True)
-            if "DONE" in status or "FAILED" in status:
+            listed = sh(["gcloud", "storage", "ls", f"gs://{bucket}/results/{a.run}/status/"],
+                        check=False, capture=True, quiet=True)
+            for marker in sorted({line.rstrip("/").rsplit("/", 1)[-1] for line in listed.split()} - seen):
+                seen.add(marker)
+                print(f"[{dt.datetime.now(dt.UTC):%H:%M:%S}Z] {marker}", flush=True)
+            info = describe(execution)
+            if info.get("status", {}).get("completionTime"):
                 break
             time.sleep(a.poll_s)
-        outcome = "done" if "DONE" in status else "failed" if "FAILED" in status else "timed out"
-        if "DONE" in status or "FAILED" in status:
-            time.sleep(30)  # let the last uploads land
-            out.parent.mkdir(parents=True, exist_ok=True)
-            sh(["gcloud", "storage", "cp", "-r", f"gs://{bucket}/results/{a.run}", str(out.parent)], check=False)
-            (out / "machine").mkdir(parents=True, exist_ok=True)
-            sh(["gcloud", "storage", "cp", f"gs://{bucket}/log/job.log", str(out / "machine" / "job.log")],
-               check=False)
+        outcome = "finished" if info.get("status", {}).get("completionTime") else "timed out"
+    except KeyboardInterrupt:
+        outcome = "canceled"
     finally:
-        sh(["terraform", "destroy", "-input=false", "-auto-approve", *tfv], cwd=TF, check=False)
-        ended = time.time()
-        shutil.rmtree(workdir, ignore_errors=True)
+        if execution and outcome != "finished":
+            sh(["gcloud", "run", "jobs", "executions", "cancel", execution, f"--region={REGION}",
+                f"--project={PROJECT}", "--quiet"], check=False)
+            info = describe(execution)
+        status = info.get("status", {})
+        start, end = status.get("startTime"), status.get("completionTime")
+        seconds = (_time(end) - _time(start)).total_seconds() if start and end else float("nan")
+        if outcome == "finished":
+            outcome = "succeeded" if int(status.get("succeededCount", 0) or 0) else "failed"
+        mp = PriceTable().cloud_run_price(REGION, a.gpu, a.cpu, a.memory_gib)
         out.mkdir(parents=True, exist_ok=True)
-        # The task's own window (apply start to destroy end) bounds the billed time from above.
-        hours = (ended - started) / 3600
-        prices = PriceTable()
-        mp = prices.machine_price(a.machine_type, a.region)
-        disk = prices.disk_price_per_gib_hour(
-            "hyperdisk-balanced" if a.machine_type.startswith("g4-") else "pd-balanced", a.region) or 0.0
+        sh(["gcloud", "storage", "cp", "-r", f"gs://{bucket}/results/{a.run}/*", str(out)], check=False)
         machine = {
-            "machine_type": a.machine_type, "zone": a.zone, "spot": a.spot, "commit": commit,
-            "outcome": outcome, "status_markers": status,
-            "started_utc": dt.datetime.fromtimestamp(started, dt.UTC).isoformat(),
-            "destroyed_utc": dt.datetime.fromtimestamp(ended, dt.UTC).isoformat(),
-            "hours": hours,
-            "cost_usd": machine_cost(mp, hours, spot=a.spot, disk_gib=a.disk_gib, disk_per_gib_hour=disk)
-            if mp else float("nan"),
-            "note": "Hours from terraform apply start to destroy end: an upper bound on the billed time.",
+            "kind": "cloud_run", "job": JOB, "execution": execution, "image": image, "commit": commit,
+            "gpu": a.gpu, "vcpus": a.cpu, "memory_gib": a.memory_gib, "region": REGION, "outcome": outcome,
+            "started_utc": start, "completed_utc": end, "seconds": seconds, "hours": seconds / 3600,
+            "cost_usd": seconds / 3600 * mp.on_demand_per_hour if mp else float("nan"),
+            "note": "Billed time from the execution's start to completion (Cloud Run bills per second while "
+                    "the task runs); the monthly free tier is not subtracted.",
         }
         (out / "machine.json").write_text(json.dumps(machine, indent=2) + "\n")
-        (out / "estimate.json").write_text(saved_estimate[0])
-        (out / "estimate.md").write_text(saved_estimate[1])
+        (out / "estimate.json").write_text(saved[0])
+        (out / "estimate.md").write_text(saved[1])
         print(json.dumps(machine, indent=2))
-    if (out / "telemetry").is_dir():
+    if (out / "telemetry").is_dir() and any((out / "telemetry").glob("*.spans.jsonl")):
         telemetry_summary.write(out)
         print(est_mod.compare(out))
-    if outcome != "done":
-        raise SystemExit(f"job {outcome}; see {out / 'machine' / 'job.log'}")
+    if outcome != "succeeded":
+        raise SystemExit(f"job {outcome}; see {out / 'machine'} and the execution's logs in Cloud Logging")
 
 
 if __name__ == "__main__":

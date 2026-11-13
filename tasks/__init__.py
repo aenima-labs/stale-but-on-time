@@ -7,7 +7,7 @@
     uv run inv e2.run --args="--think --out results/e2-think"
     uv run inv paper.anon                      # anonymised review copy under dist/
     uv run inv e2.estimate --args="--provider openai"   # estimate only, nothing runs
-    uv run inv gcp.run --run e2-gcp-g4         # GPU machine in GCP (asks before spending)
+    uv run inv gcp.run --run e2-cloudrun-l4    # Cloud Run GPU job (asks before spending)
 """
 
 from invoke import Collection, task
