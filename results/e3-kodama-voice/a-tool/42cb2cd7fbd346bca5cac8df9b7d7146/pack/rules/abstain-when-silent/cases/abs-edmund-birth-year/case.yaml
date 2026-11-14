@@ -1,0 +1,44 @@
+id: abstain-when-silent/abs-edmund-birth-year
+title: What year was he born?
+description: abstain after a continuing lead-in.
+targets:
+- abstain-when-silent
+polarity: negative
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: Grant Pa Itman was a clockmaker, wasn't he?
+    - role: assistant
+      content: Yes, with a workshop behind the house.
+    lead_in_gap_s: 2.72
+    voice:
+      final_audio: audio/abstain-when-silent_abs-edmund-birth-year.wav
+      final_audio_sha256: e4b05dfc034425c24d96a2fb1a55224af94b1945e98d331bf058bff43b143d23
+      final_audio_s: 1.28
+      tts_voice: en_US-lessac-medium
+      lead_in_said:
+      - Grandpa Edmund was a clockmaker, wasn't he?
+      turn_gap_s: 0.2
+actions:
+- kind: message
+  role: user
+  content: What year was he born?
+expected_outcomes:
+- Say that the memories do not contain the answer.
+evaluators: []
+selftests: []
+trials: 1
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:abstain
+- continuity:continuing

@@ -1,0 +1,44 @@
+id: abstain-when-silent/abs-school-name
+title: Different question. What was the name of the school she went to?
+description: abstain after a abrupt lead-in.
+targets:
+- abstain-when-silent
+polarity: negative
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: Did she like Quince Jelly, or did she just make it?
+    - role: assistant
+      content: She made it every October and gave most of it away.
+    lead_in_gap_s: 3.0
+    voice:
+      final_audio: audio/abstain-when-silent_abs-school-name.wav
+      final_audio_sha256: dcffa3836fde50734f8a255806e9d68226f0860d4ab1ebcc122fa77ee7236f7f
+      final_audio_s: 3.11
+      tts_voice: en_US-lessac-medium
+      lead_in_said:
+      - Did she like quince jelly, or did she just make it?
+      turn_gap_s: 0.2
+actions:
+- kind: message
+  role: user
+  content: Different question. What was the name of the school she went to?
+expected_outcomes:
+- Say that the memories do not contain the answer.
+evaluators: []
+selftests: []
+trials: 1
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:abstain
+- continuity:abrupt

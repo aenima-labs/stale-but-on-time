@@ -1,0 +1,68 @@
+id: recall-when-asked/honey-prize
+title: Did her honey ever win anything?
+description: asked-continuing after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: Grandma kept bees, didn't she? I remember the hives at the end of the garden.
+    - role: assistant
+      content: She did. She started in 1980 and talked to them every morning, telling them the family
+        news first.
+    lead_in_gap_s: 6.12
+    voice:
+      final_audio: audio/recall-when-asked_honey-prize.wav
+      final_audio_sha256: a8bfb8b58bd79a90315b02ab5c471ee80ceddf54e1ba7d64b148e95338c25deb
+      final_audio_s: 1.75
+      tts_voice: en_US-lessac-medium
+      lead_in_said:
+      - Grandma kept bees, didn't she? I remember the hives at the end of the garden.
+      turn_gap_s: 0.2
+actions:
+- kind: message
+  role: user
+  content: Did her honey ever win anything?
+expected_outcomes:
+- 'Mention a fact from: b-honey.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - second prize
+    - Dunmere
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Her heather honey won second prize at the Dunmere fair in 1991. She maintained that the winner
+      had added sugar.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 1
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-continuing
+- continuity:continuing
+- gold:b-honey

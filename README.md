@@ -109,6 +109,14 @@ does not contain. Its sealed bundles and trial tables are in `results/e3-kodama`
 (the reported run) and `results/e3-kodama-run1` (the first run, kept for
 disclosure); `uv run inv e2.analyze-product` re-analyses them without the product.
 `results/e3_audit_sample.csv` is the sample read against the grades.
+
+Exploratory runs against the product, kept for the record and **not reported in
+the paper**: spoken trials with one trial per case (`results/e3-kodama-voice`,
+`results/e3-kodama-voice-dtx`, and `results/e3-kodama-voice-aborted`, a run
+stopped for the reason in its `NOTE.md`), and two development runs on shortening
+the wait before the first audio (`results/e4-kodama-clauses`,
+`results/e4-kodama-checks`). Their numbers have not been audited. The `.wav`
+files are synthetic speech of the fictional cases.
 `src/e2_run.py` writes the pack path into each bundle as the relative `pack`, and
 `src/scrub_paths.py` does the same for bundles made earlier (it re-seals them and
 verifies the seal): `uv run inv e2.scrub-paths --dirs=results/e2`.

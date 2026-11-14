@@ -1,0 +1,67 @@
+id: recall-when-asked/shift-honey-prize
+title: On another note, did her honey ever win a prize at a fair?
+description: asked-shift after a abrupt lead-in.
+targets:
+- recall-when-asked
+polarity: recovery
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: I heard Grant Pa Edmund used to whistle while he worked.
+    - role: assistant
+      content: He did, always the same tune, his favourite waltz.
+    lead_in_gap_s: 3.17
+    voice:
+      final_audio: audio/recall-when-asked_shift-honey-prize.wav
+      final_audio_sha256: be4465af121ccce389e345b58c04105f793ee3930c68f88e8b5f0752a44230d1
+      final_audio_s: 3.18
+      tts_voice: en_US-lessac-medium
+      lead_in_said:
+      - I heard Grandpa Edmund used to whistle while he worked.
+      turn_gap_s: 0.2
+actions:
+- kind: message
+  role: user
+  content: On another note, did her honey ever win a prize at a fair?
+expected_outcomes:
+- 'Mention a fact from: b-honey.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - second prize
+    - Dunmere
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Her heather honey won second prize at the Dunmere fair in 1991. She maintained that the winner
+      had added sugar.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 1
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-shift
+- continuity:abrupt
+- gold:b-honey

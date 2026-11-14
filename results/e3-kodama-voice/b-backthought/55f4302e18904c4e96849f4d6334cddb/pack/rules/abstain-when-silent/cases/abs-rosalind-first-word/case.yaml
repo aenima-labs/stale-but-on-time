@@ -1,0 +1,44 @@
+id: abstain-when-silent/abs-rosalind-first-word
+title: So what was her actual first word?
+description: abstain after a continuing lead-in.
+targets:
+- abstain-when-silent
+polarity: negative
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: Mum was a quiet child, apparently.
+    - role: assistant
+      content: By Tessaly's account Rosalind said nothing for two years and then spoke in full sentences.
+    lead_in_gap_s: 5.26
+    voice:
+      final_audio: audio/abstain-when-silent_abs-rosalind-first-word.wav
+      final_audio_sha256: 405850d000d9340d09243a1356b61f5c8e0ca8a9b63c02bcc85090370a322b1b
+      final_audio_s: 2.09
+      tts_voice: en_US-lessac-medium
+      lead_in_said:
+      - Mum was a quiet child, apparently.
+      turn_gap_s: 0.2
+actions:
+- kind: message
+  role: user
+  content: So what was her actual first word?
+expected_outcomes:
+- Say that the memories do not contain the answer.
+evaluators: []
+selftests: []
+trials: 1
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:abstain
+- continuity:continuing
