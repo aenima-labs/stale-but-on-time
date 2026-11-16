@@ -73,7 +73,7 @@ def fig_staleness(e1: dict) -> None:
     conds = ["L6", "L5", "L4", "L3", "L2", "L1", "P25", "P50", "P75"]
     labels = ["6", "5", "4", "3", "2", "1", "25%", "50%", "75%", "100%"]
     x = np.arange(len(labels))
-    fig, ax = plt.subplots(figsize=(WIDTH, 2.7))
+    fig, ax = plt.subplots(figsize=(WIDTH, 2.5))
     for w in (1, 3, 5):
         triples = [e1["agreement"][f"k5/w{w}/{c}"] for c in conds]
         mean = [t[0] for t in triples] + [1.0]
@@ -87,11 +87,16 @@ def fig_staleness(e1: dict) -> None:
     ax.axhline(floor, color=MUTED, linewidth=0.8, linestyle=(0, (3, 2)))
     ax.text(9.3, floor + 0.02, "unrelated ambience (floor)", color=MUTED, fontsize=8, va="bottom",
             ha="right")
+    # Reference: fresh recall with a window of five against fresh recall with three.
+    other = e1["window_change"]["w3_vs_w5"][0]
+    ax.axhline(other, color=MUTED, linewidth=0.8, linestyle=(0, (1, 2)))
+    ax.text(-0.3, other - 0.02, "fresh $w=5$ against fresh $w=3$ (no lag)", color=MUTED,
+            fontsize=8, va="top", ha="left")
     ax.axvline(5.5, color=AXIS, linewidth=0.6)
     ax.text(2.5, 1.07, "record lags by whole utterances", ha="center", fontsize=8.5, color=MUTED)
     ax.text(7.5, 1.07, "record saw part of the incoming one", ha="center", fontsize=8.5,
             color=MUTED)
-    ax.annotate("fresh\n(blocking)", (9, 1.0), (8.25, 0.52), fontsize=8, color=MUTED, ha="center",
+    ax.annotate("fresh\n(blocking)", (9, 1.0), (8.3, 0.33), fontsize=8, color=MUTED, ha="center",
                 arrowprops={"arrowstyle": "-", "color": AXIS, "linewidth": 0.6})
     ax.set_xticks(x, labels)
     ax.set_xlim(-0.35, 9.35)
@@ -246,13 +251,26 @@ def correct_by_time(rows: list[dict], condition: str, field: str, grid: np.ndarr
     return np.array([100 * np.mean(done <= t) for t in grid])
 
 
-def fig_ontime() -> None:
+def ontime_rows(path: str) -> list[dict]:
+    """Trial rows of one set-up, with the corrected grades.
+
+    The tables of Experiment 2 already hold them. A table of Experiment 3 holds the
+    sealed grades, so it is read through the analysis, which applies the word-start rule.
+    """
     csv.field_size_limit(10**9)
+    if path.endswith("/trials.csv"):
+        from e3_analyze import regraded_rows
+
+        return regraded_rows((ROOT / "results" / path).parent)
+    with open(ROOT / "results" / path, newline="") as handle:
+        return list(csv.DictReader(handle))
+
+
+def fig_ontime() -> None:
     grid = np.linspace(0, ONTIME_MAX_S, 1001)
     fig, axes = plt.subplots(1, len(ONTIME_SETUPS), figsize=(WIDTH, 2.25), sharey=True)
     for ax, (title, path, field, conds) in zip(axes, ONTIME_SETUPS, strict=True):
-        with open(ROOT / "results" / path, newline="") as handle:
-            rows = list(csv.DictReader(handle))
+        rows = ontime_rows(path)
         for key, (colour, dashes, _) in ONTIME_STYLE.items():
             ax.plot(grid, correct_by_time(rows, conds[key], field, grid), color=colour,
                     linestyle=dashes, linewidth=1.5)

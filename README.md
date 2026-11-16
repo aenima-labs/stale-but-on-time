@@ -98,6 +98,15 @@ left out the JSON reply format is read as text, so that a refusal in words count
 an abstention. `<run>_trials.csv` keeps the sealed grade as `passed_sealed` and marks
 each changed trial as `regraded`; only the hosted run has any.
 
+The first correction also applies to Experiment 3. The product's evaluation matched
+keys anywhere in the reply, so `src/e3_analyze.py` requires a key to begin a word in
+every run against the product. Only the lag-1 condition of the runs on hosted models
+changes (4 trials in the reported run, 6 in the first hosted run, 1 in the pilot);
+`results/e3_regraded.csv` lists them. The `trials.csv`, `summary.*` and `NOTE.md`
+files inside the `results/e3-kodama*` folders were written by the product's evaluation
+code and keep the sealed grades, so they show 39% to 41% for that condition where the
+paper reports 37%.
+
 A rerun will not reproduce the stored trials bit for bit; the sealed bundles in
 `results/e2`, `results/e2-think`, `results/e2-qwen3` and `results/e2-anthropic` are the
 record the paper reports. Part of the reasoning run shared the GPU with another

@@ -1,0 +1,12 @@
+run,condition,case,attempt,passed_sealed,passed,reply
+e3-kodama-hosted,b-backthought,marbling-travel,1,True,False,I’m not sure. The memories I have don’t say that she travelled to study marbling.
+e3-kodama-hosted,b-backthought,marbling-travel,5,True,False,I’m not sure. The memories I have don’t say that she travelled to study marbling.
+e3-kodama-hosted,b-backthought,shift-teacher,2,True,False,I’m not sure. The memories here don’t say that she studied with a teacher in Japan.
+e3-kodama-hosted,b-backthought,shift-teacher,3,True,False,I’m not sure. The memories here don’t say who she studied with in Japan.
+e3-kodama-hosted-run1,b-backthought,marbling-travel,1,True,False,I’m not sure. The memories I have do not say that she travelled to study marbling.
+e3-kodama-hosted-run1,b-backthought,marbling-travel,2,True,False,I’m not sure. The memories here don’t say that she travelled to study marbling.
+e3-kodama-hosted-run1,b-backthought,marbling-travel,3,True,False,I do not know. The memories here do not say whether Tessaly travelled to study marbling.
+e3-kodama-hosted-run1,b-backthought,marbling-travel,4,True,False,I don’t know. The memories here don’t say that she travelled to study marbling.
+e3-kodama-hosted-run1,b-backthought,shift-teacher,3,True,False,I’m not sure. The memories here don’t say that Tessaly studied with anyone in Japan.
+e3-kodama-hosted-run1,b-backthought,shift-teacher,4,True,False,I’m not sure. The memories here don’t say who she studied with in Japan.
+e3-kodama-hosted-luna,b-backthought,marbling-travel,1,True,False,I do not know. The memories here do not say that Tessaly travelled to study marbling.
