@@ -1,0 +1,44 @@
+id: abstain-when-silent/abs-chess-opening
+title: What was her favourite opening?
+description: abstain after a continuing lead-in.
+targets:
+- abstain-when-silent
+polarity: negative
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: I've taken up chess again.
+    - role: assistant
+      content: Tessaly played every Thursday evening with her neighbour Mr Okafor.
+    lead_in_gap_s: 3.82
+    voice:
+      final_audio: audio/abstain-when-silent_abs-chess-opening.wav
+      final_audio_sha256: 7cc3779e5d964dbfa14bb0da78d3dbf7fa74264f3c7af9bd52e5fc6b441157d3
+      final_audio_s: 1.5
+      tts_voice: en_US-lessac-medium
+      lead_in_said:
+      - I've taken up chess again.
+      turn_gap_s: 0.2
+actions:
+- kind: message
+  role: user
+  content: What was her favourite opening?
+expected_outcomes:
+- Say that the memories do not contain the answer.
+evaluators: []
+selftests: []
+trials: 1
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:abstain
+- continuity:continuing

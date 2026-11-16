@@ -1,0 +1,63 @@
+id: recall-when-asked/regret
+title: Was there anything she regretted?
+description: asked-continuing after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: She always seemed so content with her life.
+    - role: assistant
+      content: Mostly she was. She liked to say she believed in hymns and good glue.
+    lead_in_gap_s: 1.43
+actions:
+- kind: message
+  role: user
+  content: Was there anything she regretted?
+expected_outcomes:
+- 'Mention a fact from: v-piano, v-grudges.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - piano
+    - Ansel
+    - her brother
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Her one stated regret was never learning the piano. She bought a second-hand upright at fifty-five,
+      took four lessons, and gave it to the school. Her advice on quarrels was never to go to bed on an
+      argument you can end with a cup of tea. She did not speak to her brother Ansel for two years after
+      their father's funeral and regretted it.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-continuing
+- continuity:continuing
+- gold:v-piano
+- gold:v-grudges

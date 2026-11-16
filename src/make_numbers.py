@@ -285,6 +285,53 @@ put("KOffpathMs", f"{k2['by_condition']['b-backthought']['offpath_recall_ms_medi
 put("KLlmTool", f"{k2['by_condition']['a-tool']['llm_ms_median'] / 1000:.1f}")
 put("KLlmBlock", f"{k2['by_condition']['c-blocking']['llm_ms_median'] / 1000:.1f}")
 
+# ----------------------------- Experiment 3 on hosted models (prefix KH)
+kh = e3["hosted"]
+put("KHTrials", f"{kh['n_trials']:,}")
+put("KHTrialsPerCase", str(kh["n_trials"] // 200))
+put("KHModel", kh["meta"]["c-blocking"]["model"])
+put("KHErrors", str(sum(e["errors"] for e in kh["by_condition"].values())))
+put("KHTemplated", str(sum(e["templated"] for e in kh["by_condition"].values())))
+for cond, tag in KTAG.items():
+    e = kh["by_condition"][cond]
+    put(f"KHRec{tag}", pct(e["recall_pass"][0]))
+    put(f"KHRec{tag}CI", pctci(e["recall_pass"]))
+    put(f"KHGold{tag}", pct(e["gold_in_wm"][0]))
+    put(f"KHSrch{tag}", pct(e["searched_rate"]))
+    put(f"KHPath{tag}", f"{e['path_ms']['median'] / 1000:.1f}")
+    put(f"KHAbstTool{tag}", pct(e["abstain"]["abstain_recorded"]))
+    put(f"KHUnp{tag}", pct(e["by_class"]["unprompted"]["pass"][0]))
+    put(f"KHCost{tag}", f"{100 * kh['cost']['conditions'][cond]['cost_usd_per_trial']:.2f}")
+    put(f"KHCalls{tag}", f"{kh['cost']['conditions'][cond]['model_calls_per_trial']:.1f}")
+for name, tag in (("c-blocking|b-backthought", "BlockLag"), ("c-blocking|a-tool", "BlockTool"),
+                  ("d-blocking-backthought|c-blocking", "BothBlock"), ("e-backthought-tool|a-tool", "HybTool"),
+                  ("e-backthought-tool|b-backthought", "HybLag")):
+    d = kh["paired_recall_diff"][name]
+    put(f"KHDiff{tag}", signed(100 * d[0]))
+    put(f"KHDiff{tag}CI", f"[{signed(100 * d[1])}, {signed(100 * d[2])}]")
+kh_guessed = [1 - e["abstain"]["declined_any"] for e in kh["by_condition"].values()]
+put("KHGuessMax", pct(max(kh_guessed)))
+kh_tool = [e["abstain"]["abstain_recorded"] for e in kh["by_condition"].values()]
+put("KHAbstToolMin", pct(min(kh_tool)))
+put("KHAbstToolMax", pct(max(kh_tool)))
+put("KHBlockMs", f"{kh['by_condition']['c-blocking']['blocking_ms_median']:.0f}")
+put("KHCostRun", f"{kh['cost']['total_usd']:.2f}")
+put("KHCostRunUpper", f"{kh['cost']['total_usd_upper']:.2f}")
+# The first hosted run: four conditions on the product commit before the queue fix.
+kf = e3["hosted1"]
+put("KHFirstTrials", f"{kf['n_trials']:,}")
+put("KHFirstErrors", str(sum(e["errors"] for e in kf["by_condition"].values())))
+for cond, tag in list(KTAG.items())[:4]:
+    put(f"KHFirstRec{tag}", pct(kf["by_condition"][cond]["recall_pass"][0]))
+d = kf["paired_recall_diff"]["c-blocking|b-backthought"]
+put("KHFirstDiffBlockLag", signed(100 * d[0]))
+put("KHFirstDiffBlockLagCI", f"[{signed(100 * d[1])}, {signed(100 * d[2])}]")
+put("KHFirstCostRun", f"{kf['cost']['total_usd']:.2f}")
+kp = e3["pilot"]
+put("KPilotTrials", str(kp["n_trials"]))
+put("KPilotRecBlock", pct(kp["by_condition"]["c-blocking"]["recall_pass"][0]))
+put("KPilotRecLag", pct(kp["by_condition"]["b-backthought"]["recall_pass"][0]))
+
 # ------------------------------------ what waiting costs in time (Section 8)
 # One row per set-up: the wait for recall on the reply path, and the median time
 # to a complete reply in the four conditions that load or search memories.
@@ -315,6 +362,9 @@ deploy.append(("Agent, hosted models",
 deploy.append(("Product, local models, laptop", k2["by_condition"]["c-blocking"]["blocking_ms_median"],
                [k2["by_condition"][c]["path_ms"]["median"] / 1000
                 for c in ("b-backthought", "c-blocking", "a-tool", "e-backthought-tool")]))
+deploy.append(("Product, hosted models", kh["by_condition"]["c-blocking"]["blocking_ms_median"],
+               [kh["by_condition"][c]["path_ms"]["median"] / 1000
+                for c in ("b-backthought", "c-blocking", "a-tool", "e-backthought-tool")]))
 put("RecallWaitMin", f"{min(wait for _, wait, _ in deploy):.0f}")
 put("RecallWaitMax", f"{max(wait for _, wait, _ in deploy):.0f}")
 (PAPER / "tab-deploy.tex").write_text(
@@ -326,12 +376,17 @@ put("DeploySetups", str(len(deploy)))
 csv.field_size_limit(10**9)
 grid = np.linspace(0, 30, 6001)
 lead_best = (-1.0, 0.0, 0.0, "")
-for (title, path, field, conds), tag in zip(figures.ONTIME_SETUPS, ("Lap", "Hs", "K"), strict=True):
+lag_ceilings = []
+SETUP_WORDS = {"Lap": "with the reference agent on local models",
+               "Hs": "with the reference agent on hosted models",
+               "K": "in the product on local models", "KH": "in the product on hosted models"}
+for (title, path, field, conds), tag in zip(figures.ONTIME_SETUPS, ("Lap", "Hs", "K", "KH"), strict=True):
     with open(ROOT / "results" / path, newline="") as handle:
         ot_rows = list(csv.DictReader(handle))
     lag_curve = figures.correct_by_time(ot_rows, conds["lag1"], field, grid)
     block_curve = figures.correct_by_time(ot_rows, conds["blocking"], field, grid)
     lead = lag_curve - block_curve
+    lag_ceilings.append(float(lag_curve[-1]))
     i = int(np.argmax(lead))
     passed_at = float(grid[np.argmax(block_curve > lag_curve[-1])])
     put(f"OnTimeLead{tag}", f"{lead[i]:.0f}")
@@ -341,7 +396,9 @@ for (title, path, field, conds), tag in zip(figures.ONTIME_SETUPS, ("Lap", "Hs",
 put("OnTimeLeadMax", f"{lead_best[0]:.0f}")
 put("OnTimeLeadMaxAt", f"{lead_best[1]:.1f}")
 put("OnTimeLeadMaxLost", f"{lead_best[2] - lead_best[1]:.1f}")
-assert lead_best[3] == "Hs", lead_best  # the text names the hosted set-up
+put("OnTimeLeadMaxSetup", SETUP_WORDS[lead_best[3]])
+put("LagCeilMin", f"{min(lag_ceilings):.0f}")
+put("LagCeilMax", f"{max(lag_ceilings):.0f}")
 
 (PAPER / "numbers.tex").write_text(
     "% Generated by src/make_numbers.py. Do not edit.\n"
@@ -437,6 +494,20 @@ for cond in ("a-tool", "c-blocking", "b-backthought", "d-blocking-backthought", 
               f"{e['path_ms']['median'] / 1000:.1f}"]
     rows.append(" & ".join(cells) + r" \\")
 (PAPER / "tab-e3.tex").write_text("\n".join(rows) + "\n")
+
+rows = []
+for cond in ("a-tool", "c-blocking", "b-backthought", "d-blocking-backthought", "e-backthought-tool"):
+    e = kh["by_condition"][cond]
+    c = kh["cost"]["conditions"][cond]
+    cells = [KNAMES[cond], f"{pct(e['recall_pass'][0])} {pctci(e['recall_pass'])}"]
+    cells += [pct(e["by_class"][cls]["pass"][0]) for cls in ("asked-continuing", "asked-shift", "unprompted")]
+    cells += [pct(e["gold_in_wm"][0]) if cond != "a-tool" else "--",
+              pct(e["searched_rate"]) if "tool" in cond else "--",
+              pct(e["abstain"]["abstain_recorded"]),
+              f"{e['path_ms']['median'] / 1000:.1f}",
+              f"{c['model_calls_per_trial']:.1f}", f"{100 * c['cost_usd_per_trial']:.2f}"]
+    rows.append(" & ".join(cells) + r" \\")
+(PAPER / "tab-e3-hosted.tex").write_text("\n".join(rows) + "\n")
 
 rows = []
 for cond in ("L1", "L2", "L3", "P50", "P75", "RAND"):

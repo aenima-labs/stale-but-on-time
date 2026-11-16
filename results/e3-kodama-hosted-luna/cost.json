@@ -1,0 +1,179 @@
+{
+  "prices_usd_per_mtok": {
+    "gpt-5.6-luna": {
+      "input": 0.2,
+      "cached_input": 0.02,
+      "output": 1.2
+    },
+    "text-embedding-3-small": {
+      "input": 0.02,
+      "cached_input": 0.02,
+      "output": 0.0
+    },
+    "claude-sonnet-5": {
+      "input": 2.0,
+      "cached_input": 0.2,
+      "output": 10.0
+    }
+  },
+  "price_source": {
+    "openai": "https://developers.openai.com/api/docs/pricing (standard tier), read 2026-11-13",
+    "anthropic": "https://platform.claude.com/docs/en/about-claude/pricing, read 2026-11-13"
+  },
+  "unmetered_call_upper_bound": {
+    "input_tokens": {
+      "openai check": 1092,
+      "openai reply": 3126
+    },
+    "output_tokens": "max_output_tokens (OpenAI) or max_tokens (Anthropic) of the call"
+  },
+  "request_fields_sent": {
+    "openai check": [
+      {
+        "effort": "none",
+        "temperature": null
+      }
+    ],
+    "openai reply": [
+      {
+        "effort": null,
+        "temperature": null
+      }
+    ]
+  },
+  "conditions": {
+    "a-tool": {
+      "model_calls": 249,
+      "unmetered_calls": 80,
+      "input_tokens": 318201,
+      "cached_input_tokens": 254787,
+      "output_tokens": 6727,
+      "reasoning_tokens": 1021,
+      "trials": 40,
+      "by_provider": {
+        "openai": {
+          "calls": 249,
+          "input_tokens": 318201,
+          "cached_input_tokens": 254787,
+          "output_tokens": 6727,
+          "cost_usd": 0.0259
+        }
+      },
+      "cost_usd": 0.0259,
+      "cost_usd_upper": 0.0556,
+      "cost_usd_per_trial": 0.000647
+    },
+    "b-backthought": {
+      "model_calls": 196,
+      "unmetered_calls": 79,
+      "input_tokens": 168887,
+      "cached_input_tokens": 116833,
+      "output_tokens": 4704,
+      "reasoning_tokens": 1191,
+      "trials": 40,
+      "by_provider": {
+        "openai": {
+          "calls": 196,
+          "input_tokens": 168887,
+          "cached_input_tokens": 116833,
+          "output_tokens": 4704,
+          "cost_usd": 0.0184
+        }
+      },
+      "cost_usd": 0.0184,
+      "cost_usd_upper": 0.0478,
+      "cost_usd_per_trial": 0.00046
+    },
+    "c-blocking": {
+      "model_calls": 200,
+      "unmetered_calls": 80,
+      "input_tokens": 174774,
+      "cached_input_tokens": 122092,
+      "output_tokens": 4848,
+      "reasoning_tokens": 1019,
+      "trials": 40,
+      "by_provider": {
+        "openai": {
+          "calls": 200,
+          "input_tokens": 174774,
+          "cached_input_tokens": 122092,
+          "output_tokens": 4848,
+          "cost_usd": 0.0188
+        }
+      },
+      "cost_usd": 0.0188,
+      "cost_usd_upper": 0.0486,
+      "cost_usd_per_trial": 0.00047
+    },
+    "d-blocking-backthought": {
+      "model_calls": 199,
+      "unmetered_calls": 79,
+      "input_tokens": 177833,
+      "cached_input_tokens": 135966,
+      "output_tokens": 4957,
+      "reasoning_tokens": 1090,
+      "trials": 40,
+      "by_provider": {
+        "openai": {
+          "calls": 199,
+          "input_tokens": 177833,
+          "cached_input_tokens": 135966,
+          "output_tokens": 4957,
+          "cost_usd": 0.017
+        }
+      },
+      "cost_usd": 0.017,
+      "cost_usd_upper": 0.0464,
+      "cost_usd_per_trial": 0.000425
+    },
+    "e-backthought-tool": {
+      "model_calls": 244,
+      "unmetered_calls": 80,
+      "input_tokens": 353317,
+      "cached_input_tokens": 274901,
+      "output_tokens": 6674,
+      "reasoning_tokens": 1210,
+      "trials": 40,
+      "by_provider": {
+        "openai": {
+          "calls": 244,
+          "input_tokens": 353317,
+          "cached_input_tokens": 274901,
+          "output_tokens": 6674,
+          "cost_usd": 0.0292
+        }
+      },
+      "cost_usd": 0.0292,
+      "cost_usd_upper": 0.059,
+      "cost_usd_per_trial": 0.00073
+    }
+  },
+  "run": {
+    "model_calls": 1088,
+    "unmetered_calls": 398,
+    "input_tokens": 1193012,
+    "cached_input_tokens": 904579,
+    "output_tokens": 27910,
+    "reasoning_tokens": 5531,
+    "trials": 200,
+    "by_provider": {
+      "openai": {
+        "calls": 1088,
+        "input_tokens": 1193012,
+        "cached_input_tokens": 904579,
+        "output_tokens": 27910,
+        "cost_usd": 0.1093
+      }
+    },
+    "cost_usd": 0.1093,
+    "cost_usd_upper": 0.2573,
+    "cost_usd_per_trial": 0.000547
+  },
+  "embeddings_estimate": {
+    "tokens": 673107,
+    "cost_usd": 0.0135,
+    "method": "fixture memorome characters per trial plus twice the case's user-line characters, at 4 characters per token"
+  },
+  "total_usd": 0.1228,
+  "total_usd_upper": 0.2708
+}

@@ -216,14 +216,18 @@ def fig_robust(runs: dict[str, dict]) -> None:
     save(fig, "fig-robust")
 
 
-# Correct by time: three set-ups, the four conditions that load or search memories.
+# The product on hosted models: the full run, or its pilot until the full run is in.
+E3_HOSTED = "e3-kodama-hosted"
+KODAMA_CONDITIONS = {"blocking": "c-blocking", "lag1": "b-backthought", "tool": "a-tool",
+                     "hybrid": "e-backthought-tool"}
+E2_CONDITIONS = {"blocking": "blocking", "lag1": "lag1", "tool": "tool", "hybrid": "hybrid"}
+
+# Correct by time: four set-ups, the four conditions that load or search memories.
 ONTIME_SETUPS = (
-    ("Reference agent,\nlocal model on a laptop", "e2_trials.csv", "total_ms",
-     {"blocking": "blocking", "lag1": "lag1", "tool": "tool", "hybrid": "hybrid"}),
-    ("Reference agent,\nhosted model and embeddings", "e2-anthropic_trials.csv", "total_ms",
-     {"blocking": "blocking", "lag1": "lag1", "tool": "tool", "hybrid": "hybrid"}),
-    ("The product,\nlocal model on a laptop", "e3-kodama/trials.csv", "path_ms",
-     {"blocking": "c-blocking", "lag1": "b-backthought", "tool": "a-tool", "hybrid": "e-backthought-tool"}),
+    ("Reference agent,\nlocal model", "e2_trials.csv", "total_ms", E2_CONDITIONS),
+    ("Reference agent,\nhosted model", "e2-anthropic_trials.csv", "total_ms", E2_CONDITIONS),
+    ("The product,\nlocal model", "e3-kodama/trials.csv", "path_ms", KODAMA_CONDITIONS),
+    ("The product,\nhosted model", f"{E3_HOSTED}/trials.csv", "path_ms", KODAMA_CONDITIONS),
 )
 ONTIME_STYLE = {  # colour: is the loaded record fresh; dashes: a search on the reply path
     "blocking": (BLUE, "-", "Blocking retrieval"),
@@ -231,13 +235,14 @@ ONTIME_STYLE = {  # colour: is the loaded record fresh; dashes: a search on the 
     "lag1": (ORANGE, "-", "Async, lag 1"),
     "hybrid": (ORANGE, (0, (4, 2)), "Async lag 1 + search"),
 }
-ONTIME_MAX_S = 10.0
+ONTIME_MAX_S = 12.0
 
 
 def correct_by_time(rows: list[dict], condition: str, field: str, grid: np.ndarray) -> np.ndarray:
     """Share of recall trials (%) that had a correct reply by each time on the grid."""
     sub = [r for r in rows if r["condition"] == condition and r["class"] != "abstain"]
     done = np.array([float(r[field]) / 1000 if r["passed"] == "True" else np.inf for r in sub])
+    done[np.isnan(done)] = np.inf  # a trial that ended in an error has no reply
     return np.array([100 * np.mean(done <= t) for t in grid])
 
 
@@ -253,7 +258,7 @@ def fig_ontime() -> None:
                     linestyle=dashes, linewidth=1.5)
         ax.set_title(title, pad=4)
         ax.set_xlim(0, ONTIME_MAX_S)
-        ax.set_xticks([0, 2, 4, 6, 8, 10])
+        ax.set_xticks([0, 3, 6, 9, 12])
         ax.set_ylim(0, 100)
         ax.set_yticks([0, 25, 50, 75, 100])
     axes[0].set_ylabel("recall trials answered\ncorrectly by this time (%)")
@@ -262,7 +267,7 @@ def fig_ontime() -> None:
     fig.legend(handles=handles, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.17),
                handlelength=2.6, columnspacing=1.6)
     fig.supxlabel("seconds after the listener's utterance ends", fontsize=9, y=-0.05)
-    fig.subplots_adjust(wspace=0.10)
+    fig.subplots_adjust(wspace=0.16)
     save(fig, "fig-ontime")
 
 

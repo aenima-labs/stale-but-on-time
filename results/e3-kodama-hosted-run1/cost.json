@@ -1,0 +1,158 @@
+{
+  "prices_usd_per_mtok": {
+    "gpt-5.6-luna": {
+      "input": 0.2,
+      "cached_input": 0.02,
+      "output": 1.2
+    },
+    "text-embedding-3-small": {
+      "input": 0.02,
+      "cached_input": 0.02,
+      "output": 0.0
+    },
+    "claude-sonnet-5": {
+      "input": 2.0,
+      "cached_input": 0.2,
+      "output": 10.0
+    }
+  },
+  "price_source": {
+    "openai": "https://developers.openai.com/api/docs/pricing (standard tier), read 2026-11-13",
+    "anthropic": "https://platform.claude.com/docs/en/about-claude/pricing, read 2026-11-13"
+  },
+  "unmetered_call_upper_bound": {
+    "input_tokens": {
+      "openai check": 972,
+      "openai reply": 2728
+    },
+    "output_tokens": "max_output_tokens (OpenAI) or max_tokens (Anthropic) of the call"
+  },
+  "request_fields_sent": {
+    "openai check": [
+      {
+        "effort": "none",
+        "temperature": null
+      }
+    ],
+    "openai reply": [
+      {
+        "effort": null,
+        "temperature": null
+      }
+    ]
+  },
+  "conditions": {
+    "a-tool": {
+      "model_calls": 1238,
+      "unmetered_calls": 397,
+      "input_tokens": 1580235,
+      "cached_input_tokens": 1306479,
+      "output_tokens": 34181,
+      "reasoning_tokens": 6128,
+      "trials": 200,
+      "by_provider": {
+        "openai": {
+          "calls": 1238,
+          "input_tokens": 1580235,
+          "cached_input_tokens": 1306479,
+          "output_tokens": 34181,
+          "cost_usd": 0.1219
+        }
+      },
+      "cost_usd": 0.1219,
+      "cost_usd_upper": 0.2601,
+      "cost_usd_per_trial": 0.00061
+    },
+    "b-backthought": {
+      "model_calls": 973,
+      "unmetered_calls": 388,
+      "input_tokens": 844358,
+      "cached_input_tokens": 658341,
+      "output_tokens": 23635,
+      "reasoning_tokens": 6142,
+      "trials": 200,
+      "by_provider": {
+        "openai": {
+          "calls": 973,
+          "input_tokens": 844358,
+          "cached_input_tokens": 658341,
+          "output_tokens": 23635,
+          "cost_usd": 0.0787
+        }
+      },
+      "cost_usd": 0.0787,
+      "cost_usd_upper": 0.2138,
+      "cost_usd_per_trial": 0.000394
+    },
+    "c-blocking": {
+      "model_calls": 999,
+      "unmetered_calls": 398,
+      "input_tokens": 875773,
+      "cached_input_tokens": 690531,
+      "output_tokens": 25116,
+      "reasoning_tokens": 6000,
+      "trials": 200,
+      "by_provider": {
+        "openai": {
+          "calls": 999,
+          "input_tokens": 875773,
+          "cached_input_tokens": 690531,
+          "output_tokens": 25116,
+          "cost_usd": 0.081
+        }
+      },
+      "cost_usd": 0.081,
+      "cost_usd_upper": 0.2195,
+      "cost_usd_per_trial": 0.000405
+    },
+    "d-blocking-backthought": {
+      "model_calls": 999,
+      "unmetered_calls": 399,
+      "input_tokens": 892511,
+      "cached_input_tokens": 684114,
+      "output_tokens": 25393,
+      "reasoning_tokens": 6203,
+      "trials": 200,
+      "by_provider": {
+        "openai": {
+          "calls": 999,
+          "input_tokens": 892511,
+          "cached_input_tokens": 684114,
+          "output_tokens": 25393,
+          "cost_usd": 0.0858
+        }
+      },
+      "cost_usd": 0.0858,
+      "cost_usd_upper": 0.2247,
+      "cost_usd_per_trial": 0.000429
+    }
+  },
+  "run": {
+    "model_calls": 4209,
+    "unmetered_calls": 1582,
+    "input_tokens": 4192877,
+    "cached_input_tokens": 3339465,
+    "output_tokens": 108325,
+    "reasoning_tokens": 24473,
+    "trials": 800,
+    "by_provider": {
+      "openai": {
+        "calls": 4209,
+        "input_tokens": 4192877,
+        "cached_input_tokens": 3339465,
+        "output_tokens": 108325,
+        "cost_usd": 0.3675
+      }
+    },
+    "cost_usd": 0.3675,
+    "cost_usd_upper": 0.918,
+    "cost_usd_per_trial": 0.000459
+  },
+  "embeddings_estimate": {
+    "tokens": 2692430,
+    "cost_usd": 0.0538,
+    "method": "fixture memorome characters per trial plus twice the case's user-line characters, at 4 characters per token"
+  },
+  "total_usd": 0.4213,
+  "total_usd_upper": 0.9718
+}

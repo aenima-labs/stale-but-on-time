@@ -22,7 +22,7 @@ real-time conversational agent. Target venue: TMLR.
 | `pricing/prices.yaml`, `src/pricing.py`, `src/estimate.py` | Dated price table with sources; run estimate, confirmation, estimate-vs-actual |
 | `infra/gcp/`, `src/gcp_job.py` | Terraform, image and task for running Experiment 2 as a Cloud Run GPU job |
 | `tests/` | Unit tests (`uv run inv e2.test`) |
-| `src/e3_analyze.py` | Experiment 3: analysis of the pack run against the product (bundles in `results/e3-kodama`, first run in `results/e3-kodama-run1`) |
+| `src/e3_analyze.py` | Experiment 3: analysis of the pack run against the product (bundles in `results/e3-kodama`, first run in `results/e3-kodama-run1`, run on hosted models in `results/e3-kodama-hosted`) |
 | `src/figures.py`, `src/make_numbers.py` | Figures, table bodies and number macros for the paper |
 | `results/` | Per-utterance retrievals (E1), sealed run bundles (E2: `e2` main run, `e2-think` reasoning on, `e2-qwen3` second model, `e2-anthropic` hosted model), summaries, audit sample, provenance notes (`*_NOTES.md`) |
 | `tasks/`, `src/fetch_data.py` | [Invoke](https://www.pyinvoke.org) tasks for every step; data download |
@@ -106,9 +106,30 @@ leaves those trials out of every latency figure.
 
 Experiment 3 runs the same cases against the product itself, which this repository
 does not contain. Its sealed bundles and trial tables are in `results/e3-kodama`
-(the reported run) and `results/e3-kodama-run1` (the first run, kept for
-disclosure); `uv run inv e2.analyze-product` re-analyses them without the product.
-`results/e3_audit_sample.csv` is the sample read against the grades.
+(the reported run on a local model), `results/e3-kodama-run1` (the first run,
+kept for disclosure) and `results/e3-kodama-hosted` (the run on the product's
+hosted models, with a trace of every trial under `telemetry/` and the cost in
+`cost.json`); `uv run inv e2.analyze-product` re-analyses them without the product.
+`results/e3_audit_sample.csv` is the sample of the local run read against the grades.
+
+The hosted run has a history, told in the `NOTE.md` of each folder:
+
+| Folder | What it holds |
+|---|---|
+| `results/e3-kodama-hosted-luna` | The pilot, one trial per case |
+| `results/e3-kodama-hosted-luna-aborted` | The pilot's two failed attempts at its last condition |
+| `results/e3-kodama-hosted-run1` | The first full run: four conditions, 800 trials |
+| `results/e3-kodama-hosted-aborted` | That run's two stopped attempts at the last condition, the analysis of the defect in the product that stopped them, and local checks of the fix |
+| `results/e3-kodama-hosted` | The reported run, all five conditions on the fixed product |
+| `results/e3-kodama-hosted-aborted-3101c5b` | An attempt of the reported run that ended when Docker restarted on the host |
+
+Exploratory runs against the product, kept for the record and **not reported in
+the paper**: spoken trials with one trial per case (`results/e3-kodama-voice`,
+`results/e3-kodama-voice-dtx`, and `results/e3-kodama-voice-aborted`, a run
+stopped for the reason in its `NOTE.md`), and two development runs on shortening
+the wait before the first audio (`results/e4-kodama-clauses`,
+`results/e4-kodama-checks`). Their numbers have not been audited. The `.wav`
+files are synthetic speech of the fictional cases.
 `src/e2_run.py` writes the pack path into each bundle as the relative `pack`, and
 `src/scrub_paths.py` does the same for bundles made earlier (it re-seals them and
 verifies the seal): `uv run inv e2.scrub-paths --dirs=results/e2`.

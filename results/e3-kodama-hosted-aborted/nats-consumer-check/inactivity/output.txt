@@ -1,0 +1,11 @@
+   1.0s hold-35s-durable  handler holds 35000 ms
+   1.0s hold-10s          handler holds 10000 ms
+   1.0s hold-3s           handler holds 3000 ms
+   1.0s hold-35s          handler holds 35000 ms
+  25.0s hold-10s-late     handler holds 10000 ms
+  45.2s hold-10s          end: deleted=false
+  45.2s hold-3s           end: deleted=false
+  60.3s hold-35s          end: deleted=false
+  60.3s hold-35s-durable  end: deleted=false
+  60.3s hold-10s-late     end: deleted=false
+  60.3s idle-60s          end: deleted=false

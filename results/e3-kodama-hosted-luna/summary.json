@@ -1,0 +1,922 @@
+{
+  "n_trials": 200,
+  "by_condition": {
+    "a-tool": {
+      "recall_settings": {
+        "backthought": "off",
+        "blocking": "off",
+        "tool": "on"
+      },
+      "started_at": "2026-11-14T10:15:03+00:00",
+      "finished_at": "2026-11-14T10:30:46+00:00",
+      "trials": 40,
+      "errors": 0,
+      "recall_pass": [
+        0.6666666666666666,
+        0.5,
+        0.8333333333333334
+      ],
+      "overall_pass": [
+        0.7,
+        0.55,
+        0.825
+      ],
+      "gold_in_wm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "searched_rate": 0.75,
+      "cited_rate": 0.6,
+      "text_cited_rate": 0.0,
+      "abstain_tool_rate": 0.2,
+      "templated_rate": 0.0,
+      "silent_rate": 0.0,
+      "withheld_tool_called": 0,
+      "wm_pages_mean": 0.0,
+      "wm_dropped_trials": 0,
+      "backthought_state": {},
+      "backthought_lag": {},
+      "pass_given_gold_in_wm": null,
+      "pass_given_gold_absent": 0.6666666666666666,
+      "n_gold_in_wm": 0,
+      "n_gold_absent": 30,
+      "path_ms": {
+        "n": 40,
+        "median": 9414.0,
+        "p90": 11082.0,
+        "mean": 8437.9
+      },
+      "llm_total_ms": {
+        "n": 40,
+        "median": 6976.0,
+        "p90": 7875.0,
+        "mean": 6042.2
+      },
+      "recall_collect_ms": {
+        "n": 40,
+        "median": 0.0,
+        "p90": 0.0,
+        "mean": 0.0
+      },
+      "blocking_ms": null,
+      "offpath_recall_ms": null,
+      "voice": null,
+      "by_class": {
+        "asked-continuing": {
+          "trials": 10,
+          "pass": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "gold_in_wm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "searched_rate": 1.0,
+          "delivered_abstention": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_recorded": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_text": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "asked-shift": {
+          "trials": 10,
+          "pass": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "gold_in_wm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "searched_rate": 1.0,
+          "delivered_abstention": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_recorded": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_text": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "unprompted": {
+          "trials": 10,
+          "pass": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "gold_in_wm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "searched_rate": 0.0,
+          "delivered_abstention": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_recorded": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_text": [
+            0.1,
+            0.0,
+            0.3
+          ]
+        },
+        "abstain": {
+          "trials": 10,
+          "pass": [
+            0.8,
+            0.5,
+            1.0
+          ],
+          "gold_in_wm": null,
+          "searched_rate": 1.0,
+          "delivered_abstention": [
+            0.8,
+            0.5,
+            1.0
+          ],
+          "abstain_recorded": [
+            0.8,
+            0.5,
+            1.0
+          ],
+          "abstain_text": [
+            0.8,
+            0.5,
+            1.0
+          ]
+        }
+      }
+    },
+    "b-backthought": {
+      "recall_settings": {
+        "backthought": "on",
+        "blocking": "off",
+        "tool": "off"
+      },
+      "started_at": "2026-11-14T10:31:09+00:00",
+      "finished_at": "2026-11-14T10:46:10+00:00",
+      "trials": 40,
+      "errors": 1,
+      "recall_pass": [
+        0.4,
+        0.23333333333333334,
+        0.5666666666666667
+      ],
+      "overall_pass": [
+        0.525,
+        0.375,
+        0.675
+      ],
+      "gold_in_wm": [
+        0.36666666666666664,
+        0.2,
+        0.5333333333333333
+      ],
+      "searched_rate": 0.0,
+      "cited_rate": 0.3,
+      "text_cited_rate": 0.0,
+      "abstain_tool_rate": 0.6,
+      "templated_rate": 0.025,
+      "silent_rate": 0.025,
+      "withheld_tool_called": 0,
+      "wm_pages_mean": 3.9,
+      "wm_dropped_trials": 0,
+      "backthought_state": {
+        "ready": 39
+      },
+      "backthought_lag": {
+        "1": 39
+      },
+      "pass_given_gold_in_wm": 1.0,
+      "pass_given_gold_absent": 0.05263157894736842,
+      "n_gold_in_wm": 11,
+      "n_gold_absent": 19,
+      "path_ms": {
+        "n": 39,
+        "median": 5765.0,
+        "p90": 6449.0,
+        "mean": 5804.25641025641
+      },
+      "llm_total_ms": {
+        "n": 39,
+        "median": 3320.0,
+        "p90": 4128.0,
+        "mean": 3434.4358974358975
+      },
+      "recall_collect_ms": {
+        "n": 39,
+        "median": 0.0,
+        "p90": 0.0,
+        "mean": 0.02564102564102564
+      },
+      "blocking_ms": null,
+      "offpath_recall_ms": {
+        "n": 39,
+        "median": 261.0,
+        "p90": 332.0,
+        "mean": 260.3076923076923
+      },
+      "voice": null,
+      "by_class": {
+        "asked-continuing": {
+          "trials": 10,
+          "pass": [
+            0.5,
+            0.2,
+            0.8
+          ],
+          "gold_in_wm": [
+            0.4,
+            0.1,
+            0.7
+          ],
+          "searched_rate": 0.0,
+          "delivered_abstention": [
+            0.6,
+            0.3,
+            0.9
+          ],
+          "abstain_recorded": [
+            0.5,
+            0.2,
+            0.8
+          ],
+          "abstain_text": [
+            0.5,
+            0.2,
+            0.8
+          ]
+        },
+        "asked-shift": {
+          "trials": 10,
+          "pass": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "gold_in_wm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "searched_rate": 0.0,
+          "delivered_abstention": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "abstain_recorded": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "abstain_text": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "unprompted": {
+          "trials": 10,
+          "pass": [
+            0.7,
+            0.4,
+            1.0
+          ],
+          "gold_in_wm": [
+            0.7,
+            0.4,
+            1.0
+          ],
+          "searched_rate": 0.0,
+          "delivered_abstention": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_recorded": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_text": [
+            0.1,
+            0.0,
+            0.3
+          ]
+        },
+        "abstain": {
+          "trials": 10,
+          "pass": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "gold_in_wm": null,
+          "searched_rate": 0.0,
+          "delivered_abstention": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "abstain_recorded": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "abstain_text": [
+            0.9,
+            0.7,
+            1.0
+          ]
+        }
+      }
+    },
+    "c-blocking": {
+      "recall_settings": {
+        "backthought": "off",
+        "blocking": "on",
+        "tool": "off"
+      },
+      "started_at": "2026-11-14T10:46:11+00:00",
+      "finished_at": "2026-11-14T11:01:21+00:00",
+      "trials": 40,
+      "errors": 0,
+      "recall_pass": [
+        0.9666666666666667,
+        0.9,
+        1.0
+      ],
+      "overall_pass": [
+        0.95,
+        0.875,
+        1.0
+      ],
+      "gold_in_wm": [
+        0.9666666666666667,
+        0.9,
+        1.0
+      ],
+      "searched_rate": 0.0,
+      "cited_rate": 0.75,
+      "text_cited_rate": 0.0,
+      "abstain_tool_rate": 0.25,
+      "templated_rate": 0.0,
+      "silent_rate": 0.0,
+      "withheld_tool_called": 0,
+      "wm_pages_mean": 4.0,
+      "wm_dropped_trials": 0,
+      "backthought_state": {},
+      "backthought_lag": {},
+      "pass_given_gold_in_wm": 1.0,
+      "pass_given_gold_absent": 0.0,
+      "n_gold_in_wm": 29,
+      "n_gold_absent": 1,
+      "path_ms": {
+        "n": 40,
+        "median": 6141.0,
+        "p90": 7046.0,
+        "mean": 6447.725
+      },
+      "llm_total_ms": {
+        "n": 40,
+        "median": 3458.5,
+        "p90": 4081.0,
+        "mean": 3698.525
+      },
+      "recall_collect_ms": {
+        "n": 40,
+        "median": 295.0,
+        "p90": 355.0,
+        "mean": 295.825
+      },
+      "blocking_ms": {
+        "n": 40,
+        "median": 295.0,
+        "p90": 355,
+        "mean": 295.725
+      },
+      "offpath_recall_ms": null,
+      "voice": null,
+      "by_class": {
+        "asked-continuing": {
+          "trials": 10,
+          "pass": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "gold_in_wm": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "searched_rate": 0.0,
+          "delivered_abstention": [
+            0.1,
+            0.0,
+            0.3
+          ],
+          "abstain_recorded": [
+            0.1,
+            0.0,
+            0.3
+          ],
+          "abstain_text": [
+            0.1,
+            0.0,
+            0.3
+          ]
+        },
+        "asked-shift": {
+          "trials": 10,
+          "pass": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "gold_in_wm": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "searched_rate": 0.0,
+          "delivered_abstention": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_recorded": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_text": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "unprompted": {
+          "trials": 10,
+          "pass": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "gold_in_wm": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "searched_rate": 0.0,
+          "delivered_abstention": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_recorded": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_text": [
+            0.1,
+            0.0,
+            0.3
+          ]
+        },
+        "abstain": {
+          "trials": 10,
+          "pass": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "gold_in_wm": null,
+          "searched_rate": 0.0,
+          "delivered_abstention": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "abstain_recorded": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "abstain_text": [
+            0.9,
+            0.7,
+            1.0
+          ]
+        }
+      }
+    },
+    "d-blocking-backthought": {
+      "recall_settings": {
+        "backthought": "on",
+        "blocking": "on",
+        "tool": "off"
+      },
+      "started_at": "2026-11-14T11:01:22+00:00",
+      "finished_at": "2026-11-14T11:17:46+00:00",
+      "trials": 40,
+      "errors": 0,
+      "recall_pass": [
+        0.9666666666666667,
+        0.9,
+        1.0
+      ],
+      "overall_pass": [
+        0.95,
+        0.875,
+        1.0
+      ],
+      "gold_in_wm": [
+        0.9666666666666667,
+        0.9,
+        1.0
+      ],
+      "searched_rate": 0.0,
+      "cited_rate": 0.75,
+      "text_cited_rate": 0.0,
+      "abstain_tool_rate": 0.25,
+      "templated_rate": 0.025,
+      "silent_rate": 0.0,
+      "withheld_tool_called": 0,
+      "wm_pages_mean": 4.55,
+      "wm_dropped_trials": 0,
+      "backthought_state": {
+        "ready": 40
+      },
+      "backthought_lag": {
+        "1": 17
+      },
+      "pass_given_gold_in_wm": 1.0,
+      "pass_given_gold_absent": 0.0,
+      "n_gold_in_wm": 29,
+      "n_gold_absent": 1,
+      "path_ms": {
+        "n": 40,
+        "median": 6310.5,
+        "p90": 8989.0,
+        "mean": 6648.25
+      },
+      "llm_total_ms": {
+        "n": 40,
+        "median": 3587.5,
+        "p90": 4183.0,
+        "mean": 3719.425
+      },
+      "recall_collect_ms": {
+        "n": 40,
+        "median": 289.0,
+        "p90": 337.0,
+        "mean": 295.8
+      },
+      "blocking_ms": {
+        "n": 40,
+        "median": 289.0,
+        "p90": 337,
+        "mean": 295.475
+      },
+      "offpath_recall_ms": {
+        "n": 40,
+        "median": 272.0,
+        "p90": 332.0,
+        "mean": 300.875
+      },
+      "voice": null,
+      "by_class": {
+        "asked-continuing": {
+          "trials": 10,
+          "pass": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "gold_in_wm": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "searched_rate": 0.0,
+          "delivered_abstention": [
+            0.1,
+            0.0,
+            0.3
+          ],
+          "abstain_recorded": [
+            0.1,
+            0.0,
+            0.3
+          ],
+          "abstain_text": [
+            0.1,
+            0.0,
+            0.3
+          ]
+        },
+        "asked-shift": {
+          "trials": 10,
+          "pass": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "gold_in_wm": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "searched_rate": 0.0,
+          "delivered_abstention": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_recorded": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_text": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "unprompted": {
+          "trials": 10,
+          "pass": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "gold_in_wm": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "searched_rate": 0.0,
+          "delivered_abstention": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_recorded": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_text": [
+            0.1,
+            0.0,
+            0.3
+          ]
+        },
+        "abstain": {
+          "trials": 10,
+          "pass": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "gold_in_wm": null,
+          "searched_rate": 0.0,
+          "delivered_abstention": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "abstain_recorded": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "abstain_text": [
+            0.9,
+            0.7,
+            1.0
+          ]
+        }
+      }
+    },
+    "e-backthought-tool": {
+      "recall_settings": {
+        "backthought": "on",
+        "blocking": "off",
+        "tool": "on"
+      },
+      "started_at": "2026-11-15T10:11:08+00:00",
+      "finished_at": "2026-11-15T10:27:42+00:00",
+      "trials": 40,
+      "errors": 0,
+      "recall_pass": [
+        0.9,
+        0.7666666666666667,
+        1.0
+      ],
+      "overall_pass": [
+        0.9,
+        0.8,
+        0.975
+      ],
+      "gold_in_wm": [
+        0.36666666666666664,
+        0.2,
+        0.5333333333333333
+      ],
+      "searched_rate": 0.625,
+      "cited_rate": 0.725,
+      "text_cited_rate": 0.0,
+      "abstain_tool_rate": 0.25,
+      "templated_rate": 0.0,
+      "silent_rate": 0.0,
+      "withheld_tool_called": 0,
+      "wm_pages_mean": 4.0,
+      "wm_dropped_trials": 0,
+      "backthought_state": {
+        "ready": 40
+      },
+      "backthought_lag": {
+        "1": 40
+      },
+      "pass_given_gold_in_wm": 1.0,
+      "pass_given_gold_absent": 0.8421052631578947,
+      "n_gold_in_wm": 11,
+      "n_gold_absent": 19,
+      "path_ms": {
+        "n": 40,
+        "median": 9082.5,
+        "p90": 11172.0,
+        "mean": 8416.975
+      },
+      "llm_total_ms": {
+        "n": 40,
+        "median": 6842.5,
+        "p90": 8701.0,
+        "mean": 6099.85
+      },
+      "recall_collect_ms": {
+        "n": 40,
+        "median": 0.0,
+        "p90": 0.0,
+        "mean": 0.0
+      },
+      "blocking_ms": null,
+      "offpath_recall_ms": {
+        "n": 40,
+        "median": 255.0,
+        "p90": 314.0,
+        "mean": 263.2
+      },
+      "voice": null,
+      "by_class": {
+        "asked-continuing": {
+          "trials": 10,
+          "pass": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "gold_in_wm": [
+            0.4,
+            0.1,
+            0.7
+          ],
+          "searched_rate": 0.6,
+          "delivered_abstention": [
+            0.1,
+            0.0,
+            0.3
+          ],
+          "abstain_recorded": [
+            0.1,
+            0.0,
+            0.3
+          ],
+          "abstain_text": [
+            0.1,
+            0.0,
+            0.3
+          ]
+        },
+        "asked-shift": {
+          "trials": 10,
+          "pass": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "gold_in_wm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "searched_rate": 1.0,
+          "delivered_abstention": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_recorded": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_text": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "unprompted": {
+          "trials": 10,
+          "pass": [
+            0.8,
+            0.5,
+            1.0
+          ],
+          "gold_in_wm": [
+            0.7,
+            0.4,
+            1.0
+          ],
+          "searched_rate": 0.0,
+          "delivered_abstention": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_recorded": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_text": [
+            0.1,
+            0.0,
+            0.3
+          ]
+        },
+        "abstain": {
+          "trials": 10,
+          "pass": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "gold_in_wm": null,
+          "searched_rate": 0.9,
+          "delivered_abstention": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "abstain_recorded": [
+            0.9,
+            0.7,
+            1.0
+          ],
+          "abstain_text": [
+            0.9,
+            0.7,
+            1.0
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,9 +1,12 @@
 """Experiment 3 analysis: the async-recall pack run against the product.
 
 Reads the sealed bundles and the trial table under ``results/e3-kodama`` (the
-reported run) and ``results/e3-kodama-run1`` (the first run, kept for
-disclosure), checks every seal and that the trial table agrees with the grades
-stored in the bundles, and writes ``results/e3_summary.json``.
+reported run), ``results/e3-kodama-run1`` (the first run, kept for disclosure)
+``results/e3-kodama-hosted`` (the product on hosted models),
+``results/e3-kodama-hosted-run1`` (the first hosted run, four conditions) and
+``results/e3-kodama-hosted-luna`` (the hosted pilot, one trial per case), checks
+every seal and that the trial table agrees with the grades stored in the bundles,
+and writes ``results/e3_summary.json``.
 
 The trial table (``trials.csv``) is produced by the product's own evaluation
 code (``evals/recall/analyze.py`` in the product repository) from the events
@@ -26,17 +29,29 @@ from e2_analyze import BOOT, SEED, case_boot, paired_diff
 ROOT = Path(__file__).resolve().parents[1]
 CONDITIONS = ("a-tool", "b-backthought", "c-blocking", "d-blocking-backthought", "e-backthought-tool")
 CLASSES = ("asked-continuing", "asked-shift", "unprompted", "abstain")
-RUNS = {"run2": "e3-kodama", "run1": "e3-kodama-run1"}
+RUNS = {"run2": "e3-kodama", "run1": "e3-kodama-run1", "hosted": "e3-kodama-hosted",
+        "hosted1": "e3-kodama-hosted-run1", "pilot": "e3-kodama-hosted-luna"}
+PAIRED = ("run2", "hosted", "hosted1")  # runs whose conditions are compared case by case
+# The first hosted run has no bundle for the last condition (see its NOTE.md).
+RUN_CONDITIONS = {"hosted1": CONDITIONS[:4]}
+PAIRS = (
+    ("c-blocking", "b-backthought"),
+    ("c-blocking", "a-tool"),
+    ("d-blocking-backthought", "c-blocking"),
+    ("e-backthought-tool", "a-tool"),
+    ("e-backthought-tool", "b-backthought"),
+)
 
 
 def flag(value: str) -> bool:
     return value == "True"
 
 
-def load(run_dir: Path) -> tuple[list[dict], dict]:
+def load(run_dir: Path, conditions: tuple[str, ...] = CONDITIONS) -> tuple[list[dict], dict]:
     rows = list(csv.DictReader(open(run_dir / "trials.csv")))
+    assert {r["condition"] for r in rows} == set(conditions), run_dir
     meta: dict = {}
-    for condition in CONDITIONS:
+    for condition in conditions:
         info = json.loads((run_dir / condition / "condition.json").read_text())
         bundles = [p for p in (run_dir / condition).iterdir() if p.is_dir()]
         assert len(bundles) == 1, condition
@@ -62,15 +77,50 @@ def load(run_dir: Path) -> tuple[list[dict], dict]:
     return rows, meta
 
 
+def load_cost(run_dir: Path, conditions: tuple[str, ...] = CONDITIONS) -> dict | None:
+    """Tokens, model calls and cost per condition, for runs whose model calls were metered.
+
+    ``telemetry.csv`` has one row per trial, written by the product's evaluation code
+    from the spans of each model request; ``cost_usd_upper`` also bills in full the
+    calls that the product stopped early, which report no usage.
+    """
+    path = run_dir / "telemetry.csv"
+    if not path.exists():
+        return None
+    rows = list(csv.DictReader(open(path)))
+    out: dict = {"conditions": {}}
+    for condition in conditions:
+        sub = [r for r in rows if r["condition"] == condition]
+        out["conditions"][condition] = {
+            "trials": len(sub),
+            "model_calls_per_trial": float(np.mean([float(r["model_calls"]) for r in sub])),
+            "input_tokens_per_trial": float(np.mean([float(r["input_tokens"]) for r in sub])),
+            "output_tokens_per_trial": float(np.mean([float(r["output_tokens"]) for r in sub])),
+            "cost_usd_per_trial": float(np.mean([float(r["cost_usd"]) for r in sub])),
+            "cost_usd": float(sum(float(r["cost_usd"]) for r in sub)),
+            "cost_usd_upper": float(sum(float(r["cost_usd_upper"]) for r in sub)),
+        }
+    out["cost_usd"] = sum(c["cost_usd"] for c in out["conditions"].values())
+    out["cost_usd_upper"] = sum(c["cost_usd_upper"] for c in out["conditions"].values())
+    # The embedding requests are not metered per trial; cost.json estimates them from
+    # the characters embedded and adds them to the totals of the run.
+    totals = json.loads((run_dir / "cost.json").read_text())
+    out["embeddings_usd"] = totals["embeddings_estimate"]["cost_usd"]
+    out["total_usd"] = totals["total_usd"]
+    out["total_usd_upper"] = totals["total_usd_upper"]
+    assert abs(out["cost_usd"] - totals["run"]["cost_usd"]) < 0.005, run_dir
+    return out
+
+
 def median_ms(rows: list[dict], key: str) -> float | None:
     """Median of a timing column; None when the condition never records it."""
     values = [float(r[key]) for r in rows if r.get(key) not in (None, "", "nan", "None")]
     return float(np.median(values)) if values else None
 
 
-def summarise(rows: list[dict], rng: np.random.Generator) -> dict:
+def summarise(rows: list[dict], rng: np.random.Generator, conditions: tuple[str, ...] = CONDITIONS) -> dict:
     out: dict = {}
-    for condition in CONDITIONS:
+    for condition in conditions:
         sub = [r for r in rows if r["condition"] == condition]
         recall = [r for r in sub if r["class"] != "abstain"]
         abstain = [r for r in sub if r["class"] == "abstain"]
@@ -81,9 +131,9 @@ def summarise(rows: list[dict], rng: np.random.Generator) -> dict:
             "gold_in_wm": case_boot(recall, "gold_in_wm", rng),
             "searched_rate": float(np.mean([r["searched"] for r in sub])),
             "templated": sum(r["templated"] for r in sub),
-            "path_ms": {
-                "median": float(np.median([r["path_ms"] for r in sub])),
-                "p90": float(np.percentile([r["path_ms"] for r in sub], 90)),
+            "path_ms": {  # a trial that ended in an error has no reply-path time
+                "median": float(np.nanmedian([r["path_ms"] for r in sub])),
+                "p90": float(np.nanpercentile([r["path_ms"] for r in sub], 90)),
             },
             "llm_ms_median": median_ms(sub, "llm_total_ms"),
             "blocking_ms_median": median_ms(sub, "blocking_ms"),
@@ -113,19 +163,18 @@ def main() -> None:
     rng = np.random.default_rng(SEED)
     result: dict = {"bootstrap": BOOT}
     for name, folder in RUNS.items():
-        rows, meta = load(ROOT / "results" / folder)
-        result[name] = {"n_trials": len(rows), "meta": meta, "by_condition": summarise(rows, rng)}
-        if name == "run2":
+        conditions = RUN_CONDITIONS.get(name, CONDITIONS)
+        rows, meta = load(ROOT / "results" / folder, conditions)
+        result[name] = {"n_trials": len(rows), "meta": meta, "by_condition": summarise(rows, rng, conditions)}
+        cost = load_cost(ROOT / "results" / folder, conditions)
+        if cost:
+            result[name]["cost"] = cost
+        if name in PAIRED:
             recall = [r for r in rows if r["class"] != "abstain"]
             result[name]["paired_recall_diff"] = {
                 f"{a}|{b}": paired_diff(recall, a, b, rng)
-                for a, b in (
-                    ("c-blocking", "b-backthought"),
-                    ("c-blocking", "a-tool"),
-                    ("d-blocking-backthought", "c-blocking"),
-                    ("e-backthought-tool", "a-tool"),
-                    ("e-backthought-tool", "b-backthought"),
-                )
+                for a, b in PAIRS
+                if a in conditions and b in conditions
             }
             loaded = [r for r in recall if r["condition"] in ("b-backthought", "c-blocking", "d-blocking-backthought")]
             result[name]["loaded_conditions"] = {
@@ -147,8 +196,9 @@ def main() -> None:
                 + f"  tmpl {e['templated']:3d}  path {e['path_ms']['median']:5.0f}/{e['path_ms']['p90']:5.0f}"
                 + f"  abst {e['abstain']}  |gold {e['pass_given_gold']}  |no gold {e['pass_given_no_gold']}"
             )
-    print("paired:", {k: [round(100 * x) for x in v] for k, v in result["run2"]["paired_recall_diff"].items()})
-    print("loaded conditions:", result["run2"]["loaded_conditions"])
+    for name in PAIRED:
+        print(name, "paired:", {k: [round(100 * x) for x in v] for k, v in result[name]["paired_recall_diff"].items()})
+        print(name, "loaded conditions:", result[name]["loaded_conditions"])
 
 
 if __name__ == "__main__":

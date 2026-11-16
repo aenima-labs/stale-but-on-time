@@ -1,0 +1,8 @@
+2026/11/15 21:02:17 WARN test: next message error consumer=embed-conversation err="nats: consumer deleted"
+--- PASS: TestEnsure_ConsumersAreDurable (0.04s)
+--- PASS: TestEnsure_MakesEphemeralConsumerDurable (0.10s)
+2026/11/15 21:02:18 INFO test: resumed consumer=embed-conversation
+--- PASS: TestConsume_ResumesAfterConsumerDeleted (1.12s)
+--- PASS: TestConsumer_DurableSurvivesPullGap (10.04s)
+PASS
+ok  	github.com/aenimalabs/kodama/internal/queue	10.575s

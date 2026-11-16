@@ -1,0 +1,44 @@
+id: abstain-when-silent/abs-car
+title: Random question, but what kind of car did she drive?
+description: abstain after a abrupt lead-in.
+targets:
+- abstain-when-silent
+polarity: negative
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: She listened to the shipping forecast every night, Mum says.
+    - role: assistant
+      content: Every night before sleeping. She called it the only poetry she knew by heart.
+    lead_in_gap_s: 4.43
+    voice:
+      final_audio: audio/abstain-when-silent_abs-car.wav
+      final_audio_sha256: 22fca9c962e0c63377dbe60c09d332f88780ed0c16a39908b9f79be3673236e3
+      final_audio_s: 3.18
+      tts_voice: en_US-lessac-medium
+      lead_in_said:
+      - She listened to the shipping forecast every night, Mum says.
+      turn_gap_s: 0.2
+actions:
+- kind: message
+  role: user
+  content: Random question, but what kind of car did she drive?
+expected_outcomes:
+- Say that the memories do not contain the answer.
+evaluators: []
+selftests: []
+trials: 1
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:abstain
+- continuity:abrupt

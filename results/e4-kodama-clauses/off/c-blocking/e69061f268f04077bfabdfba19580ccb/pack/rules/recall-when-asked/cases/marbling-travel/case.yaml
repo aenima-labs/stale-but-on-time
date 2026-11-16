@@ -1,0 +1,69 @@
+id: recall-when-asked/marbling-travel
+title: Did she ever travel anywhere to study it?
+description: asked-continuing after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: Her marbled papers are beautiful, I have one framed.
+    - role: assistant
+      content: Marbling was her speciality. Her comb was made from her mother's hat pins.
+    lead_in_gap_s: 4.43
+    voice:
+      final_audio: audio/recall-when-asked_marbling-travel.wav
+      final_audio_sha256: 8739e89d995f3010225a61593a7a5b153334ce0cc2f3b3fa20c4db1e5afe9d96
+      final_audio_s: 2.29
+      tts_voice: en_US-lessac-medium
+      lead_in_said:
+      - Her marbled papers are beautiful. I have one framed.
+      turn_gap_s: 0.2
+actions:
+- kind: message
+  role: user
+  content: Did she ever travel anywhere to study it?
+expected_outcomes:
+- 'Mention a fact from: t-japan.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - Hayato
+    - Mori
+    - suminagashi
+    - Japan
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: In 1998 she travelled to Japan for three weeks to study suminagashi, floating-ink marbling,
+      with a teacher named Hayato Mori. She called it the only time she felt like a beginner again.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 1
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-continuing
+- continuity:continuing
+- gold:t-japan
