@@ -13,7 +13,7 @@ def build_pack(c):
 
 @task
 def run(c, args=""):
-    """Run the six memory conditions (~18 min, needs Ollama). Extra CLI args via --args.
+    """Run the six memory conditions (~22 min, needs Ollama). Extra CLI args via --args.
 
     Prints an estimate first and waits for confirmation if the run spends money
     (--yes skips, --estimate-only stops). Hosted models: --provider openai|vertex|anthropic,
@@ -41,13 +41,14 @@ def test(c):
     c.run(f"{PY} -m pytest -q tests", env=SRC_ENV, pty=False)
 
 
-RUNS = ("e2", "e2-think", "e2-qwen3", "e2-anthropic")  # main run, reasoning on, second model, hosted model
+# main run (50 cases), first run of the same setting (40 cases), reasoning on, second model, hosted model
+RUNS = ("e2", "e2-run1", "e2-think", "e2-qwen3", "e2-anthropic")
 TIMING_RUNS = ("e2-cloudrun-l4-timing",)  # one trial per case on a cloud GPU; reported for timing only
 
 
 @task
 def analyze(c):
-    """Analysis of the main run, the three further runs and the cloud timing pass."""
+    """Analysis of the main run, the first run, the three further runs and the cloud timing pass."""
     for name in RUNS + TIMING_RUNS:
         run_src(c, "e2_analyze.py", f"--run {name}")
 

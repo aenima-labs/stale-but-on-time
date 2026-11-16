@@ -686,5 +686,56 @@
    0.26,
    0.6133333333333333
   ]
+ },
+ "case_level": {
+  "blocking-lag1": {
+   "cases": 30,
+   "ahead": 18,
+   "behind": 1,
+   "level": 11,
+   "sign_flip_p": 1.999980000199998e-05
+  },
+  "blocking-prefetch50": {
+   "cases": 30,
+   "ahead": 10,
+   "behind": 2,
+   "level": 18,
+   "sign_flip_p": 0.001949980500194998
+  },
+  "blocking-tool": {
+   "cases": 30,
+   "ahead": 9,
+   "behind": 5,
+   "level": 16,
+   "sign_flip_p": 0.3086369136308637
+  },
+  "prefetch50-lag1": {
+   "cases": 30,
+   "ahead": 8,
+   "behind": 0,
+   "level": 22,
+   "sign_flip_p": 0.007719922800771993
+  },
+  "tool-lag1": {
+   "cases": 30,
+   "ahead": 18,
+   "behind": 4,
+   "level": 8,
+   "sign_flip_p": 0.004369956300436996
+  },
+  "hybrid-lag1": {
+   "cases": 30,
+   "ahead": 5,
+   "behind": 1,
+   "level": 24,
+   "sign_flip_p": 0.06281937180628194
+  },
+  "blocking-hybrid": {
+   "cases": 30,
+   "ahead": 16,
+   "behind": 2,
+   "level": 12,
+   "sign_flip_p": 0.00011999880001199988
+  }
  }
 }

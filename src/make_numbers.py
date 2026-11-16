@@ -157,6 +157,74 @@ put("SrchUnpTool", rate("tool", "unprompted", "searched"))
 put("SrchUnpHyb", rate("hybrid", "unprompted", "searched"))
 put("SrchContHyb", rate("hybrid", "asked-continuing", "searched"))
 
+# The control class of pack 1.1.0 (answer in the note in play); never pooled into "recall".
+CARRY = "asked-carry"
+put("EtwoCases", str(len({r["case"] for r in trials})))
+put("EtwoPerCondition", str(e2["n_trials"] // len(TAG)))
+for cond, tag in TAG.items():
+    c = bc[cond]["by_class"][CARRY]
+    put(f"Carry{tag}", pct(c["pass"][0]))
+    put(f"Carry{tag}CI", pctci(c["pass"]))
+    put(f"CarryGold{tag}", pct(c["gold_in_context"]))
+    put(f"CarrySrch{tag}", pct(c["searched"]))
+for name, tag in (("blocking-lag1", "BlockLag"), ("blocking-prefetch50", "BlockPre"), ("blocking-tool", "BlockTool")):
+    d = e2["paired_carry_diff"][name]
+    put(f"CarryDiff{tag}", signed(100 * d[0]))
+    put(f"CarryDiff{tag}CI", f"[{signed(100 * d[1])}, {signed(100 * d[2])}]")
+put("CarryPassGivenGold", pct(extra["carry_pooled"]["pass_given_gold"][0]))
+put("CarryPassGivenGoldN", str(extra["carry_pooled"]["pass_given_gold"][1]))
+put("CarryNoGoldN", str(extra["carry_pooled"]["pass_given_no_gold"][1]))
+put("CarryNoGoldPassed", str(round((extra["carry_pooled"]["pass_given_no_gold"][0] or 0)
+                                   * extra["carry_pooled"]["pass_given_no_gold"][1])))
+
+
+def gold_cases(rows: list[dict], cond: str, classes: tuple[str, ...]) -> tuple[int, int]:
+    """Cases in which the target note was in context, and cases in all. Local retrieval
+    is deterministic, so a case has the note in all of its trials or in none."""
+    by_case: dict[str, list[bool]] = {}
+    for r in rows:
+        if r["condition"] == cond and r["class"] in classes:
+            by_case.setdefault(r["case"], []).append(r["gold_in_context"] == "True")
+    # A hosted embedding model need not return the same vector twice, so a case
+    # counts when the note was there in most of its trials.
+    return sum(np.mean(v) > 0.5 for v in by_case.values()), len(by_case)
+
+
+NEW_NEED = ("asked-continuing", "asked-shift", "unprompted")
+for cond, tag in (("lag1", "Lag"), ("prefetch50", "Pre"), ("blocking", "Block")):
+    put(f"GoldCases{tag}", str(gold_cases(trials, cond, NEW_NEED)[0]))
+    put(f"CarryGoldCases{tag}", str(gold_cases(trials, cond, (CARRY,))[0]))
+for name, tag in (("blocking-lag1", "BlockLag"), ("blocking-prefetch50", "BlockPre"), ("blocking-tool", "BlockTool")):
+    c = e2["case_level"][name]
+    put(f"CaseAhead{tag}", str(c["ahead"]))
+    put(f"CaseBehind{tag}", str(c["behind"]))
+    put(f"CaseLevel{tag}", str(c["level"]))
+    put(f"CaseP{tag}", "< 0.001" if c["sign_flip_p"] < 0.001 else f"= {c['sign_flip_p']:.2f}")
+
+# The first full run of the main setting (pack 1.0.0, 40 cases, 10 November): prefix Fr.
+fr = json.loads((ROOT / "results" / "e2-run1_summary.json").read_text())
+put("FrTrials", f"{fr['n_trials']:,}")
+for cond, tag in TAG.items():
+    put(f"FrRec{tag}", pct(fr["by_condition"][cond]["recall_pass"][0]))
+d = fr["paired_recall_diff"]["blocking-lag1"]
+put("FrDiffBlockLag", signed(100 * d[0]))
+put("FrDiffBlockLagCI", f"[{signed(100 * d[1])}, {signed(100 * d[2])}]")
+put("FrMaxDiff", f"{max(abs(100 * (fr['by_condition'][c]['recall_pass'][0] - bc[c]['recall_pass'][0])) for c in TAG):.0f}")
+
+
+def new_need_rate(cond: str, without: str) -> float:
+    """New-need pass rate of a condition with one case left out (mean over cases)."""
+    by_case: dict[str, list[bool]] = {}
+    for r in trials:
+        if r["condition"] == cond and r["class"] in NEW_NEED and r["case"] != without:
+            by_case.setdefault(r["case"], []).append(r["passed"] == "True")
+    return float(np.mean([np.mean(v) for v in by_case.values()]))
+
+
+# The case that the review judged unfair (a second note fits the remark as well).
+put("NoApprRecBlock", pct(new_need_rate("blocking", "amb-apprenticeship")))
+put("NoApprRecLag", pct(new_need_rate("lag1", "amb-apprenticeship")))
+
 # ------------------------------------------------- robustness runs (Section 6.3)
 # Same pack, same seeds, a different model setting. The reasoning run shared the
 # GPU with another process for part of its duration (results/e2-think_NOTES.md);
@@ -250,6 +318,8 @@ no_gold = [json.loads((ROOT / "results" / f"{run}_extra.json").read_text())["poo
 put("AllNoGoldN", f"{sum(n for _, n in no_gold):,}")
 put("AllNoGoldPassed", str(round(sum(rate * n for rate, n in no_gold))))
 put("AllTrials", f"{sum(summary['n_trials'] for summary, _ in robust.values()):,}")
+for cond, tag in (("lag1", "Lag"), ("prefetch50", "Pre"), ("blocking", "Block")):
+    put(f"HsGoldCases{tag}", str(gold_cases(robust["e2-anthropic"][1], cond, NEW_NEED)[0]))
 
 # ------------------------------------------------ Experiment 3 (the product)
 e3 = json.loads((ROOT / "results" / "e3_summary.json").read_text())
@@ -322,6 +392,8 @@ put("KHAbstToolMax", pct(max(kh_tool)))
 put("KHBlockMs", f"{kh['by_condition']['c-blocking']['blocking_ms_median']:.0f}")
 put("KHCostRun", f"{kh['cost']['total_usd']:.2f}")
 put("KHCostRunUpper", f"{kh['cost']['total_usd_upper']:.2f}")
+# All hosted runs of Experiment 3 that the paper reports: the main one and the later ones.
+put("KHCostAll", f"{kh['cost']['total_usd'] + sum(e3[k]['cost']['total_usd'] for k in ('hosted_carry', 'hosted_bringup') if k in e3):.2f}")
 # The first hosted run: four conditions on the product commit before the queue fix.
 kf = e3["hosted1"]
 put("KHFirstTrials", f"{kf['n_trials']:,}")
@@ -420,17 +492,20 @@ put("LagCeilMax", f"{max(lag_ceilings):.0f}")
 
 # ---------------------------------------------------------------- tables
 NAMES = {"none": "No memory", "tool": "Search tool", "blocking": "Blocking retrieval",
-         "prefetch50": "Async, prefetch 50\\%", "lag1": "Async, lag 1",
-         "hybrid": "Async lag 1 + search"}
+         "prefetch50": "Prefetch 50\\%", "lag1": "Lag 1",
+         "hybrid": "Lag 1 + search"}
 ORDER = ["none", "tool", "blocking", "prefetch50", "lag1", "hybrid"]
 
 rows = []
 for cond in ORDER:
     e = bc[cond]
+    carry = e["by_class"][CARRY]["pass"]
     cells = [NAMES[cond], f"{pct(e['recall_pass'][0])} {pctci(e['recall_pass'])}"]
-    cells += [pct(e["by_class"][c]["pass"][0]) for c in ("asked-continuing", "asked-shift", "unprompted", "abstain")]
-    cells += [pct(e["gold_in_context"][0]) if cond != "none" else "--",
-              f"{e['pre_generation_ms']['median']:.0f}", f"{e['pre_generation_ms']['p90']:.0f}"]
+    cells += [pct(e["by_class"][c]["pass"][0]) for c in ("asked-continuing", "asked-shift", "unprompted")]
+    cells += [f"{pct(carry[0])} {pctci(carry)}", pct(e["by_class"]["abstain"]["pass"][0])]
+    cells += ([str(gold_cases(trials, cond, NEW_NEED)[0]), str(gold_cases(trials, cond, (CARRY,))[0])]
+              if cond in ("blocking", "prefetch50", "lag1", "hybrid") else ["--", "--"])
+    cells += [f"{e['pre_generation_ms']['median']:.0f}"]
     rows.append(" & ".join(cells) + r" \\")
 (PAPER / "tab-e2.tex").write_text("\n".join(rows) + "\n")
 
@@ -452,7 +527,7 @@ rows = []
 for cond in ORDER:
     e = bc[cond]
     cells = [NAMES[cond]]
-    for c in ("asked-continuing", "asked-shift", "unprompted", "abstain"):
+    for c in (CARRY, "asked-continuing", "asked-shift", "unprompted", "abstain"):
         b = e["by_class"][c]
         cells.append(f"{pct(b['pass'][0])} {pctci(b['pass'])}")
         cells.append(pct(b["pass_all_5"]))
@@ -493,9 +568,9 @@ for run, (summary, run_rows) in robust.items():
         rows.append(" & ".join(cells) + r" \\")
 (PAPER / "tab-robust.tex").write_text("\n".join(rows) + "\n")
 
-KNAMES = {"a-tool": "Search tool (shipped)", "b-backthought": "Async, lag 1",
-          "c-blocking": "Blocking retrieval", "d-blocking-backthought": "Blocking + async",
-          "e-backthought-tool": "Async lag 1 + search"}
+KNAMES = {"a-tool": "Search tool (shipped)", "b-backthought": "Lag 1",
+          "c-blocking": "Blocking retrieval", "d-blocking-backthought": "Blocking + lag 1",
+          "e-backthought-tool": "Lag 1 + search"}
 rows = []
 for cond in ("a-tool", "c-blocking", "b-backthought", "d-blocking-backthought", "e-backthought-tool"):
     e = k2["by_condition"][cond]

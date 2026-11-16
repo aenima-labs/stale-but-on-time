@@ -32,7 +32,21 @@ from circumstances.artifacts import verify_bundle
 
 ROOT = Path(__file__).resolve().parents[1]
 CONDITIONS = ("none", "tool", "blocking", "lag1", "prefetch50", "hybrid")
-CLASSES = ("asked-continuing", "asked-shift", "unprompted", "abstain")
+CLASSES = ("asked-continuing", "asked-shift", "unprompted", "abstain", "asked-carry")
+# "Recall" pools the classes whose final utterance needs a note other than the
+# one the lead-in draws on. The control class asked-carry (pack 1.1.0), whose
+# answer is in the note in play, is reported on its own and never pooled.
+NEW_NEED = ("asked-continuing", "asked-shift", "unprompted")
+CARRY = "asked-carry"
+PAIRS = (
+    ("blocking", "lag1"),
+    ("blocking", "prefetch50"),
+    ("blocking", "tool"),
+    ("prefetch50", "lag1"),
+    ("tool", "lag1"),
+    ("hybrid", "lag1"),
+    ("blocking", "hybrid"),
+)
 BOOT = 10000
 SEED = 20261110
 
@@ -49,8 +63,9 @@ REFUSAL = re.compile(
 
 
 def key_starts_word(reply: str, keys: list) -> bool:
-    """True if a key occurs at the start of a word ("regret" in "regretted", not "Mori" in "memories")."""
-    return any(re.search(r"(?<![A-Za-z])" + re.escape(str(k)), reply, re.IGNORECASE) for k in keys)
+    """True if a key occurs at the start of a word or number ("regret" in "regretted",
+    not "Mori" in "memories", not "112" in "2112")."""
+    return any(re.search(r"(?<![A-Za-z0-9])" + re.escape(str(k)), reply, re.IGNORECASE) for k in keys)
 
 
 def load(run: str) -> list[dict]:
@@ -129,6 +144,26 @@ def paired_diff(rows: list[dict], a: str, b: str, rng: np.random.Generator) -> l
     return [float(diffs.mean()), float(lo), float(hi)]
 
 
+def case_level(rows: list[dict], a: str, b: str) -> dict:
+    """Case-level view of a - b: counts of cases ahead, behind and level, and a
+    sign-flip test of the mean per-case difference (own generator, so that it
+    does not move the bootstrap draws)."""
+    rate: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
+    for r in rows:
+        if r["condition"] in (a, b):
+            rate[r["case"]][r["condition"]].append(float(r["passed"]))
+    diffs = np.array([np.mean(v[a]) - np.mean(v[b]) for v in rate.values()])
+    flips = np.random.default_rng(SEED + 1).choice([-1.0, 1.0], size=(100_000, len(diffs)))
+    null = np.abs((flips * diffs).mean(axis=1))
+    return {
+        "cases": int(len(diffs)),
+        "ahead": int((diffs > 0).sum()),
+        "behind": int((diffs < 0).sum()),
+        "level": int((diffs == 0).sum()),
+        "sign_flip_p": float((np.sum(null >= abs(diffs.mean()) - 1e-12) + 1) / (len(null) + 1)),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", default="e2", help="run directory name under results/")
@@ -143,8 +178,8 @@ def main() -> None:
     out: dict = {"n_trials": len(rows), "by_condition": {}}
     for condition in CONDITIONS:
         sub = [r for r in rows if r["condition"] == condition]
-        recall = [r for r in sub if r["class"] != "abstain"]
-        asked = [r for r in sub if r["class"].startswith("asked")]
+        recall = [r for r in sub if r["class"] in NEW_NEED]
+        asked = [r for r in sub if r["class"] in ("asked-continuing", "asked-shift")]
         entry: dict = {
             "trials": len(sub),
             "errors": sum(bool(r["error"]) for r in sub),
@@ -182,6 +217,8 @@ def main() -> None:
         }
         for cls in CLASSES:
             part = [r for r in sub if r["class"] == cls]
+            if not part:  # a run of pack 1.0.0 has no control class
+                continue
             cases: dict[str, list[bool]] = defaultdict(list)
             for r in part:
                 cases[r["case"]].append(r["passed"])
@@ -201,19 +238,16 @@ def main() -> None:
             }
         out["by_condition"][condition] = entry
 
-    recall_rows = [r for r in rows if r["class"] != "abstain"]
-    out["paired_recall_diff"] = {
-        f"{a}-{b}": paired_diff(recall_rows, a, b, rng)
-        for a, b in (
-            ("blocking", "lag1"),
-            ("blocking", "prefetch50"),
-            ("blocking", "tool"),
-            ("prefetch50", "lag1"),
-            ("tool", "lag1"),
-            ("hybrid", "lag1"),
-            ("blocking", "hybrid"),
-        )
-    }
+    recall_rows = [r for r in rows if r["class"] in NEW_NEED]
+    out["paired_recall_diff"] = {f"{a}-{b}": paired_diff(recall_rows, a, b, rng) for a, b in PAIRS}
+    # The same contrasts at the level of cases: in how many of the 30 cases is a
+    # ahead of b, behind it, or level, and a two-sided sign-flip test of the mean
+    # difference (exact over the 2^n sign patterns is too many, so 100,000 draws).
+    out["case_level"] = {f"{a}-{b}": case_level(recall_rows, a, b) for a, b in PAIRS}
+    carry_rows = [r for r in rows if r["class"] == CARRY]
+    if carry_rows:
+        out["paired_carry_diff"] = {f"{a}-{b}": paired_diff(carry_rows, a, b, rng) for a, b in PAIRS}
+        out["carry_case_level"] = {f"{a}-{b}": case_level(carry_rows, a, b) for a, b in PAIRS}
     (ROOT / "results" / f"{run}_summary.json").write_text(json.dumps(out, indent=1))
 
     # Mediation: pass rate of recall trials given whether a target note was in context.
@@ -233,24 +267,31 @@ def main() -> None:
         "pass_given_gold": given(with_memory, True),
         "pass_given_no_gold": given(with_memory, False),
     }
+    if carry_rows:
+        carry_memory = [r for r in carry_rows if r["condition"] != "none"]
+        extra["carry_pooled"] = {
+            "pass_given_gold": given(carry_memory, True),
+            "pass_given_no_gold": given(carry_memory, False),
+        }
     (ROOT / "results" / f"{run}_extra.json").write_text(json.dumps(extra, indent=1))
 
     def pct(triple: list[float]) -> str:
         return f"{100 * triple[0]:5.1f} [{100 * triple[1]:4.0f},{100 * triple[2]:4.0f}]"
 
-    print(f"{'condition':11s} {'recall pass':18s} " + " ".join(f"{c[:14]:>14s}" for c in CLASSES)
+    present = [c for c in CLASSES if c in out["by_condition"][CONDITIONS[0]]["by_class"]]
+    print(f"{'condition':11s} {'recall pass':18s} " + " ".join(f"{c[:14]:>14s}" for c in present)
           + "  gold  srch  pre50 pre90 tot50  fmt rep err")
     for condition, e in out["by_condition"].items():
         print(
             f"{condition:11s} {pct(e['recall_pass']):18s} "
-            + " ".join(f"{100 * e['by_class'][c]['pass'][0]:14.1f}" for c in CLASSES)
+            + " ".join(f"{100 * e['by_class'][c]['pass'][0]:14.1f}" for c in present)
             + f"  {100 * e['gold_in_context'][0]:4.0f}  {100 * e['searched_rate']:4.0f}"
             + f"  {e['pre_generation_ms']['median']:5.0f} {e['pre_generation_ms']['p90']:5.0f}"
             + f" {e['total_ms']['median']:5.0f}  {e['format_errors']:3d} {e['repaired']:3d} {e['errors']:3d}"
         )
     print("pass^5 (all five trials pass), by class")
     for condition, e in out["by_condition"].items():
-        print(f"  {condition:11s}", " ".join(f"{100 * e['by_class'][c]['pass_all_5']:6.0f}" for c in CLASSES))
+        print(f"  {condition:11s}", " ".join(f"{100 * e['by_class'][c]['pass_all_5']:6.0f}" for c in present))
     print("recall pass by continuity (continuing / abrupt), and gold in context")
     for condition, e in out["by_condition"].items():
         c, a = e["by_continuity"]["continuing"], e["by_continuity"]["abrupt"]
@@ -263,6 +304,17 @@ def main() -> None:
     print("paired differences in recall pass rate (percentage points)")
     for name, triple in out["paired_recall_diff"].items():
         print(f"  {name:22s} {pct(triple)}")
+    print("the same contrasts by case: ahead / behind / level of 30, sign-flip p")
+    for name, c in out["case_level"].items():
+        print(f"  {name:22s} {c['ahead']:2d} {c['behind']:2d} {c['level']:2d}  p = {c['sign_flip_p']:.4f}")
+    if "paired_carry_diff" in out:
+        print("control class (answer in the note in play): pass, gold in context, searched")
+        for condition, e in out["by_condition"].items():
+            c = e["by_class"][CARRY]
+            print(f"  {condition:11s} {pct(c['pass'])} gold {100 * c['gold_in_context']:3.0f} srch {100 * c['searched']:3.0f}")
+        print("control class: paired differences (percentage points)")
+        for name, triple in out["paired_carry_diff"].items():
+            print(f"  {name:22s} {pct(triple)}")
 
 
 if __name__ == "__main__":

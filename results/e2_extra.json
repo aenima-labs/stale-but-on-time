@@ -11,17 +11,17 @@
  },
  "tool": {
   "pass_given_gold": [
-   0.968503937007874,
-   127
+   0.9516129032258065,
+   124
   ],
   "pass_given_no_gold": [
    0.0,
-   23
+   26
   ]
  },
  "blocking": {
   "pass_given_gold": [
-   0.896,
+   0.904,
    125
   ],
   "pass_given_no_gold": [
@@ -31,7 +31,7 @@
  },
  "lag1": {
   "pass_given_gold": [
-   0.8285714285714286,
+   0.8571428571428571,
    35
   ],
   "pass_given_no_gold": [
@@ -51,22 +51,32 @@
  },
  "hybrid": {
   "pass_given_gold": [
-   0.9014084507042254,
-   71
+   0.9130434782608695,
+   69
   ],
   "pass_given_no_gold": [
    0.0,
-   79
+   81
   ]
  },
  "pooled": {
   "pass_given_gold": [
-   0.9076212471131639,
-   433
+   0.9088785046728972,
+   428
   ],
   "pass_given_no_gold": [
    0.0,
-   317
+   322
+  ]
+ },
+ "carry_pooled": {
+  "pass_given_gold": [
+   1.0,
+   246
+  ],
+  "pass_given_no_gold": [
+   0.0,
+   4
   ]
  }
 }

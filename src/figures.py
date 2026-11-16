@@ -146,21 +146,25 @@ NAMES = {
     "none": "No memory",
     "tool": "Search tool",
     "blocking": "Blocking retrieval",
-    "prefetch50": "Async, prefetch 50%",
-    "lag1": "Async, lag 1",
-    "hybrid": "Async lag 1 + search",
+    "prefetch50": "Prefetch 50%",
+    "lag1": "Lag 1",
+    "hybrid": "Lag 1 + search",
 }
 ORDER = ["none", "tool", "blocking", "prefetch50", "lag1", "hybrid"]
+# The control class first: the three "asked" classes run from the memory in play,
+# over another memory on the same topic, to a memory on a new topic.
+NEW_NEED = ("asked-continuing", "asked-shift", "unprompted")  # as in e2_analyze
 CLASS_TITLES = {
-    "asked-continuing": "Asked, topic continues",
-    "asked-shift": "Asked, topic shifts",
-    "unprompted": "Unprompted",
-    "abstain": "Must abstain",
+    "asked-carry": "Asked,\nsame memory",
+    "asked-continuing": "Asked,\nsame topic",
+    "asked-shift": "Asked,\nnew topic",
+    "unprompted": "Unprompted\n",
+    "abstain": "Must abstain\n",
 }
 
 
 def fig_classes(e2: dict) -> None:
-    fig, axes = plt.subplots(1, 4, figsize=(WIDTH, 1.95), sharey=True)
+    fig, axes = plt.subplots(1, len(CLASS_TITLES), figsize=(WIDTH, 2.1), sharey=True)
     y = np.arange(len(ORDER))[::-1]
     for ax, (cls, title) in zip(axes, CLASS_TITLES.items(), strict=True):
         triples = [e2["by_condition"][c]["by_class"][cls]["pass"] for c in ORDER]
@@ -235,17 +239,17 @@ ONTIME_SETUPS = (
     ("The product,\nhosted model", f"{E3_HOSTED}/trials.csv", "path_ms", KODAMA_CONDITIONS),
 )
 ONTIME_STYLE = {  # colour: is the loaded record fresh; dashes: a search on the reply path
-    "blocking": (BLUE, "-", "Blocking retrieval"),
-    "tool": (BLUE, (0, (4, 2)), "Search tool"),
-    "lag1": (ORANGE, "-", "Async, lag 1"),
-    "hybrid": (ORANGE, (0, (4, 2)), "Async lag 1 + search"),
-}
+    "blocking": (BLUE, "-", None, "Blocking retrieval"),
+    "tool": (BLUE, (0, (4, 2)), None, "Search tool"),
+    "lag1": (ORANGE, "-", "o", "Lag 1"),
+    "hybrid": (ORANGE, (0, (4, 2)), "o", "Lag 1 + search"),
+}  # circles mark the two conditions that load a lag-1 record, so colour is not the only cue
 ONTIME_MAX_S = 12.0
 
 
 def correct_by_time(rows: list[dict], condition: str, field: str, grid: np.ndarray) -> np.ndarray:
     """Share of recall trials (%) that had a correct reply by each time on the grid."""
-    sub = [r for r in rows if r["condition"] == condition and r["class"] != "abstain"]
+    sub = [r for r in rows if r["condition"] == condition and r["class"] in NEW_NEED]
     done = np.array([float(r[field]) / 1000 if r["passed"] == "True" else np.inf for r in sub])
     done[np.isnan(done)] = np.inf  # a trial that ended in an error has no reply
     return np.array([100 * np.mean(done <= t) for t in grid])
@@ -271,17 +275,19 @@ def fig_ontime() -> None:
     fig, axes = plt.subplots(1, len(ONTIME_SETUPS), figsize=(WIDTH, 2.25), sharey=True)
     for ax, (title, path, field, conds) in zip(axes, ONTIME_SETUPS, strict=True):
         rows = ontime_rows(path)
-        for key, (colour, dashes, _) in ONTIME_STYLE.items():
+        for key, (colour, dashes, marker, _) in ONTIME_STYLE.items():
             ax.plot(grid, correct_by_time(rows, conds[key], field, grid), color=colour,
-                    linestyle=dashes, linewidth=1.5)
+                    linestyle=dashes, linewidth=1.5, marker=marker, markevery=(60, 125),
+                    markersize=3.4, markerfacecolor="white", markeredgewidth=0.9)
         ax.set_title(title, pad=4)
         ax.set_xlim(0, ONTIME_MAX_S)
         ax.set_xticks([0, 3, 6, 9, 12])
         ax.set_ylim(0, 100)
         ax.set_yticks([0, 25, 50, 75, 100])
     axes[0].set_ylabel("recall trials answered\ncorrectly by this time (%)")
-    handles = [plt.Line2D([], [], color=c, linestyle=d, linewidth=1.5, label=label)
-               for c, d, label in ONTIME_STYLE.values()]
+    handles = [plt.Line2D([], [], color=c, linestyle=d, linewidth=1.5, label=label, marker=m,
+                          markersize=3.4, markerfacecolor="white", markeredgewidth=0.9)
+               for c, d, m, label in ONTIME_STYLE.values()]
     fig.legend(handles=handles, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.17),
                handlelength=2.6, columnspacing=1.6)
     fig.supxlabel("seconds after the listener's utterance ends", fontsize=9, y=-0.05)

@@ -686,5 +686,56 @@
    -0.08666666666666667,
    0.10666666666666667
   ]
+ },
+ "case_level": {
+  "blocking-lag1": {
+   "cases": 30,
+   "ahead": 19,
+   "behind": 0,
+   "level": 11,
+   "sign_flip_p": 1.999980000199998e-05
+  },
+  "blocking-prefetch50": {
+   "cases": 30,
+   "ahead": 13,
+   "behind": 0,
+   "level": 17,
+   "sign_flip_p": 0.0003099969000309997
+  },
+  "blocking-tool": {
+   "cases": 30,
+   "ahead": 7,
+   "behind": 2,
+   "level": 21,
+   "sign_flip_p": 0.34925650743492564
+  },
+  "prefetch50-lag1": {
+   "cases": 30,
+   "ahead": 6,
+   "behind": 0,
+   "level": 24,
+   "sign_flip_p": 0.03036969630303697
+  },
+  "tool-lag1": {
+   "cases": 30,
+   "ahead": 19,
+   "behind": 3,
+   "level": 8,
+   "sign_flip_p": 2.999970000299997e-05
+  },
+  "hybrid-lag1": {
+   "cases": 30,
+   "ahead": 21,
+   "behind": 0,
+   "level": 9,
+   "sign_flip_p": 9.99990000099999e-06
+  },
+  "blocking-hybrid": {
+   "cases": 30,
+   "ahead": 4,
+   "behind": 2,
+   "level": 24,
+   "sign_flip_p": 0.9056009439905601
+  }
  }
 }

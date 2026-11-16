@@ -1,0 +1,290 @@
+{
+  "plan": {
+    "run": "e2",
+    "conditions": [
+      "none",
+      "tool",
+      "blocking",
+      "lag1",
+      "prefetch50",
+      "hybrid"
+    ],
+    "trials": {
+      "none": 250,
+      "tool": 250,
+      "blocking": 250,
+      "lag1": 250,
+      "prefetch50": 250,
+      "hybrid": 250
+    },
+    "provider": "ollama",
+    "model": "gemma4:e4b",
+    "embed_provider": "ollama",
+    "embed_model": "nomic-embed-text",
+    "think": false,
+    "machine": null,
+    "date": "2026-11-16"
+  },
+  "profile": {
+    "source": "telemetry of results/e2-cloudrun-l4-timing",
+    "token_method": "measured",
+    "provider": "ollama",
+    "model": "gemma4:e4b"
+  },
+  "matched_profile": true,
+  "prices": {
+    "chat": {
+      "provider": "ollama",
+      "model": "*",
+      "input_per_mtok": 0.0,
+      "cached_input_per_mtok": 0.0,
+      "output_per_mtok": 0.0,
+      "source": "local inference, no per-token charge",
+      "read_on": "2026-11-13"
+    },
+    "embed": {
+      "provider": "ollama",
+      "model": "*",
+      "input_per_mtok": 0.0,
+      "cached_input_per_mtok": 0.0,
+      "output_per_mtok": 0.0,
+      "source": "local inference, no per-token charge",
+      "read_on": "2026-11-13"
+    }
+  },
+  "conditions": {
+    "none": {
+      "trials": 250,
+      "chat_calls": [
+        225.0,
+        250.0,
+        275.0
+      ],
+      "input_tokens": [
+        56750.625,
+        63056.25,
+        69361.875
+      ],
+      "output_tokens": [
+        4421.25,
+        4912.5,
+        5403.75
+      ],
+      "embed_tokens": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        98.75993023125,
+        109.73325581249999,
+        120.70658139374999
+      ]
+    },
+    "tool": {
+      "trials": 250,
+      "chat_calls": [
+        444.375,
+        493.75,
+        543.125
+      ],
+      "input_tokens": [
+        163170.0,
+        181300.0,
+        199430.0
+      ],
+      "output_tokens": [
+        10923.75,
+        12137.5,
+        13351.25
+      ],
+      "embed_tokens": [
+        2244.375,
+        2493.75,
+        2743.125
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        238.561542590625,
+        265.06838065625,
+        291.575218721875
+      ]
+    },
+    "blocking": {
+      "trials": 250,
+      "chat_calls": [
+        225.0,
+        250.0,
+        275.0
+      ],
+      "input_tokens": [
+        88065.0,
+        97850.0,
+        107635.0
+      ],
+      "output_tokens": [
+        6733.125,
+        7481.25,
+        8229.375
+      ],
+      "embed_tokens": [
+        10726.875,
+        11918.75,
+        13110.625
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        147.097083504375,
+        163.44120389375001,
+        179.785324283125
+      ]
+    },
+    "lag1": {
+      "trials": 250,
+      "chat_calls": [
+        225.0,
+        250.0,
+        275.0
+      ],
+      "input_tokens": [
+        87615.0,
+        97350.0,
+        107085.0
+      ],
+      "output_tokens": [
+        5236.875,
+        5818.75,
+        6400.625
+      ],
+      "embed_tokens": [
+        7678.125,
+        8531.25,
+        9384.375
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        123.99332413500002,
+        137.77036015000002,
+        151.547396165
+      ]
+    },
+    "prefetch50": {
+      "trials": 250,
+      "chat_calls": [
+        225.0,
+        250.0,
+        275.0
+      ],
+      "input_tokens": [
+        87581.25,
+        97312.5,
+        107043.75
+      ],
+      "output_tokens": [
+        5709.375,
+        6343.75,
+        6978.125
+      ],
+      "embed_tokens": [
+        9185.625,
+        10206.25,
+        11226.875
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        130.733726113125,
+        145.25969568124998,
+        159.78566524937497
+      ]
+    },
+    "hybrid": {
+      "trials": 250,
+      "chat_calls": [
+        365.625,
+        406.25,
+        446.875
+      ],
+      "input_tokens": [
+        170521.875,
+        189468.75,
+        208415.625
+      ],
+      "output_tokens": [
+        9900.0,
+        11000.0,
+        12100.0
+      ],
+      "embed_tokens": [
+        8364.375,
+        9293.75,
+        10223.125
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        219.177532771875,
+        243.53059196875,
+        267.883651165625
+      ]
+    }
+  },
+  "totals": {
+    "chat_calls": [
+      1710.0,
+      1900.0,
+      2090.0
+    ],
+    "input_tokens": [
+      653703.75,
+      726337.5,
+      798971.25
+    ],
+    "output_tokens": [
+      42924.375,
+      47693.75,
+      52463.125
+    ],
+    "embed_tokens": [
+      49407.375,
+      53651.75,
+      57896.125
+    ],
+    "cost_usd": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "duration_s": [
+      958.3231393462501,
+      1064.8034881625,
+      1171.2838369787498
+    ]
+  },
+  "machine": null,
+  "spends_money": false,
+  "notes": []
+}

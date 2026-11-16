@@ -1,0 +1,822 @@
+{
+  "run": "e2",
+  "conditions": {
+    "none": {
+      "trials": 250,
+      "models": [
+        "ollama/gemma4:e4b",
+        "ollama/nomic-embed-text"
+      ],
+      "latency_ms": {
+        "chat:reply": {
+          "median": 410.9985,
+          "p90": 638.957,
+          "n": 250
+        },
+        "embeddings:index": {
+          "median": 934.005,
+          "p90": 934.005,
+          "n": 1
+        },
+        "reply_path": {
+          "median": 411.173,
+          "p90": 639.1251,
+          "n": 250
+        },
+        "trial": {
+          "median": 411.669,
+          "p90": 639.4234,
+          "n": 250
+        }
+      },
+      "per_trial": {
+        "chat_calls": {
+          "n": 250,
+          "mean": 1.0,
+          "median": 1.0,
+          "p90": 1.0,
+          "sd": 0.0
+        },
+        "input_tokens": {
+          "n": 250,
+          "mean": 252.0,
+          "median": 252.0,
+          "p90": 259.2,
+          "sd": 6.356225800402532
+        },
+        "output_tokens": {
+          "n": 250,
+          "mean": 19.968,
+          "median": 16.0,
+          "p90": 28.0,
+          "sd": 5.592502152103755
+        },
+        "cached_input_tokens": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "reasoning_tokens": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "embed_tokens": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "cost_usd": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "wall_ms": {
+          "n": 250,
+          "mean": 449.536728,
+          "median": 411.669,
+          "p90": 639.4234,
+          "sd": 150.14502504561986
+        },
+        "path_total_ms": {
+          "n": 250,
+          "mean": 445.2280951961875,
+          "median": 411.0620415303856,
+          "p90": 639.0409422107041,
+          "sd": 131.96578404457517
+        }
+      },
+      "totals": {
+        "chat_calls": 250,
+        "input_tokens": 63000,
+        "output_tokens": 4992,
+        "cached_input_tokens": 0,
+        "embed_tokens": 1868,
+        "cost_usd": 0.0,
+        "wall_s": 112.466841,
+        "errors": 0,
+        "chat_calls_without_tokens": 0
+      },
+      "overhead_index": {
+        "embed_tokens": 1868,
+        "cost_usd": 0.0,
+        "calls": 1
+      },
+      "slow_calls": {
+        "count": 0,
+        "max_ms": 0.0,
+        "rule": "chat and query-embedding calls slower than max(5x median, median + 1 s) of their kind"
+      },
+      "ollama_model_loads": {
+        "calls": 251,
+        "calls_with_load": 0,
+        "trials_affected": 0,
+        "threshold_ms": 1000.0
+      },
+      "prices_missing": []
+    },
+    "tool": {
+      "trials": 250,
+      "models": [
+        "ollama/gemma4:e4b",
+        "ollama/nomic-embed-text"
+      ],
+      "latency_ms": {
+        "chat:reply": {
+          "median": 781.2445,
+          "p90": 1091.8664,
+          "n": 248
+        },
+        "chat:tool_offer": {
+          "median": 424.172,
+          "p90": 637.2785,
+          "n": 250
+        },
+        "embeddings:index": {
+          "median": 675.008,
+          "p90": 675.008,
+          "n": 1
+        },
+        "embeddings:query": {
+          "median": 10.981,
+          "p90": 24.3025,
+          "n": 246
+        },
+        "execute_tool": {
+          "median": 11.2825,
+          "p90": 24.448999999999998,
+          "n": 246
+        },
+        "recall:tool": {
+          "median": 11.225,
+          "p90": 24.429000000000002,
+          "n": 246
+        },
+        "reply_path": {
+          "median": 1255.2575000000002,
+          "p90": 1655.5833,
+          "n": 250
+        },
+        "trial": {
+          "median": 1255.608,
+          "p90": 1665.1393,
+          "n": 250
+        }
+      },
+      "per_trial": {
+        "chat_calls": {
+          "n": 250,
+          "mean": 1.992,
+          "median": 2.0,
+          "p90": 2.0,
+          "sd": 0.08926293455821277
+        },
+        "input_tokens": {
+          "n": 250,
+          "mean": 728.82,
+          "median": 735.0,
+          "p90": 754.1,
+          "sd": 40.36454864294402
+        },
+        "output_tokens": {
+          "n": 250,
+          "mean": 49.076,
+          "median": 50.0,
+          "p90": 63.099999999999994,
+          "sd": 10.437720442324967
+        },
+        "cached_input_tokens": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "reasoning_tokens": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "embed_tokens": {
+          "n": 250,
+          "mean": 10.632,
+          "median": 11.0,
+          "p90": 14.0,
+          "sd": 2.953552078348725
+        },
+        "cost_usd": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "wall_ms": {
+          "n": 250,
+          "mean": 1251.340188,
+          "median": 1255.608,
+          "p90": 1665.1393,
+          "sd": 300.7052120961922
+        },
+        "path_total_ms": {
+          "n": 250,
+          "mean": 1248.0666361749172,
+          "median": 1255.1980420248583,
+          "p90": 1655.4474999662489,
+          "sd": 297.4398759914511
+        }
+      },
+      "totals": {
+        "chat_calls": 498,
+        "input_tokens": 182205,
+        "output_tokens": 12269,
+        "cached_input_tokens": 0,
+        "embed_tokens": 4526,
+        "cost_usd": 0.0,
+        "wall_s": 312.918536,
+        "errors": 0,
+        "chat_calls_without_tokens": 0
+      },
+      "overhead_index": {
+        "embed_tokens": 1868,
+        "cost_usd": 0.0,
+        "calls": 1
+      },
+      "slow_calls": {
+        "count": 0,
+        "max_ms": 0.0,
+        "rule": "chat and query-embedding calls slower than max(5x median, median + 1 s) of their kind"
+      },
+      "ollama_model_loads": {
+        "calls": 745,
+        "calls_with_load": 0,
+        "trials_affected": 0,
+        "threshold_ms": 1000.0
+      },
+      "prices_missing": []
+    },
+    "blocking": {
+      "trials": 250,
+      "models": [
+        "ollama/gemma4:e4b",
+        "ollama/nomic-embed-text"
+      ],
+      "latency_ms": {
+        "chat:reply": {
+          "median": 690.6705,
+          "p90": 999.299,
+          "n": 250
+        },
+        "embeddings:index": {
+          "median": 705.815,
+          "p90": 705.815,
+          "n": 1
+        },
+        "embeddings:query": {
+          "median": 11.754000000000001,
+          "p90": 24.2737,
+          "n": 250
+        },
+        "recall:reply_path": {
+          "median": 12.211500000000001,
+          "p90": 24.6636,
+          "n": 250
+        },
+        "reply_path": {
+          "median": 704.0105,
+          "p90": 1013.6456,
+          "n": 250
+        },
+        "trial": {
+          "median": 705.2215000000001,
+          "p90": 1020.8463999999999,
+          "n": 250
+        }
+      },
+      "per_trial": {
+        "chat_calls": {
+          "n": 250,
+          "mean": 1.0,
+          "median": 1.0,
+          "p90": 1.0,
+          "sd": 0.0
+        },
+        "input_tokens": {
+          "n": 250,
+          "mean": 391.2,
+          "median": 391.0,
+          "p90": 407.1,
+          "sd": 13.33232927946442
+        },
+        "output_tokens": {
+          "n": 250,
+          "mean": 29.58,
+          "median": 30.0,
+          "p90": 44.0,
+          "sd": 10.391705836906816
+        },
+        "cached_input_tokens": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "reasoning_tokens": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "embed_tokens": {
+          "n": 250,
+          "mean": 47.14,
+          "median": 47.5,
+          "p90": 55.0,
+          "sd": 6.22860998372167
+        },
+        "cost_usd": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "wall_ms": {
+          "n": 250,
+          "mean": 720.711412,
+          "median": 705.2215000000001,
+          "p90": 1020.8463999999999,
+          "sd": 237.60572074401617
+        },
+        "path_total_ms": {
+          "n": 250,
+          "mean": 717.1468666624278,
+          "median": 703.8717289688066,
+          "p90": 1013.5385082103312,
+          "sd": 233.79478947833118
+        }
+      },
+      "totals": {
+        "chat_calls": 250,
+        "input_tokens": 97800,
+        "output_tokens": 7395,
+        "cached_input_tokens": 0,
+        "embed_tokens": 13653,
+        "cost_usd": 0.0,
+        "wall_s": 180.279805,
+        "errors": 0,
+        "chat_calls_without_tokens": 0
+      },
+      "overhead_index": {
+        "embed_tokens": 1868,
+        "cost_usd": 0.0,
+        "calls": 1
+      },
+      "slow_calls": {
+        "count": 0,
+        "max_ms": 0.0,
+        "rule": "chat and query-embedding calls slower than max(5x median, median + 1 s) of their kind"
+      },
+      "ollama_model_loads": {
+        "calls": 501,
+        "calls_with_load": 0,
+        "trials_affected": 0,
+        "threshold_ms": 1000.0
+      },
+      "prices_missing": []
+    },
+    "lag1": {
+      "trials": 250,
+      "models": [
+        "ollama/gemma4:e4b",
+        "ollama/nomic-embed-text"
+      ],
+      "latency_ms": {
+        "chat:reply": {
+          "median": 581.863,
+          "p90": 937.0084999999999,
+          "n": 250
+        },
+        "embeddings:index": {
+          "median": 696.951,
+          "p90": 696.951,
+          "n": 1
+        },
+        "embeddings:query": {
+          "median": 11.3885,
+          "p90": 25.196199999999997,
+          "n": 250
+        },
+        "recall:off_path": {
+          "median": 11.765,
+          "p90": 25.433899999999998,
+          "n": 250
+        },
+        "reply_path": {
+          "median": 582.0765,
+          "p90": 937.2582999999998,
+          "n": 250
+        },
+        "trial": {
+          "median": 594.75,
+          "p90": 963.1964,
+          "n": 250
+        }
+      },
+      "per_trial": {
+        "chat_calls": {
+          "n": 250,
+          "mean": 1.0,
+          "median": 1.0,
+          "p90": 1.0,
+          "sd": 0.0
+        },
+        "input_tokens": {
+          "n": 250,
+          "mean": 389.98,
+          "median": 390.5,
+          "p90": 409.1,
+          "sd": 14.999986613113169
+        },
+        "output_tokens": {
+          "n": 250,
+          "mean": 24.092,
+          "median": 21.0,
+          "p90": 39.0,
+          "sd": 9.42160296391429
+        },
+        "cached_input_tokens": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "reasoning_tokens": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "embed_tokens": {
+          "n": 250,
+          "mean": 34.52,
+          "median": 35.0,
+          "p90": 42.099999999999994,
+          "sd": 6.206745909018386
+        },
+        "cost_usd": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "wall_ms": {
+          "n": 250,
+          "mean": 616.7753200000001,
+          "median": 594.75,
+          "p90": 963.1964,
+          "sd": 228.0156287943868
+        },
+        "path_total_ms": {
+          "n": 250,
+          "mean": 598.652592683211,
+          "median": 581.9278334965929,
+          "p90": 937.1058410266413,
+          "sd": 222.2455534817307
+        }
+      },
+      "totals": {
+        "chat_calls": 250,
+        "input_tokens": 97495,
+        "output_tokens": 6023,
+        "cached_input_tokens": 0,
+        "embed_tokens": 10498,
+        "cost_usd": 0.0,
+        "wall_s": 154.286644,
+        "errors": 0,
+        "chat_calls_without_tokens": 0
+      },
+      "overhead_index": {
+        "embed_tokens": 1868,
+        "cost_usd": 0.0,
+        "calls": 1
+      },
+      "slow_calls": {
+        "count": 0,
+        "max_ms": 0.0,
+        "rule": "chat and query-embedding calls slower than max(5x median, median + 1 s) of their kind"
+      },
+      "ollama_model_loads": {
+        "calls": 501,
+        "calls_with_load": 0,
+        "trials_affected": 0,
+        "threshold_ms": 1000.0
+      },
+      "prices_missing": []
+    },
+    "prefetch50": {
+      "trials": 250,
+      "models": [
+        "ollama/gemma4:e4b",
+        "ollama/nomic-embed-text"
+      ],
+      "latency_ms": {
+        "chat:reply": {
+          "median": 625.681,
+          "p90": 1053.6462,
+          "n": 250
+        },
+        "embeddings:index": {
+          "median": 810.462,
+          "p90": 810.462,
+          "n": 1
+        },
+        "embeddings:query": {
+          "median": 11.678,
+          "p90": 29.535899999999998,
+          "n": 250
+        },
+        "recall:off_path": {
+          "median": 12.155000000000001,
+          "p90": 29.880899999999997,
+          "n": 250
+        },
+        "reply_path": {
+          "median": 625.8205,
+          "p90": 1053.8149,
+          "n": 250
+        },
+        "trial": {
+          "median": 642.15,
+          "p90": 1079.9112,
+          "n": 250
+        }
+      },
+      "per_trial": {
+        "chat_calls": {
+          "n": 250,
+          "mean": 1.0,
+          "median": 1.0,
+          "p90": 1.0,
+          "sd": 0.0
+        },
+        "input_tokens": {
+          "n": 250,
+          "mean": 389.9,
+          "median": 391.0,
+          "p90": 406.2,
+          "sd": 15.31758838904561
+        },
+        "output_tokens": {
+          "n": 250,
+          "mean": 26.512,
+          "median": 24.0,
+          "p90": 43.0,
+          "sd": 10.643636785237659
+        },
+        "cached_input_tokens": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "reasoning_tokens": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "embed_tokens": {
+          "n": 250,
+          "mean": 40.72,
+          "median": 40.5,
+          "p90": 47.19999999999999,
+          "sd": 5.650603265942169
+        },
+        "cost_usd": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "wall_ms": {
+          "n": 250,
+          "mean": 725.031348,
+          "median": 642.15,
+          "p90": 1079.9112,
+          "sd": 657.3879111788009
+        },
+        "path_total_ms": {
+          "n": 250,
+          "mean": 702.6561506427824,
+          "median": 625.7458745967597,
+          "p90": 1053.704970702529,
+          "sd": 652.2004329776169
+        }
+      },
+      "totals": {
+        "chat_calls": 250,
+        "input_tokens": 97475,
+        "output_tokens": 6628,
+        "cached_input_tokens": 0,
+        "embed_tokens": 12048,
+        "cost_usd": 0.0,
+        "wall_s": 181.333493,
+        "errors": 0,
+        "chat_calls_without_tokens": 0
+      },
+      "overhead_index": {
+        "embed_tokens": 1868,
+        "cost_usd": 0.0,
+        "calls": 1
+      },
+      "slow_calls": {
+        "count": 1,
+        "max_ms": 10071.028,
+        "rule": "chat and query-embedding calls slower than max(5x median, median + 1 s) of their kind"
+      },
+      "ollama_model_loads": {
+        "calls": 501,
+        "calls_with_load": 0,
+        "trials_affected": 0,
+        "threshold_ms": 1000.0
+      },
+      "prices_missing": []
+    },
+    "hybrid": {
+      "trials": 250,
+      "models": [
+        "ollama/gemma4:e4b",
+        "ollama/nomic-embed-text"
+      ],
+      "latency_ms": {
+        "chat:reply": {
+          "median": 935.3435,
+          "p90": 1362.196,
+          "n": 156
+        },
+        "chat:tool_offer": {
+          "median": 647.6210000000001,
+          "p90": 1144.1764999999998,
+          "n": 250
+        },
+        "embeddings:index": {
+          "median": 896.828,
+          "p90": 896.828,
+          "n": 1
+        },
+        "embeddings:query": {
+          "median": 12.829,
+          "p90": 32.6008,
+          "n": 349
+        },
+        "execute_tool": {
+          "median": 10.39,
+          "p90": 29.3744,
+          "n": 99
+        },
+        "recall:off_path": {
+          "median": 13.3575,
+          "p90": 33.80329999999999,
+          "n": 250
+        },
+        "recall:tool": {
+          "median": 10.365,
+          "p90": 29.347600000000003,
+          "n": 99
+        },
+        "reply_path": {
+          "median": 1278.1565,
+          "p90": 2246.3813999999998,
+          "n": 250
+        },
+        "trial": {
+          "median": 1305.0884999999998,
+          "p90": 2270.9797,
+          "n": 250
+        }
+      },
+      "per_trial": {
+        "chat_calls": {
+          "n": 250,
+          "mean": 1.624,
+          "median": 2.0,
+          "p90": 2.0,
+          "sd": 0.4853516921369914
+        },
+        "input_tokens": {
+          "n": 250,
+          "mean": 767.62,
+          "median": 874.0,
+          "p90": 1014.0,
+          "sd": 228.107218677646
+        },
+        "output_tokens": {
+          "n": 250,
+          "mean": 44.588,
+          "median": 43.0,
+          "p90": 72.1,
+          "sd": 19.534190394728675
+        },
+        "cached_input_tokens": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "reasoning_tokens": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "embed_tokens": {
+          "n": 250,
+          "mean": 38.736,
+          "median": 38.0,
+          "p90": 52.0,
+          "sd": 9.6913359227648
+        },
+        "cost_usd": {
+          "n": 250,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "sd": 0.0
+        },
+        "wall_ms": {
+          "n": 250,
+          "mean": 1436.8932680000003,
+          "median": 1305.0884999999998,
+          "p90": 2270.9797,
+          "sd": 944.6132822392108
+        },
+        "path_total_ms": {
+          "n": 250,
+          "mean": 1411.9389058314264,
+          "median": 1278.0968750594184,
+          "p90": 2246.311595500447,
+          "sd": 940.7789539018854
+        }
+      },
+      "totals": {
+        "chat_calls": 406,
+        "input_tokens": 191905,
+        "output_tokens": 11147,
+        "cached_input_tokens": 0,
+        "embed_tokens": 11552,
+        "cost_usd": 0.0,
+        "wall_s": 359.289178,
+        "errors": 0,
+        "chat_calls_without_tokens": 0
+      },
+      "overhead_index": {
+        "embed_tokens": 1868,
+        "cost_usd": 0.0,
+        "calls": 1
+      },
+      "slow_calls": {
+        "count": 3,
+        "max_ms": 10114.279,
+        "rule": "chat and query-embedding calls slower than max(5x median, median + 1 s) of their kind"
+      },
+      "ollama_model_loads": {
+        "calls": 756,
+        "calls_with_load": 0,
+        "trials_affected": 0,
+        "threshold_ms": 1000.0
+      },
+      "prices_missing": []
+    }
+  },
+  "run_totals": {
+    "trials": 1500,
+    "chat_calls": 1904,
+    "input_tokens": 729880,
+    "output_tokens": 48454,
+    "embed_tokens": 54145,
+    "cost_usd": 0.0,
+    "wall_s": 1300.574497
+  },
+  "prices": "pricing/prices.yaml"
+}

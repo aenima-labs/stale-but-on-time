@@ -1,0 +1,60 @@
+id: recall-unprompted/amb-flood
+title: They're saying the lower town might flood if the surge comes in with the tide.
+description: unprompted after a continuing lead-in.
+targets:
+- recall-unprompted
+polarity: normal
+actors:
+  user: grandchild
+fixture:
+  type: asyncrecall.memorome
+  version: '1'
+  digest: sha256:0a91e52430ada86f04a875cccf2e7e6e18f09485bb8c6342c9204645d1af6089
+  privacy: public
+  config:
+    memorome: tessaly-v1
+    history:
+    - role: user
+      content: The storm last night was something. The harbour road is closed.
+    - role: assistant
+      content: Storms were part of life in Hollin Reach. Her father watched them from the lighthouse at
+        Carrow Point.
+actions:
+- kind: message
+  role: user
+  content: They're saying the lower town might flood if the surge comes in with the tide.
+expected_outcomes:
+- 'Mention a fact from: c-flood.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - '1953'
+    - church hall
+    - wet wool
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: In January 1953 a storm surge flooded the lower town. Tessaly, then eleven, spent two nights
+      in the church hall of St Brannoc and remembered the smell of wet wool ever after.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:unprompted
+- continuity:continuing
+- gold:c-flood
