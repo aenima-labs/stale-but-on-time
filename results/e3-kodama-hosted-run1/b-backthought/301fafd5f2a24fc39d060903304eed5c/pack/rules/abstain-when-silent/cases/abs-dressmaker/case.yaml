@@ -1,0 +1,36 @@
+id: abstain-when-silent/abs-dressmaker
+title: Who made the wedding dress?
+description: abstain after a continuing lead-in.
+targets:
+- abstain-when-silent
+polarity: negative
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: I saw the square from her wedding dress in the quilt.
+    - role: assistant
+      content: Yes, the quilt was pieced from her mother's dressmaking offcuts and includes that square.
+    lead_in_gap_s: 1.43
+actions:
+- kind: message
+  role: user
+  content: Who made the wedding dress?
+expected_outcomes:
+- Say that the memories do not contain the answer.
+evaluators: []
+selftests: []
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:abstain
+- continuity:continuing

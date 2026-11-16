@@ -1,0 +1,11 @@
+   0.0s T2 none waiting  got message, handler holds 40000 ms
+   0.0s T1 pull waiting  got message, handler holds 10 ms
+   5.0s T1 pull waiting  deleting consumer (as NATS does for an inactive non-durable one)
+   5.0s T1 pull waiting  next error: nats: consumer deleted
+   6.0s T1 pull waiting  next error: nats: messages iterator closed
+  10.0s T1 pull waiting  recreating consumer and publishing 3 messages (as a Kodama restart would)
+  33.0s T2 none waiting  deleting consumer (as NATS does for an inactive non-durable one)
+  50.0s T2 none waiting  recreating consumer and publishing 3 messages (as a Kodama restart would)
+  70.0s T2 none waiting  next error: nats: no heartbeat received
+  80.0s T1 pull waiting  end: messages handled 1 of 4
+ 120.0s T2 none waiting  end: messages handled 1 of 4

@@ -1,0 +1,11 @@
+    zz_nopull_check_test.go:19:    0.0s got {"id":"row-1"}; the handler now holds it for 40 s, so no pull request is sent
+    zz_nopull_check_test.go:19:   33.0s consumer deleted while no pull request was waiting
+    zz_nopull_check_test.go:19:   40.0s handler done; row-2 published; calling Next
+2026/11/15 21:02:01 WARN check: next message error consumer=embed-conversation err="nats: no heartbeat received"
+2026/11/15 21:02:02 INFO check: resumed consumer=embed-conversation
+    zz_nopull_check_test.go:19:   71.1s got {"id":"row-1"}
+    zz_nopull_check_test.go:19:   71.1s got {"id":"row-2"}
+    zz_nopull_check_test.go:19:   71.1s consumer exists again, durable="embed-conversation"
+--- PASS: TestCheckNoPullWaiting (71.13s)
+PASS
+ok  	github.com/aenimalabs/kodama/internal/queue	71.763s

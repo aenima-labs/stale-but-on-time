@@ -1,0 +1,23 @@
+format_version: 4
+id: async-recall
+version: 1.0.0
+title: Asynchronous recall in a live conversation
+description: Recall when asked, recall unprompted, and abstention, each after a scripted two-utterance
+  lead-in that either continues or abruptly changes the topic. Ported to Kodama from the pack of the paper
+  'Stale but on Time'; the cases, lead-ins and key facts are unchanged.
+license: Apache-2.0
+publisher:
+  name: kodama-eval
+created_at: '2026-11-10T00:00:00Z'
+reviewed_at: '2026-11-10T00:00:00Z'
+required_capabilities:
+- message.text
+- kodama.memorome
+permissions:
+- fixture:kodama.memorome
+tags:
+- recall
+- memory
+- fictional-fixtures
+evaluators: []
+selftests: []

@@ -1,0 +1,50 @@
+# Docker Desktop restart on 2026-11-15, collected 23:55 UTC. Times are UTC. The home directory is shown as ~.
+
+## 1. macOS log: Docker Desktop launched from its update-install folder
+2026-11-15 23:43:55.093 Df runningboardd[404:3cd94df] [com.apple.runningboard:process] Checking PreventLaunch: global:0 exPath:~/Library/Application Support/com.docker.install/in_progress/Docker.app/Contents/MacOS/com.docker.backend predicates:(null) allow:(null)
+2026-11-15 23:43:55.224 Df loginwindow[400:11ce] [com.apple.loginwindow.logging:Standard] -[Application _updateInformationInternal] | Got App URL: file://~/Library/Application%20Support/com.docker.install/in_progress/Docker.app/
+
+## 2. Docker VM log (vm/init.log): engine shutdown and new start
+{"component":"control","level":"info","msg":"gracefully shutting down","time":"2026-11-15T23:44:00.869187711Z"}
+{"component":"init","level":"info","msg":"stopping command","time":"2026-11-15T23:44:00.869399627Z"}
+{"component":"init","level":"info","msg":"sending SIGTERM","time":"2026-11-15T23:44:00.869492169Z"}
+{"component":"command","level":"info","msg":"Processing signal 'terminated'","time":"2026-11-15T23:44:00.870449336Z"}
+{"component":"init","level":"info","msg":"dockerd exited due to explicit Stop() call","time":"2026-11-15T23:44:04.578235421Z"}
+{"component":"init","level":"info","msg":"stopping services","time":"2026-11-15T23:44:04.578709296Z"}
+{"component":"command","level":"info","msg":"Starting up","time":"2026-11-15T23:44:14.720273625Z"}
+{"commit":"70efc0e","component":"command","containerd-snapshotter":true,"level":"info","msg":"Docker daemon","storage-driver":"overlayfs","time":"2026-11-15T23:44:15.071036416Z","version":"29.9.3"}
+{"component":"command","level":"info","msg":"API listen on /var/run/docker.raw.sock","time":"2026-11-15T23:44:15.511941667Z"}
+
+## 3. Containers of all local stacks after the restart (docker inspect)
+kodama-audio-1 status=exited exit=0 finished=2026-11-15T23:44:02.415928045Z started=2026-11-10T12:53:08.090744552Z restart=no
+kodama-kodama-1 status=running exit=0 finished=2026-11-15T23:44:03.938254421Z started=2026-11-15T23:44:14.995760333Z restart=unless-stopped
+kodama-livekit-1 status=exited exit=0 finished=2026-11-15T23:44:00.927277752Z started=2026-11-10T12:54:37.055612926Z restart=no
+kodama-postgres-1 status=exited exit=0 finished=2026-11-15T23:44:00.957905294Z started=2026-11-10T12:54:36.982744676Z restart=no
+kodama-recall-hosted-kodama-1 status=exited exit=0 finished=2026-11-15T23:44:00.931812502Z started=2026-11-15T22:37:22.112474263Z restart=no
+kodama-recall-hosted-livekit-1 status=exited exit=0 finished=2026-11-15T23:44:00.906143377Z started=2026-11-15T20:54:12.289571426Z restart=no
+kodama-recall-hosted-postgres-1 status=exited exit=0 finished=2026-11-15T23:44:00.942133544Z started=2026-11-15T20:54:12.442596634Z restart=no
+kodama-recall-kodama-1 status=running exit=0 finished=2026-11-15T23:44:03.970135879Z started=2026-11-15T23:44:14.996213791Z restart=unless-stopped
+kodama-recall-listener-1 status=exited exit=0 finished=2026-11-15T23:44:02.078000545Z started=2026-11-12T17:16:57.247310916Z restart=no
+kodama-recall-livekit-1 status=exited exit=0 finished=2026-11-15T23:44:00.928167752Z started=2026-11-11T12:55:11.208611595Z restart=no
+kodama-recall-postgres-1 status=exited exit=0 finished=2026-11-15T23:44:00.991780836Z started=2026-11-11T12:55:11.140305637Z restart=no
+
+## 4. Kodama log, from the last turn to the end
+21743:time=2026-11-15T23:43:47.063Z level=DEBUG msg="provenance: cite recorded" evidence_id=compiled/events/c-dog.md
+21744:time=2026-11-15T23:43:47.063Z level=INFO msg="agent reply" session=72aa49f5-a7af-4c3f-8c4e-dd004f748467 cited=true llm_ttft_ms=7580 llm_total_ms=7580 reply="They had a wire-haired terrier named Pilchard. He rode in the bow of her father\xe2"
+21745:time=2026-11-15T23:43:47.064Z level=INFO msg=turn.latency session=72aa49f5-a7af-4c3f-8c4e-dd004f748467 llm_ttft_ms=7580 llm_total_ms=7580 send_ms=0 total_ms=9815 text_mode=true path_ms=9813 recall_collect_ms=0 recall_pages=4
+21795:time=2026-11-15T23:43:47.441Z level=INFO msg=backthought kind=recall.semantic conversation=72aa49f5-a7af-4c3f-8c4e-dd004f748467 turn_seq=4 generation=4 written=false elapsed_ms=378
+21796:time=2026-11-15T23:44:00.881Z level=INFO msg="api server shutting down"
+21797:time=2026-11-15T23:44:00.882Z level=WARN msg="embed consumer: handler error" consumer=embed-memorome-page id=380a1b37-bce5-49b5-a58b-67552d5aaa4d err="embed memorome page: openai embed: request: Post \"https://api.openai.com/v1/embeddings\": context canceled"
+
+## 5. Versions
+Docker Desktop app: 4.99.0 (build 245822)
+Engine now: server 29.9.3, API 1.56
+modified Nov  5 17:15:08 2026  /Applications/Docker.app/Contents/Info.plist
+modified Nov  9 12:47:42 2026  /Applications/Docker.app/Contents/MacOS/com.docker.backend
+modified Nov  9 12:47:57 2026  /Applications/Docker.app/Contents/Resources/linuxkit/desktop.img
+modified Nov  9 12:47:58 2026  /Applications/Docker.app/Contents/Resources/linuxkit/kernel
+VM kernel in the boot log of the VM that ran until 23:44 (booted 2026-11-10): Linux version 7.0.14-linuxkit
+VM kernel in the boot log of the VM started 23:44:13: Linux version 7.0.14-linuxkit
+born Oct  5 09:49:16 2026  modified Nov  9 12:47:36 2026  /Applications/Docker.app/Contents
+modified Nov 15 23:44:11 2026  /Applications
+The previous engine start is not in the surviving VM logs (the VM had run since 2026-11-10). The engine ships in linuxkit/desktop.img, unchanged since 2026-11-09.
