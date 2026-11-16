@@ -18,6 +18,10 @@ e1 = json.loads((ROOT / "results" / "e1_summary.json").read_text())
 e2 = json.loads((ROOT / "results" / "e2_summary.json").read_text())
 extra = json.loads((ROOT / "results" / "e2_extra.json").read_text())
 trials = list(csv.DictReader(open(ROOT / "results" / "e2_trials.csv")))
+# The main run without its control class: the 40 cases that every other run also has.
+# Shares of trials with a search and times to a reply are taken from these, so that
+# they compare with the other runs.
+trials40 = [r for r in trials if r["class"] != "asked-carry"]
 
 macros: dict[str, str] = {}
 
@@ -46,6 +50,12 @@ def signed(x: float) -> str:
 
 def pctci(t: list[float]) -> str:
     return f"[{100 * t[1]:.0f}, {100 * t[2]:.0f}]"
+
+
+def pct_with_ci(t: list[float]) -> str:
+    """A rate with its interval for a table cell; the interval is left out when every
+    case gave the same result and it has no width."""
+    return pct(t[0]) if t[1] == t[2] else f"{pct(t[0])} {pctci(t)}"
 
 
 # ---------------------------------------------------------------- Experiment 1
@@ -115,7 +125,7 @@ for cond, tag in TAG.items():
     put(f"Rec{tag}CI", pctci(e["recall_pass"]))
     put(f"Gold{tag}", pct(e["gold_in_context"][0]))
     put(f"Abst{tag}", pct(e["by_class"]["abstain"]["pass"][0]))
-    put(f"Srch{tag}", pct(e["searched_rate"]))
+    put(f"Srch{tag}", pct(float(np.mean([r["searched"] == "True" for r in trials40 if r["condition"] == cond]))))
     for cls, ctag in (("asked-continuing", "Cont"), ("asked-shift", "Shift"), ("unprompted", "Unp")):
         put(f"{ctag}{tag}", pct(e["by_class"][cls]["pass"][0]))
     o = e["asked_outcomes"]
@@ -253,7 +263,7 @@ def class_rate(rows: list[dict], cond: str, cls: str, field: str) -> str:
     return pct(float(np.mean([r[field] == "True" for r in sub])))
 
 
-robust = {"e2": (e2, trials)}
+robust = {"e2": (e2, trials40)}
 for run, prefix in ROBUST.items():
     summary, rows = load_run(run)
     robust[run] = (summary, rows)
@@ -299,7 +309,7 @@ for run, prefix in ROBUST.items():
     put(f"{prefix}RegradedRecall", str(sum(rb[c]["regraded"]["recall_to_fail"] for c in rb)))
     put(f"{prefix}RegradedAbstain", str(sum(rb[c]["regraded"]["abstain_to_pass"] for c in rb)))
 for cond, tag in TAG.items():
-    put(f"Reply{tag}", f"{reply_seconds('e2', trials, cond):.1f}")
+    put(f"Reply{tag}", f"{reply_seconds('e2', trials40, cond):.1f}")
 put("RegradedRecall", str(sum(bc[c]["regraded"]["recall_to_fail"] for c in bc)))
 put("RegradedAbstain", str(sum(bc[c]["regraded"]["abstain_to_pass"] for c in bc)))
 put("RobustRuns", str(len(ROBUST)))
@@ -426,7 +436,7 @@ import figures  # noqa: E402  (the set-ups and the curve of Figure "correct by t
 CLOUD = "e2-cloudrun-l4-timing"  # one trial per case on a cloud GPU; timing only
 deploy = [
     ("Agent, local models, laptop", bc["blocking"]["pre_generation_ms"]["median"],
-     [reply_seconds("e2", trials, c) for c in ("lag1", "blocking", "tool", "hybrid")]),
+     [reply_seconds("e2", trials40, c) for c in ("lag1", "blocking", "tool", "hybrid")]),
 ]
 if (ROOT / "results" / f"{CLOUD}_summary.json").exists():
     cloud_summary, cloud_rows = load_run(CLOUD)
@@ -500,9 +510,9 @@ rows = []
 for cond in ORDER:
     e = bc[cond]
     carry = e["by_class"][CARRY]["pass"]
-    cells = [NAMES[cond], f"{pct(e['recall_pass'][0])} {pctci(e['recall_pass'])}"]
+    cells = [NAMES[cond], pct_with_ci(e["recall_pass"])]
     cells += [pct(e["by_class"][c]["pass"][0]) for c in ("asked-continuing", "asked-shift", "unprompted")]
-    cells += [f"{pct(carry[0])} {pctci(carry)}", pct(e["by_class"]["abstain"]["pass"][0])]
+    cells += [pct_with_ci(carry), pct(e["by_class"]["abstain"]["pass"][0])]
     cells += ([str(gold_cases(trials, cond, NEW_NEED)[0]), str(gold_cases(trials, cond, (CARRY,))[0])]
               if cond in ("blocking", "prefetch50", "lag1", "hybrid") else ["--", "--"])
     cells += [f"{e['pre_generation_ms']['median']:.0f}"]
@@ -529,7 +539,7 @@ for cond in ORDER:
     cells = [NAMES[cond]]
     for c in (CARRY, "asked-continuing", "asked-shift", "unprompted", "abstain"):
         b = e["by_class"][c]
-        cells.append(f"{pct(b['pass'][0])} {pctci(b['pass'])}")
+        cells.append(pct_with_ci(b["pass"]))
         cells.append(pct(b["pass_all_5"]))
     rows.append(" & ".join(cells) + r" \\")
 (PAPER / "tab-e2-classes.tex").write_text("\n".join(rows) + "\n")
@@ -563,7 +573,8 @@ for run, (summary, run_rows) in robust.items():
         cells += [pct(e["by_class"][c]["pass"][0])
                   for c in ("asked-continuing", "asked-shift", "unprompted", "abstain")]
         cells += [pct(e["asked_outcomes"]["other_answer"]),
-                  pct(e["searched_rate"]) if cond in ("tool", "hybrid") else "--",
+                  pct(float(np.mean([r["searched"] == "True" for r in run_rows if r["condition"] == cond])))
+                  if cond in ("tool", "hybrid") else "--",
                   f"{sec:.1f}" if sec is not None else r"--$^{\dagger}$"]
         rows.append(" & ".join(cells) + r" \\")
 (PAPER / "tab-robust.tex").write_text("\n".join(rows) + "\n")
