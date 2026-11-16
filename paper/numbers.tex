@@ -527,6 +527,84 @@
 \newcommand{\KOffpathMs}{19}
 \newcommand{\KLlmTool}{3.9}
 \newcommand{\KLlmBlock}{1.7}
+\newcommand{\KHTrials}{1,000}
+\newcommand{\KHTrialsPerCase}{5}
+\newcommand{\KHModel}{gpt-5.6-luna}
+\newcommand{\KHErrors}{2}
+\newcommand{\KHTemplated}{23}
+\newcommand{\KHRecTool}{65}
+\newcommand{\KHRecToolCI}{[48, 81]}
+\newcommand{\KHGoldTool}{0}
+\newcommand{\KHSrchTool}{75}
+\newcommand{\KHPathTool}{9.1}
+\newcommand{\KHAbstToolTool}{74}
+\newcommand{\KHUnpTool}{0}
+\newcommand{\KHCostTool}{0.06}
+\newcommand{\KHCallsTool}{6.2}
+\newcommand{\KHRecLag}{39}
+\newcommand{\KHRecLagCI}{[23, 56]}
+\newcommand{\KHGoldLag}{37}
+\newcommand{\KHSrchLag}{0}
+\newcommand{\KHPathLag}{5.6}
+\newcommand{\KHAbstToolLag}{90}
+\newcommand{\KHUnpLag}{70}
+\newcommand{\KHCostLag}{0.04}
+\newcommand{\KHCallsLag}{4.9}
+\newcommand{\KHRecBlock}{95}
+\newcommand{\KHRecBlockCI}{[88, 100]}
+\newcommand{\KHGoldBlock}{96}
+\newcommand{\KHSrchBlock}{0}
+\newcommand{\KHPathBlock}{6.1}
+\newcommand{\KHAbstToolBlock}{88}
+\newcommand{\KHUnpBlock}{98}
+\newcommand{\KHCostBlock}{0.04}
+\newcommand{\KHCallsBlock}{5.0}
+\newcommand{\KHRecBoth}{97}
+\newcommand{\KHRecBothCI}{[90, 100]}
+\newcommand{\KHGoldBoth}{97}
+\newcommand{\KHSrchBoth}{0}
+\newcommand{\KHPathBoth}{6.1}
+\newcommand{\KHAbstToolBoth}{90}
+\newcommand{\KHUnpBoth}{100}
+\newcommand{\KHCostBoth}{0.04}
+\newcommand{\KHCallsBoth}{5.0}
+\newcommand{\KHRecHyb}{89}
+\newcommand{\KHRecHybCI}{[77, 99]}
+\newcommand{\KHGoldHyb}{37}
+\newcommand{\KHSrchHyb}{66}
+\newcommand{\KHPathHyb}{8.9}
+\newcommand{\KHAbstToolHyb}{78}
+\newcommand{\KHUnpHyb}{70}
+\newcommand{\KHCostHyb}{0.07}
+\newcommand{\KHCallsHyb}{6.2}
+\newcommand{\KHDiffBlockLag}{56}
+\newcommand{\KHDiffBlockLagCI}{[39, 73]}
+\newcommand{\KHDiffBlockTool}{31}
+\newcommand{\KHDiffBlockToolCI}{[12, 49]}
+\newcommand{\KHDiffBothBlock}{1}
+\newcommand{\KHDiffBothBlockCI}{[0, 3]}
+\newcommand{\KHDiffHybTool}{24}
+\newcommand{\KHDiffHybToolCI}{[10, 40]}
+\newcommand{\KHDiffHybLag}{49}
+\newcommand{\KHDiffHybLagCI}{[33, 67]}
+\newcommand{\KHGuessMax}{16}
+\newcommand{\KHAbstToolMin}{74}
+\newcommand{\KHAbstToolMax}{90}
+\newcommand{\KHBlockMs}{292}
+\newcommand{\KHCostRun}{0.56}
+\newcommand{\KHCostRunUpper}{1.31}
+\newcommand{\KHFirstTrials}{800}
+\newcommand{\KHFirstErrors}{0}
+\newcommand{\KHFirstRecTool}{65}
+\newcommand{\KHFirstRecLag}{41}
+\newcommand{\KHFirstRecBlock}{97}
+\newcommand{\KHFirstRecBoth}{96}
+\newcommand{\KHFirstDiffBlockLag}{56}
+\newcommand{\KHFirstDiffBlockLagCI}{[39, 73]}
+\newcommand{\KHFirstCostRun}{0.42}
+\newcommand{\KPilotTrials}{200}
+\newcommand{\KPilotRecBlock}{97}
+\newcommand{\KPilotRecLag}{40}
 \newcommand{\CloudRecallMs}{8}
 \newcommand{\CloudTrials}{240}
 \newcommand{\CloudCost}{0.25}
@@ -536,13 +614,18 @@
 \newcommand{\CloudReplyHyb}{0.8}
 \newcommand{\RecallWaitMin}{8}
 \newcommand{\RecallWaitMax}{336}
-\newcommand{\DeploySetups}{4}
+\newcommand{\DeploySetups}{5}
 \newcommand{\OnTimeLeadLap}{0}
 \newcommand{\OnTimePassedLap}{0.7}
 \newcommand{\OnTimeLeadHs}{4}
 \newcommand{\OnTimePassedHs}{1.8}
 \newcommand{\OnTimeLeadK}{1}
 \newcommand{\OnTimePassedK}{4.0}
+\newcommand{\OnTimeLeadKH}{2}
+\newcommand{\OnTimePassedKH}{6.0}
 \newcommand{\OnTimeLeadMax}{4}
 \newcommand{\OnTimeLeadMaxAt}{1.5}
 \newcommand{\OnTimeLeadMaxLost}{0.2}
+\newcommand{\OnTimeLeadMaxSetup}{with the reference agent on hosted models}
+\newcommand{\LagCeilMin}{19}
+\newcommand{\LagCeilMax}{39}

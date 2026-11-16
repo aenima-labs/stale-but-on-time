@@ -46,6 +46,7 @@ SUBS = [
     ("https://aenimalabs.com", "https://anonymous.invalid"),
     ("aenimalabs.com", "anonymous.invalid"),
     ("aenima-labs", "anonymous"),
+    ("github.com/aenimalabs/", "github.com/anonymous/"),
     ("You are Kodama,", "You are [PRODUCT NAME],"),
 ]
 # The product name. As a word of its own it is a name someone says or reads; inside an
@@ -55,11 +56,14 @@ PRODUCT = [
     (re.compile(r"KODAMA"), "PRODUCT"),
     (re.compile(r"Kodama"), "Product"),
     (re.compile(r"kodama"), "product"),
+    # The author's first name, in the notes of the hosted runs.
+    (re.compile(r"(?m)(^|[.!?:*]\s+)Anton\b"), r"\1The author"),
+    (re.compile(r"\bAnton\b"), "the author"),
 ]
 VENDORED = [(re.compile(r"kodama", re.IGNORECASE), "product")]
-IDENTIFYING = re.compile(rb"aenima|kodama|chernov|lebeg|/Users/", re.IGNORECASE)
+IDENTIFYING = re.compile(rb"aenima|kodama|chernov|lebeg|\banton\b|/Users/", re.IGNORECASE)
 TEXT_SUFFIXES = {".py", ".md", ".tex", ".yaml", ".yml", ".toml", ".sh", ".json", ".jsonl",
-                  ".bib", ".txt", ".csv", ".log", ".cff", ".tf", ".hcl"}
+                  ".bib", ".txt", ".csv", ".log", ".cff", ".tf", ".hcl", ".go", ".mod", ".sum"}
 TEXT_NAMES = {"LICENSE", "Dockerfile"}
 SKIP = {"paper/main.pdf", "src/make_anon.py", "uv.lock"}
 # Exploratory runs that the paper does not report (spoken trials and their audio,
@@ -94,7 +98,7 @@ from its bundles but not re-run.
 |---|---|
 | `pack-src/`, `pack/`, `fixtures/` | Fictional memory store and the 40-case test pack |
 | `src/` | Retriever, Experiment 1 (LoCoMo replay), Experiment 2 (reference agent and runner), Experiment 3 (analysis of the runs against the product), figures |
-| `results/` | Per-utterance retrievals (E1), sealed run bundles with every trial (E2: `e2`, `e2-think`, `e2-qwen3`, `e2-anthropic`; E3: `e3-product`, `e3-product-run1`), summaries |
+| `results/` | Per-utterance retrievals (E1), sealed run bundles with every trial (E2: `e2`, `e2-think`, `e2-qwen3`, `e2-anthropic`; E3: `e3-product`, `e3-product-run1`, `e3-product-hosted`, with the pilot, the first run and the stopped attempts of the hosted run in the other `e3-product-hosted-*` folders, each with a `NOTE.md`), summaries |
 | `vendor/circumstances/` | The evaluation framework, vendored at the commit used |
 | `paper/` | LaTeX sources, generated tables, number macros |
 
