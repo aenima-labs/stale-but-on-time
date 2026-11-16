@@ -74,6 +74,7 @@ RULES = {
 }
 CLASS_RULE = {
     "asked-continuing": ("recall-when-asked", "positive"),
+    "asked-carry": ("recall-when-asked", "positive"),
     "asked-shift": ("recall-when-asked", "recovery"),
     "unprompted": ("recall-unprompted", "normal"),
     "abstain": ("abstain-when-silent", "negative"),
@@ -102,7 +103,7 @@ def main() -> None:
         {
             "format_version": 4,
             "id": "aenima/async-recall",
-            "version": "1.0.0",
+            "version": "1.1.0",
             "title": "Asynchronous recall in a live conversation",
             "description": (
                 "Recall when asked, recall unprompted, and abstention, each after a "
@@ -112,7 +113,7 @@ def main() -> None:
             "license": "Apache-2.0",
             "publisher": {"name": "Aenima Labs", "url": "https://aenimalabs.com"},
             "created_at": "2026-11-10T00:00:00Z",
-            "reviewed_at": "2026-11-10T00:00:00Z",
+            "reviewed_at": "2026-11-16T00:00:00Z",
             "required_capabilities": ["message.text"],
             "permissions": [],
             "tags": ["recall", "memory", "fictional-fixtures"],
