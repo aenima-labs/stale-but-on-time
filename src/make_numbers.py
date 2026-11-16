@@ -461,6 +461,14 @@ for key, prefix in (("bringup", "KBring"), ("hosted_bringup", "KHBring")):
             put(f"{prefix}{tag}{ptag}CI", f"[{signed(100 * d[1])}, {signed(100 * d[2])}]" if d else "")
 # The share of unprompted trials with a search in the shipped condition, for comparison.
 put("KSrchUnpTool", pct(k2["by_condition"]["a-tool"]["by_class"]["unprompted"]["searched"]))
+# The shipped search tool on the version of the sixth condition, once that run is delivered;
+# until then, and for the hosted models (one version throughout), the reported run.
+base = e3.get("bringup_baseline")
+ship = base["by_condition"]["a-tool"] if base else k2["by_condition"]["a-tool"]
+put("KShipUnp", pct(ship["by_class"]["unprompted"]["pass"][0]))
+put("KShipSrchUnp", pct(ship["by_class"]["unprompted"]["searched"]))
+put("KShipRec", pct(ship["recall_pass"][0]))
+put("KShipVersion", "on the same version" if base else "in the reported run, on an earlier version")
 put("KHSrchUnpTool", pct(kh["by_condition"]["a-tool"]["by_class"]["unprompted"]["searched"]))
 
 # ------------------------------------ what waiting costs in time (Section 8)

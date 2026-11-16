@@ -51,6 +51,9 @@ BRINGUP = "a2-tool-bringup"
 ADDONS = {
     "carry": ("e3-kodama-carry", CONDITIONS),
     "hosted_carry": ("e3-kodama-hosted-carry", CONDITIONS),
+    # The search tool as shipped, run again on the local model on the version of the sixth
+    # condition (the reported local run is on an earlier version of the product).
+    "bringup_baseline": ("e3-kodama-toolprompt-baseline", ("a-tool",)),
     "bringup": ("e3-kodama-toolprompt", (BRINGUP,)),
     "hosted_bringup": ("e3-kodama-hosted-toolprompt", (BRINGUP,)),
 }
@@ -318,6 +321,9 @@ def main() -> None:
             continue
         shipped = [r for r in load(ROOT / "results" / RUNS[base], RUN_CONDITIONS.get(base, CONDITIONS))[0]
                    if r["condition"] == "a-tool"]
+        if name == "bringup" and "bringup_baseline" in kept:
+            shipped = kept["bringup_baseline"]
+        result[name]["shipped_from"] = "same version" if name != "bringup" or "bringup_baseline" in kept else "earlier version"
         both = kept[name] + shipped
         result[name]["against_shipped"] = {
             "new_need": paired_diff([r for r in both if r["class"] in NEW_NEED], BRINGUP, "a-tool", rng),

@@ -2397,5 +2397,126 @@
     0.0
    ]
   }
+ },
+ "bringup": {
+  "n_trials": 200,
+  "meta": {
+   "a2-tool-bringup": {
+    "backend_commit": "3101c5b",
+    "started_at": "2026-11-16T12:45:21+00:00",
+    "finished_at": "2026-11-16T13:11:24+00:00",
+    "trials": 200,
+    "model": "gemma4:e4b"
+   }
+  },
+  "by_condition": {
+   "a2-tool-bringup": {
+    "trials": 200,
+    "errors": 0,
+    "templated": 12,
+    "regraded_recall_to_fail": 1,
+    "searched_rate": 0.77,
+    "path_ms_median": 4464.0,
+    "by_class": {
+     "abstain": {
+      "pass": [
+       0.2,
+       0.03950000000000046,
+       0.42000000000000004
+      ],
+      "searched": 1.0,
+      "gold_in_wm": 0.0,
+      "gold_cases": 0,
+      "cases": 10
+     },
+     "asked-continuing": {
+      "pass": [
+       0.8800000000000001,
+       0.72,
+       1.0
+      ],
+      "searched": 1.0,
+      "gold_in_wm": 0.0,
+      "gold_cases": 0,
+      "cases": 10
+     },
+     "asked-shift": {
+      "pass": [
+       0.9199999999999999,
+       0.8,
+       1.0
+      ],
+      "searched": 0.92,
+      "gold_in_wm": 0.0,
+      "gold_cases": 0,
+      "cases": 10
+     },
+     "unprompted": {
+      "pass": [
+       0.1,
+       0.0,
+       0.21999999999999997
+      ],
+      "searched": 0.16,
+      "gold_in_wm": 0.0,
+      "gold_cases": 0,
+      "cases": 10
+     }
+    },
+    "recall_pass": [
+     0.6333333333333333,
+     0.48000000000000004,
+     0.7799999999999999
+    ],
+    "abstain": {
+     "abstain_recorded": 0.2,
+     "abstain_text": 0.46,
+     "declined_any": 0.52
+    }
+   }
+  },
+  "cost": {
+   "conditions": {
+    "a2-tool-bringup": {
+     "trials": 200,
+     "model_calls_per_trial": 3.05,
+     "input_tokens_per_trial": 7613.85,
+     "output_tokens_per_trial": 87.53,
+     "cost_usd_per_trial": 0.0,
+     "cost_usd": 0.0,
+     "cost_usd_upper": 0.0
+    }
+   },
+   "cost_usd": 0.0,
+   "cost_usd_upper": 0.0,
+   "embeddings_usd": 0.0,
+   "total_usd": 0.0,
+   "total_usd_upper": 0.0
+  },
+  "shipped_from": "earlier version",
+  "against_shipped": {
+   "new_need": [
+    3.7007434154171884e-18,
+    -0.04666666666666666,
+    0.05333333333333334
+   ],
+   "unprompted": [
+    0.0,
+    -0.1,
+    0.12000000000000002
+   ]
+  },
+  "blocking_against_bringup": {
+   "new_need": [
+    0.20666666666666664,
+    0.03333333333333333,
+    0.37333333333333335
+   ],
+   "unprompted": [
+    0.6399999999999999,
+    0.41999999999999993,
+    0.86
+   ]
+  }
  }
 }

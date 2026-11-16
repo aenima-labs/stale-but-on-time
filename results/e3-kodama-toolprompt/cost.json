@@ -1,0 +1,100 @@
+{
+  "prices_usd_per_mtok": {
+    "gpt-5.6-luna": {
+      "input": 0.2,
+      "cached_input": 0.02,
+      "output": 1.2
+    },
+    "text-embedding-3-small": {
+      "input": 0.02,
+      "cached_input": 0.02,
+      "output": 0.0
+    },
+    "claude-sonnet-5": {
+      "input": 2.0,
+      "cached_input": 0.2,
+      "output": 10.0
+    },
+    "gemma4:e4b": {
+      "input": 0.0,
+      "cached_input": 0.0,
+      "output": 0.0
+    },
+    "nomic-embed-text": {
+      "input": 0.0,
+      "cached_input": 0.0,
+      "output": 0.0
+    }
+  },
+  "price_source": {
+    "openai": "https://developers.openai.com/api/docs/pricing (standard tier), read 2026-11-13",
+    "anthropic": "https://platform.claude.com/docs/en/about-claude/pricing, read 2026-11-13",
+    "local": "the host's Ollama; no API cost"
+  },
+  "unmetered_call_upper_bound": {
+    "input_tokens": {
+      "local reply": 3621
+    },
+    "output_tokens": "max_output_tokens (OpenAI) or max_tokens (Anthropic) of the call"
+  },
+  "request_fields_sent": {
+    "local reply": [
+      {
+        "effort": null,
+        "temperature": null
+      }
+    ]
+  },
+  "conditions": {
+    "a2-tool-bringup": {
+      "model_calls": 610,
+      "unmetered_calls": 0,
+      "input_tokens": 1522770,
+      "cached_input_tokens": 1368681,
+      "output_tokens": 17506,
+      "reasoning_tokens": 0,
+      "trials": 200,
+      "by_provider": {
+        "local": {
+          "calls": 610,
+          "input_tokens": 1522770,
+          "cached_input_tokens": 1368681,
+          "output_tokens": 17506,
+          "cost_usd": 0.0
+        }
+      },
+      "cost_usd": 0.0,
+      "cost_usd_upper": 0.0,
+      "cost_usd_per_trial": 0.0
+    }
+  },
+  "run": {
+    "model_calls": 610,
+    "unmetered_calls": 0,
+    "input_tokens": 1522770,
+    "cached_input_tokens": 1368681,
+    "output_tokens": 17506,
+    "reasoning_tokens": 0,
+    "trials": 200,
+    "by_provider": {
+      "local": {
+        "calls": 610,
+        "input_tokens": 1522770,
+        "cached_input_tokens": 1368681,
+        "output_tokens": 17506,
+        "cost_usd": 0.0
+      }
+    },
+    "cost_usd": 0.0,
+    "cost_usd_upper": 0.0,
+    "cost_usd_per_trial": 0.0
+  },
+  "embeddings_estimate": {
+    "tokens": 673107,
+    "cost_usd": 0.0,
+    "method": "fixture memorome characters per trial plus twice the case's user-line characters, at 4 characters per token",
+    "model": "nomic-embed-text"
+  },
+  "total_usd": 0.0,
+  "total_usd_upper": 0.0
+}
