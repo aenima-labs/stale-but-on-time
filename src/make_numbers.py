@@ -78,6 +78,11 @@ for tag, key in (("Fresh", "L0"), ("Lone", "L1"), ("Lthree", "L3"), ("Phalf", "P
     put(f"Hind{tag}", f"{h[key][0]:.3f}")
     put(f"Hind{tag}CI", f"[{h[key][1]:.3f}, {h[key][2]:.3f}]")
 put("HindRetained", pct((h["L1"][0] - h["RAND"][0]) / (h["L0"][0] - h["RAND"][0])))
+# Two fresh retrievals that differ only in the window: the reference for the overlap.
+wc = e1["window_change"]
+put("OvFreshWfive", f2(wc["w3_vs_w5"][0]))
+put("OvFreshWfiveCI", ci2(wc["w3_vs_w5"]))
+put("OvFreshWone", f2(wc["w3_vs_w1"][0]))
 t = e1["timing"]
 cost = t["cost_s"]
 
@@ -328,6 +333,15 @@ put("KHFirstDiffBlockLag", signed(100 * d[0]))
 put("KHFirstDiffBlockLagCI", f"[{signed(100 * d[1])}, {signed(100 * d[2])}]")
 put("KHFirstCostRun", f"{kf['cost']['total_usd']:.2f}")
 kp = e3["pilot"]
+# Trials whose pass the word-start rule turned into a failure, per run.
+def regraded(run: dict) -> str:
+    return str(sum(e["regraded_recall_to_fail"] for e in run["by_condition"].values()))
+
+
+put("KRegraded", str(int(regraded(k2)) + int(regraded(k1))))
+put("KHRegraded", regraded(kh))
+put("KHFirstRegraded", regraded(kf))
+put("KPilotRegraded", regraded(kp))
 put("KPilotTrials", str(kp["n_trials"]))
 put("KPilotRecBlock", pct(kp["by_condition"]["c-blocking"]["recall_pass"][0]))
 put("KPilotRecLag", pct(kp["by_condition"]["b-backthought"]["recall_pass"][0]))
@@ -381,8 +395,7 @@ SETUP_WORDS = {"Lap": "with the reference agent on local models",
                "Hs": "with the reference agent on hosted models",
                "K": "in the product on local models", "KH": "in the product on hosted models"}
 for (title, path, field, conds), tag in zip(figures.ONTIME_SETUPS, ("Lap", "Hs", "K", "KH"), strict=True):
-    with open(ROOT / "results" / path, newline="") as handle:
-        ot_rows = list(csv.DictReader(handle))
+    ot_rows = figures.ontime_rows(path)
     lag_curve = figures.correct_by_time(ot_rows, conds["lag1"], field, grid)
     block_curve = figures.correct_by_time(ot_rows, conds["blocking"], field, grid)
     lead = lag_curve - block_curve

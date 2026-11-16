@@ -151,6 +151,18 @@ def main() -> None:
         timing[f"{label}/L1_slack_s_median"] = float(np.median(slack["L1"]))
     out["timing"] = timing
 
+    # 5. A reference for the overlap itself: two fresh retrievals of the same
+    #    utterance that differ only in the ambience window. Neither is stale, so
+    #    their disagreement is what a change of query of this size does to the
+    #    top five without any lag. (Computed last, so that the bootstrap draws of
+    #    the sections above are unchanged.)
+    out["window_change"] = {
+        f"w3_vs_w{w}": boot_ci(
+            np.array([overlap(r["topk"]["w3/L0"], r["topk"][f"w{w}/L0"], 5) for r in rows]), conv, rng
+        )
+        for w in (1, 5)
+    }
+
     (ROOT / "results" / "e1_summary.json").write_text(json.dumps(out, indent=1))
 
     def show(key: str, triple: list) -> None:
@@ -170,6 +182,9 @@ def main() -> None:
     print("hindsight overlap@5 with memories retrieved by the next utterance (w=3)")
     for cond in ("L0", "L1", "L2", "L3", "P50", "P75", "RAND"):
         show(cond, out["hindsight"][cond])
+    print("fresh against fresh: overlap@5 of the w=3 set with another window, no lag")
+    for key, triple in out["window_change"].items():
+        show(key, triple)
     for label in RATES:
         print(label, "median utterance s", round(timing[f"{label}/utterance_s_median"], 1),
               "median L1 slack s", round(timing[f"{label}/L1_slack_s_median"], 1))
