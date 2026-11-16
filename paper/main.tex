@@ -147,16 +147,7 @@ The first class is a control, and it was added last. An independent review of an
 
 \paragraph{Grading.} In the four recall classes a trial passes if the reply contains one of a small set of strings that identify the remembered fact, for example a name or a year that appears in the target note and nowhere in the lead-in. A string must begin a word. In the abstain class the agent returns its reply together with a flag that says whether it declined to answer; a trial passes if the flag is set or the reply declines in words. Both grades are automatic. The last paragraph of this section says how far they were checked.
 
-\paragraph{Conditions.} One agent is run six ways. The prompt (Appendix~\ref{app:prompt}), model, retriever, window ($w=3$) and number of notes shown ($k=4$) are the same throughout.
-
-\begin{itemize}[leftmargin=*,itemsep=1pt,topsep=3pt]
-\item \emph{No memory.} Nothing is loaded.
-\item \emph{Search tool.} Nothing is loaded; the model may call a search tool once before it replies.
-\item \emph{Blocking retrieval.} Recall on the ambience including the incoming utterance, on the reply path.
-\item \emph{Lag 1.} The record was computed from the lead-in only.
-\item \emph{Prefetch 50\%.} The record was computed from the lead-in and the first half of the incoming utterance.
-\item \emph{Lag 1 + search.} The lag-1 record is loaded and the search tool is also offered.
-\end{itemize}
+\paragraph{Conditions.} One agent is run six ways; the prompt (Appendix~\ref{app:prompt}), model, retriever, window ($w=3$) and number of notes shown ($k=4$) are the same throughout. With \emph{no memory}, nothing is loaded. With the \emph{search tool}, nothing is loaded and the model may call a search tool once before it replies. \emph{Blocking retrieval} runs recall on the reply path, on the ambience including the incoming utterance. \emph{Lag 1} loads a record computed from the lead-in only, and \emph{prefetch 50\%} one computed from the lead-in and the first half of the incoming utterance. \emph{Lag 1 + search} loads the lag-1 record and also offers the search tool.
 
 \paragraph{Model and runs.} The agent is \texttt{gemma4:e4b} (8 billion parameters, 4-bit quantised) served by Ollama on one laptop, at temperature 0.7 with its reasoning mode switched off. Each case runs five times with fixed seeds: \EtwoPerCondition{} trials per condition and \EtwoTrials{} in all. This is the main run. The 40 cases of the other four classes had been run in full six days earlier with other seeds; that first run agrees with the main run to within \FrMaxDiff{} points in every condition (Appendix~\ref{app:e2}). We debugged the harness on four cases before the first run, which led us to switch off the reasoning mode and to use the model's native tool calls; the 40 cases and their evaluators were not changed afterwards.
 

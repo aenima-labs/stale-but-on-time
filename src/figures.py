@@ -164,7 +164,7 @@ CLASS_TITLES = {
 
 
 def fig_classes(e2: dict) -> None:
-    fig, axes = plt.subplots(1, len(CLASS_TITLES), figsize=(WIDTH, 2.1), sharey=True)
+    fig, axes = plt.subplots(1, len(CLASS_TITLES), figsize=(WIDTH, 1.85), sharey=True)
     y = np.arange(len(ORDER))[::-1]
     for ax, (cls, title) in zip(axes, CLASS_TITLES.items(), strict=True):
         triples = [e2["by_condition"][c]["by_class"][cls]["pass"] for c in ORDER]
@@ -272,7 +272,7 @@ def ontime_rows(path: str) -> list[dict]:
 
 def fig_ontime() -> None:
     grid = np.linspace(0, ONTIME_MAX_S, 1001)
-    fig, axes = plt.subplots(1, len(ONTIME_SETUPS), figsize=(WIDTH, 2.25), sharey=True)
+    fig, axes = plt.subplots(1, len(ONTIME_SETUPS), figsize=(WIDTH, 2.0), sharey=True)
     for ax, (title, path, field, conds) in zip(axes, ONTIME_SETUPS, strict=True):
         rows = ontime_rows(path)
         for key, (colour, dashes, marker, _) in ONTIME_STYLE.items():
