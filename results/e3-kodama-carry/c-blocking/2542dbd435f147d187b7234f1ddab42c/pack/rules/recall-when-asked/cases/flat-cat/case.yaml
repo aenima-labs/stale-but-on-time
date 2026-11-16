@@ -1,0 +1,58 @@
+id: recall-when-asked/flat-cat
+title: Wasn't there a cat?
+description: asked-continuing after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: I visited her flat on Quay Street a few times near the end.
+    - role: assistant
+      content: She moved there in 2016, to the second floor, with a view of the harbour mouth.
+    lead_in_gap_s: 1.14
+actions:
+- kind: message
+  role: user
+  content: Wasn't there a cat?
+expected_outcomes:
+- 'Mention a fact from: l-cat.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - Vellum
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Her last companion was a grey cat named Vellum, who slept in the paper drawer. Vellum came
+      from the lifeboat station, where she had been living under the slipway.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-continuing
+- continuity:continuing
+- gold:l-cat

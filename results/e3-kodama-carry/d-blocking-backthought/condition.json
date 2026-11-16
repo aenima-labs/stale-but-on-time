@@ -1,0 +1,78 @@
+{
+  "condition": "d-blocking-backthought",
+  "mode": "text",
+  "recall": {
+    "backthought": "on",
+    "blocking": "on",
+    "tool": "off"
+  },
+  "speech": {
+    "clauses": "off"
+  },
+  "sampling": {
+    "provider": "ollama-local",
+    "model": "gemma4:e4b",
+    "sent": {},
+    "model_defaults": {
+      "temperature": 1.0,
+      "top_k": 64.0,
+      "top_p": 0.95
+    },
+    "effective": {
+      "temperature": 1.0,
+      "top_k": 64.0,
+      "top_p": 0.95
+    }
+  },
+  "settings_id": "a7f90548-4426-4f81-906a-26eb5c521e0c",
+  "settings_document": {
+    "models": {
+      "stt": {
+        "model": "base.en",
+        "language": "en",
+        "provider": "local"
+      },
+      "tts": {
+        "voice": "en_US-lessac-medium",
+        "provider": "local",
+        "fallback_provider": "off"
+      },
+      "vad": {
+        "speech_threshold": 500,
+        "end_silence_frames": 45
+      },
+      "recall": {
+        "tool": "off",
+        "blocking": "on",
+        "backthought": "on"
+      },
+      "speech": {
+        "clauses": "off"
+      },
+      "realtime": {
+        "model": "gemma4:e4b",
+        "provider": "ollama-local"
+      },
+      "memorizer": {
+        "model": "gemma4:e4b",
+        "provider": "ollama-local"
+      }
+    },
+    "prompts": {
+      "friend": 1,
+      "interviewer": 1,
+      "schema_default": 1
+    }
+  },
+  "started_at": "2026-11-16T12:33:42+00:00",
+  "finished_at": "2026-11-16T12:38:30+00:00",
+  "seconds": 288,
+  "trials": 50,
+  "trials_per_case": 5,
+  "stop_after": 3,
+  "passed": 48,
+  "bundle": "e172157d4803414b8d9bd909bd0df237",
+  "seal_problems": [],
+  "backend_commit": "3101c5b",
+  "api": "http://127.0.0.1:18082"
+}

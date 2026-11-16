@@ -2169,5 +2169,233 @@
    "total_usd": 0.1228,
    "total_usd_upper": 0.2708
   }
+ },
+ "carry": {
+  "n_trials": 250,
+  "meta": {
+   "a-tool": {
+    "backend_commit": "3101c5b",
+    "started_at": "2026-11-16T12:17:56+00:00",
+    "finished_at": "2026-11-16T12:24:13+00:00",
+    "trials": 50,
+    "model": "gemma4:e4b"
+   },
+   "b-backthought": {
+    "backend_commit": "3101c5b",
+    "started_at": "2026-11-16T12:24:15+00:00",
+    "finished_at": "2026-11-16T12:28:57+00:00",
+    "trials": 50,
+    "model": "gemma4:e4b"
+   },
+   "c-blocking": {
+    "backend_commit": "3101c5b",
+    "started_at": "2026-11-16T12:28:59+00:00",
+    "finished_at": "2026-11-16T12:33:40+00:00",
+    "trials": 50,
+    "model": "gemma4:e4b"
+   },
+   "d-blocking-backthought": {
+    "backend_commit": "3101c5b",
+    "started_at": "2026-11-16T12:33:42+00:00",
+    "finished_at": "2026-11-16T12:38:30+00:00",
+    "trials": 50,
+    "model": "gemma4:e4b"
+   },
+   "e-backthought-tool": {
+    "backend_commit": "3101c5b",
+    "started_at": "2026-11-16T12:38:32+00:00",
+    "finished_at": "2026-11-16T12:44:19+00:00",
+    "trials": 50,
+    "model": "gemma4:e4b"
+   }
+  },
+  "by_condition": {
+   "a-tool": {
+    "trials": 50,
+    "errors": 0,
+    "templated": 0,
+    "regraded_recall_to_fail": 0,
+    "searched_rate": 1.0,
+    "path_ms_median": 4565.5,
+    "by_class": {
+     "asked-carry": {
+      "pass": [
+       0.9199999999999999,
+       0.8,
+       1.0
+      ],
+      "searched": 1.0,
+      "gold_in_wm": 0.0,
+      "gold_cases": 0,
+      "cases": 10
+     }
+    }
+   },
+   "b-backthought": {
+    "trials": 50,
+    "errors": 0,
+    "templated": 0,
+    "regraded_recall_to_fail": 0,
+    "searched_rate": 0.0,
+    "path_ms_median": 2751.5,
+    "by_class": {
+     "asked-carry": {
+      "pass": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "searched": 0.0,
+      "gold_in_wm": 1.0,
+      "gold_cases": 10,
+      "cases": 10
+     }
+    }
+   },
+   "c-blocking": {
+    "trials": 50,
+    "errors": 0,
+    "templated": 2,
+    "regraded_recall_to_fail": 0,
+    "searched_rate": 0.0,
+    "path_ms_median": 2696.5,
+    "by_class": {
+     "asked-carry": {
+      "pass": [
+       0.8800000000000001,
+       0.6799999999999999,
+       1.0
+      ],
+      "searched": 0.0,
+      "gold_in_wm": 1.0,
+      "gold_cases": 10,
+      "cases": 10
+     }
+    }
+   },
+   "d-blocking-backthought": {
+    "trials": 50,
+    "errors": 0,
+    "templated": 0,
+    "regraded_recall_to_fail": 0,
+    "searched_rate": 0.0,
+    "path_ms_median": 2875.0,
+    "by_class": {
+     "asked-carry": {
+      "pass": [
+       0.96,
+       0.8799999999999999,
+       1.0
+      ],
+      "searched": 0.0,
+      "gold_in_wm": 1.0,
+      "gold_cases": 10,
+      "cases": 10
+     }
+    }
+   },
+   "e-backthought-tool": {
+    "trials": 50,
+    "errors": 0,
+    "templated": 1,
+    "regraded_recall_to_fail": 0,
+    "searched_rate": 0.8,
+    "path_ms_median": 4201.5,
+    "by_class": {
+     "asked-carry": {
+      "pass": [
+       0.9800000000000001,
+       0.9400000000000001,
+       1.0
+      ],
+      "searched": 0.8,
+      "gold_in_wm": 1.0,
+      "gold_cases": 10,
+      "cases": 10
+     }
+    }
+   }
+  },
+  "cost": {
+   "conditions": {
+    "a-tool": {
+     "trials": 50,
+     "model_calls_per_trial": 3.8,
+     "input_tokens_per_trial": 9600.98,
+     "output_tokens_per_trial": 104.46,
+     "cost_usd_per_trial": 0.0,
+     "cost_usd": 0.0,
+     "cost_usd_upper": 0.0
+    },
+    "b-backthought": {
+     "trials": 50,
+     "model_calls_per_trial": 1.96,
+     "input_tokens_per_trial": 3755.32,
+     "output_tokens_per_trial": 43.54,
+     "cost_usd_per_trial": 0.0,
+     "cost_usd": 0.0,
+     "cost_usd_upper": 0.0
+    },
+    "c-blocking": {
+     "trials": 50,
+     "model_calls_per_trial": 2.0,
+     "input_tokens_per_trial": 3822.02,
+     "output_tokens_per_trial": 45.68,
+     "cost_usd_per_trial": 0.0,
+     "cost_usd": 0.0,
+     "cost_usd_upper": 0.0
+    },
+    "d-blocking-backthought": {
+     "trials": 50,
+     "model_calls_per_trial": 2.02,
+     "input_tokens_per_trial": 3942.56,
+     "output_tokens_per_trial": 44.72,
+     "cost_usd_per_trial": 0.0,
+     "cost_usd": 0.0,
+     "cost_usd_upper": 0.0
+    },
+    "e-backthought-tool": {
+     "trials": 50,
+     "model_calls_per_trial": 3.22,
+     "input_tokens_per_trial": 9246.96,
+     "output_tokens_per_trial": 83.84,
+     "cost_usd_per_trial": 0.0,
+     "cost_usd": 0.0,
+     "cost_usd_upper": 0.0
+    }
+   },
+   "cost_usd": 0.0,
+   "cost_usd_upper": 0.0,
+   "embeddings_usd": 0.0,
+   "total_usd": 0.0,
+   "total_usd_upper": 0.0
+  },
+  "paired_diff": {
+   "c-blocking|b-backthought": [
+    -0.12,
+    -0.32,
+    0.0
+   ],
+   "c-blocking|a-tool": [
+    -0.04,
+    -0.3,
+    0.16
+   ],
+   "d-blocking-backthought|c-blocking": [
+    0.07999999999999999,
+    0.0,
+    0.2
+   ],
+   "e-backthought-tool|a-tool": [
+    0.06,
+    -0.039999999999999994,
+    0.2
+   ],
+   "e-backthought-tool|b-backthought": [
+    -0.019999999999999997,
+    -0.059999999999999984,
+    0.0
+   ]
+  }
  }
 }

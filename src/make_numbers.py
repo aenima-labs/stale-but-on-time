@@ -428,6 +428,41 @@ put("KPilotTrials", str(kp["n_trials"]))
 put("KPilotRecBlock", pct(kp["by_condition"]["c-blocking"]["recall_pass"][0]))
 put("KPilotRecLag", pct(kp["by_condition"]["b-backthought"]["recall_pass"][0]))
 
+# ----------------- later runs of Experiment 3: control cases and the sixth condition
+# A run that has not been delivered yet shows as "??" in the manuscript.
+MISSING = r"\textbf{??}"
+BRINGUP = "a2-tool-bringup"
+for key, prefix in (("carry", "KCarry"), ("hosted_carry", "KHCarry")):
+    run = e3.get(key)
+    put(f"{prefix}Trials", str(run["n_trials"]) if run else MISSING)
+    put(f"{prefix}Errors", str(sum(e["errors"] for e in run["by_condition"].values())) if run else MISSING)
+    for cond, tag in KTAG.items():
+        c = run["by_condition"][cond]["by_class"]["asked-carry"] if run else None
+        put(f"{prefix}{tag}", pct(c["pass"][0]) if c else MISSING)
+        put(f"{prefix}{tag}CI", pctci(c["pass"]) if c else "")
+        put(f"{prefix}GoldCases{tag}", str(c["gold_cases"]) if c else MISSING)
+    d = run["paired_diff"]["c-blocking|b-backthought"] if run else None
+    put(f"{prefix}DiffBlockLag", signed(100 * d[0]) if d else MISSING)
+    put(f"{prefix}DiffBlockLagCI", f"[{signed(100 * d[1])}, {signed(100 * d[2])}]" if d else "")
+for key, prefix in (("bringup", "KBring"), ("hosted_bringup", "KHBring")):
+    run = e3.get(key)
+    e = run["by_condition"][BRINGUP] if run else None
+    put(f"{prefix}Trials", str(run["n_trials"]) if run else MISSING)
+    put(f"{prefix}Rec", pct(e["recall_pass"][0]) if e else MISSING)
+    put(f"{prefix}RecCI", pctci(e["recall_pass"]) if e else "")
+    put(f"{prefix}Unp", pct(e["by_class"]["unprompted"]["pass"][0]) if e else MISSING)
+    put(f"{prefix}SrchUnp", pct(e["by_class"]["unprompted"]["searched"]) if e else MISSING)
+    put(f"{prefix}Path", f"{e['path_ms_median'] / 1000:.1f}" if e else MISSING)
+    put(f"{prefix}Guess", pct(1 - e["abstain"]["declined_any"]) if e else MISSING)
+    for name, tag in (("against_shipped", "VsShipped"), ("blocking_against_bringup", "BlockVs")):
+        for part, ptag in (("new_need", "Rec"), ("unprompted", "Unp")):
+            d = run[name][part] if run else None
+            put(f"{prefix}{tag}{ptag}", signed(100 * d[0]) if d else MISSING)
+            put(f"{prefix}{tag}{ptag}CI", f"[{signed(100 * d[1])}, {signed(100 * d[2])}]" if d else "")
+# The share of unprompted trials with a search in the shipped condition, for comparison.
+put("KSrchUnpTool", pct(k2["by_condition"]["a-tool"]["by_class"]["unprompted"]["searched"]))
+put("KHSrchUnpTool", pct(kh["by_condition"]["a-tool"]["by_class"]["unprompted"]["searched"]))
+
 # ------------------------------------ what waiting costs in time (Section 8)
 # One row per set-up: the wait for recall on the reply path, and the median time
 # to a complete reply in the four conditions that load or search memories.
@@ -582,16 +617,42 @@ for run, (summary, run_rows) in robust.items():
 KNAMES = {"a-tool": "Search tool (shipped)", "b-backthought": "Lag 1",
           "c-blocking": "Blocking retrieval", "d-blocking-backthought": "Blocking + lag 1",
           "e-backthought-tool": "Lag 1 + search"}
+def carry_cell(key: str, cond: str) -> str:
+    run = e3.get(key)
+    return pct(run["by_condition"][cond]["by_class"]["asked-carry"]["pass"][0]) if run else MISSING
+
+
+def bringup_row(key: str, hosted: bool) -> list[str]:
+    """The sixth condition as a table row, or nothing while its run is not delivered."""
+    run = e3.get(key)
+    if not run:
+        return []
+    e = run["by_condition"][BRINGUP]
+    cells = ["Search tool + sentence", f"{pct(e['recall_pass'][0])} {pctci(e['recall_pass'])}"]
+    cells += [pct(e["by_class"][c]["pass"][0]) for c in ("asked-continuing", "asked-shift", "unprompted")]
+    cells += ["--", "--", pct(e["searched_rate"])]
+    if hosted:
+        c = run["cost"]["conditions"][BRINGUP]
+        cells += [pct(e["abstain"]["abstain_recorded"]), f"{e['path_ms_median'] / 1000:.1f}",
+                  f"{c['model_calls_per_trial']:.1f}", f"{100 * c['cost_usd_per_trial']:.2f}"]
+    else:
+        cells += [pct(e["abstain"]["abstain_recorded"]), pct(e["abstain"]["abstain_text"]),
+                  f"{e['path_ms_median'] / 1000:.1f}"]
+    return [r"\addlinespace[2pt]", " & ".join(cells) + r" \\"]
+
+
 rows = []
 for cond in ("a-tool", "c-blocking", "b-backthought", "d-blocking-backthought", "e-backthought-tool"):
     e = k2["by_condition"][cond]
     cells = [KNAMES[cond], f"{pct(e['recall_pass'][0])} {pctci(e['recall_pass'])}"]
     cells += [pct(e["by_class"][c]["pass"][0]) for c in ("asked-continuing", "asked-shift", "unprompted")]
+    cells += [carry_cell("carry", cond)]
     cells += [pct(e["gold_in_wm"][0]) if cond != "a-tool" else "--",
               pct(e["searched_rate"]) if "tool" in cond else "--",
               pct(e["abstain"]["abstain_recorded"]), pct(e["abstain"]["abstain_text"]),
               f"{e['path_ms']['median'] / 1000:.1f}"]
     rows.append(" & ".join(cells) + r" \\")
+rows += bringup_row("bringup", hosted=False)
 (PAPER / "tab-e3.tex").write_text("\n".join(rows) + "\n")
 
 rows = []
@@ -600,12 +661,14 @@ for cond in ("a-tool", "c-blocking", "b-backthought", "d-blocking-backthought", 
     c = kh["cost"]["conditions"][cond]
     cells = [KNAMES[cond], f"{pct(e['recall_pass'][0])} {pctci(e['recall_pass'])}"]
     cells += [pct(e["by_class"][cls]["pass"][0]) for cls in ("asked-continuing", "asked-shift", "unprompted")]
+    cells += [carry_cell("hosted_carry", cond)]
     cells += [pct(e["gold_in_wm"][0]) if cond != "a-tool" else "--",
               pct(e["searched_rate"]) if "tool" in cond else "--",
               pct(e["abstain"]["abstain_recorded"]),
               f"{e['path_ms']['median'] / 1000:.1f}",
               f"{c['model_calls_per_trial']:.1f}", f"{100 * c['cost_usd_per_trial']:.2f}"]
     rows.append(" & ".join(cells) + r" \\")
+rows += bringup_row("hosted_bringup", hosted=True)
 (PAPER / "tab-e3-hosted.tex").write_text("\n".join(rows) + "\n")
 
 rows = []
