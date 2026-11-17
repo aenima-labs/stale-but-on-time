@@ -73,7 +73,7 @@ def fig_staleness(e1: dict) -> None:
     conds = ["L6", "L5", "L4", "L3", "L2", "L1", "P25", "P50", "P75"]
     labels = ["6", "5", "4", "3", "2", "1", "25%", "50%", "75%", "100%"]
     x = np.arange(len(labels))
-    fig, ax = plt.subplots(figsize=(WIDTH, 2.5))
+    fig, ax = plt.subplots(figsize=(WIDTH, 2.25))
     for w in (1, 3, 5):
         triples = [e1["agreement"][f"k5/w{w}/{c}"] for c in conds]
         mean = [t[0] for t in triples] + [1.0]
