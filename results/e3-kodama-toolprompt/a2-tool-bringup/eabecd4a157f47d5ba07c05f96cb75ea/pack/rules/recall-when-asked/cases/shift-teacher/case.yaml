@@ -1,0 +1,59 @@
+id: recall-when-asked/shift-teacher
+title: Unrelated, but who was the teacher she studied with in Japan?
+description: asked-shift after a abrupt lead-in.
+targets:
+- recall-when-asked
+polarity: recovery
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: Mum says Grandma couldn't stand celery.
+    - role: assistant
+      content: She picked it out of everything, and she took her tea black with a slice of lemon.
+    lead_in_gap_s: 3.14
+actions:
+- kind: message
+  role: user
+  content: Unrelated, but who was the teacher she studied with in Japan?
+expected_outcomes:
+- 'Mention a fact from: t-japan.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - Hayato
+    - Mori
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: In 1998 she travelled to Japan for three weeks to study suminagashi, floating-ink marbling,
+      with a teacher named Hayato Mori. She called it the only time she felt like a beginner again.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-shift
+- continuity:abrupt
+- gold:t-japan

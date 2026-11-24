@@ -76,7 +76,7 @@ def test_confirm_refuses_without_terminal(monkeypatch, capsys):
 def test_bundle_profile_covers_stored_run():
     p = e.profile_from_bundles(e.ROOT / "results" / "e2")
     assert set(p["conditions"]) == set(e.MAX_CALLS)
-    assert all(len(v) == 200 for v in p["conditions"].values())
+    assert all(len(v) == 250 for v in p["conditions"].values())  # 50 cases, five trials each
     assert all(1 <= r["chat_calls"] <= e.MAX_CALLS[c] for c, v in p["conditions"].items() for r in v)
 
 

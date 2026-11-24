@@ -1,0 +1,59 @@
+id: recall-when-asked/carry-ferry-wait
+title: What did they do while they waited?
+description: asked-carry after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: How did Grandma and Grandpa meet?
+    - role: assistant
+      content: They met in 1962, when the Carrow ferry was held up by fog for three hours.
+    lead_in_gap_s: 2.0
+actions:
+- kind: message
+  role: user
+  content: What did they do while they waited?
+expected_outcomes:
+- 'Mention a fact from: h-meeting.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - peppermint
+    - coat
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: She met Edmund in 1962 when the Carrow ferry was delayed three hours by fog. He lent her
+      his coat and they shared a bag of peppermints.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-carry
+- continuity:continuing
+- gold:h-meeting

@@ -686,5 +686,56 @@
    -0.2666666666666667,
    0.06666666666666668
   ]
+ },
+ "case_level": {
+  "blocking-lag1": {
+   "cases": 30,
+   "ahead": 18,
+   "behind": 1,
+   "level": 11,
+   "sign_flip_p": 1.999980000199998e-05
+  },
+  "blocking-prefetch50": {
+   "cases": 30,
+   "ahead": 10,
+   "behind": 1,
+   "level": 19,
+   "sign_flip_p": 0.002969970300296997
+  },
+  "blocking-tool": {
+   "cases": 30,
+   "ahead": 6,
+   "behind": 8,
+   "level": 16,
+   "sign_flip_p": 0.35348646513534865
+  },
+  "prefetch50-lag1": {
+   "cases": 30,
+   "ahead": 8,
+   "behind": 0,
+   "level": 22,
+   "sign_flip_p": 0.007719922800771993
+  },
+  "tool-lag1": {
+   "cases": 30,
+   "ahead": 23,
+   "behind": 2,
+   "level": 5,
+   "sign_flip_p": 9.99990000099999e-06
+  },
+  "hybrid-lag1": {
+   "cases": 30,
+   "ahead": 23,
+   "behind": 0,
+   "level": 7,
+   "sign_flip_p": 9.99990000099999e-06
+  },
+  "blocking-hybrid": {
+   "cases": 30,
+   "ahead": 7,
+   "behind": 8,
+   "level": 15,
+   "sign_flip_p": 0.3002769972300277
+  }
  }
 }

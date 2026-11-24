@@ -686,5 +686,56 @@
    0.16666666666666666,
    0.6333333333333333
   ]
+ },
+ "case_level": {
+  "blocking-lag1": {
+   "cases": 30,
+   "ahead": 17,
+   "behind": 0,
+   "level": 13,
+   "sign_flip_p": 1.999980000199998e-05
+  },
+  "blocking-prefetch50": {
+   "cases": 30,
+   "ahead": 10,
+   "behind": 0,
+   "level": 20,
+   "sign_flip_p": 0.002019979800201998
+  },
+  "blocking-tool": {
+   "cases": 30,
+   "ahead": 4,
+   "behind": 5,
+   "level": 21,
+   "sign_flip_p": 1.0
+  },
+  "prefetch50-lag1": {
+   "cases": 30,
+   "ahead": 7,
+   "behind": 0,
+   "level": 23,
+   "sign_flip_p": 0.015409845901540984
+  },
+  "tool-lag1": {
+   "cases": 30,
+   "ahead": 19,
+   "behind": 1,
+   "level": 10,
+   "sign_flip_p": 6.999930000699993e-05
+  },
+  "hybrid-lag1": {
+   "cases": 30,
+   "ahead": 5,
+   "behind": 0,
+   "level": 25,
+   "sign_flip_p": 0.06238937610623894
+  },
+  "blocking-hybrid": {
+   "cases": 30,
+   "ahead": 15,
+   "behind": 3,
+   "level": 12,
+   "sign_flip_p": 0.007789922100778992
+  }
  }
 }

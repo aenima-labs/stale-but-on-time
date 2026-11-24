@@ -58,7 +58,7 @@ memorome:
   e-ansel: Her brother Ansel emigrated in 1960 and worked as a ship's engineer. They wrote to each other every month after they reconciled; she kept his letters in a biscuit tin.
   e-radio: She listened to the shipping forecast every night before sleeping. She said it was the only poetry she knew by heart.
 
-# class: asked-continuing | asked-shift | unprompted | abstain
+# class: asked-continuing | asked-carry | asked-shift | unprompted | abstain
 # continuity: continuing (the lead-in is on the topic) | abrupt (it is not)
 cases:
   # --- asked, continuing topic ------------------------------------------------
@@ -142,6 +142,95 @@ cases:
     a1: Mostly she was. She liked to say she believed in hymns and good glue.
     u2: Was there anything she regretted?
     keys: [piano, Ansel, her brother]
+
+  # --- asked, the note in play (control class, added 2026-11-16) ---------------
+  # Added after an independent review pointed out that every recall case above
+  # and below needs a note other than the one the lead-in draws on, so a record
+  # computed from the lead-in could hardly hold it. In these ten cases the
+  # agent's scripted reply quotes part of one note and the listener asks for a
+  # detail from the rest of the same note. Written and committed before any
+  # trial was run on them. Expectation, stated in advance: a lag-1 record holds
+  # the note and passes about as often as blocking retrieval.
+  - id: carry-hives
+    class: asked-carry
+    continuity: continuing
+    gold: [b-bees]
+    u1: Grandma kept bees, didn't she?
+    a1: She did. She started in 1980 and talked to them every morning, telling them the family news first.
+    u2: How many hives did she end up with?
+    keys: [six, 6 hives]
+  - id: carry-steps
+    class: asked-carry
+    continuity: continuing
+    gold: [c-lighthouse]
+    u1: What was her childhood like, out at the lighthouse?
+    a1: Her father Wilmot kept the light at Carrow Point, and she went up to the lamp room with him every evening.
+    u2: How many steps was it up to the lamp room?
+    keys: ["112", hundred and twelve, hundred twelve]
+  - id: carry-headbands
+    class: asked-carry
+    continuity: continuing
+    gold: [w-apprentice]
+    u1: How did she get into bookbinding?
+    a1: She was apprenticed at the Marlowe & Finch bindery in 1959, when she was eighteen.
+    u2: What did they have her do at first?
+    keys: [headband]
+  - id: carry-colours
+    class: asked-carry
+    continuity: continuing
+    gold: [w-marbling]
+    u1: Her marbled papers are beautiful. I have one framed.
+    a1: Marbling was her speciality. Her signature pattern was one she called storm tide.
+    u2: What colours went into that pattern?
+    keys: [indigo, rust]
+  - id: carry-ferry-wait
+    class: asked-carry
+    continuity: continuing
+    gold: [h-meeting]
+    u1: How did Grandma and Grandpa meet?
+    a1: They met in 1962, when the Carrow ferry was held up by fog for three hours.
+    u2: What did they do while they waited?
+    keys: [peppermint, coat]
+  - id: carry-clock-fast
+    class: asked-carry
+    continuity: continuing
+    gold: [h-clock]
+    u1: I have the ship's clock from her flat on my shelf now.
+    a1: Edmund built it for her for their twenty-fifth anniversary, in a walnut case.
+    u2: Was there anything odd about the way he set it?
+    keys: [four minutes, 4 minutes, minutes fast]
+  - id: carry-flat-things
+    class: asked-carry
+    continuity: continuing
+    gold: [l-flat]
+    u1: I visited her flat on Quay Street a few times near the end.
+    a1: She moved there in 2016, to the second floor, with a view of the harbour mouth.
+    u2: What did she take with her from the house?
+    keys: [clock, press]
+  - id: carry-cast
+    class: asked-carry
+    continuity: continuing
+    gold: [k-arm]
+    u1: Uncle Jory told me he broke his arm when he was little.
+    a1: He did, in the summer of 1977. He fell from the pear tree and broke his left arm.
+    u2: What did Grandma do about his cast?
+    keys: [book cloth, blue]
+  - id: carry-walk-days
+    class: asked-carry
+    continuity: continuing
+    gold: [t-walk]
+    u1: Mum says Grandma was a serious walker.
+    a1: At sixty she walked the whole Greywether coast path, 190 miles of it.
+    u2: How long did that take her?
+    keys: [sixteen, 16 days]
+  - id: carry-cat-sleep
+    class: asked-carry
+    continuity: continuing
+    gold: [l-cat]
+    u1: Wasn't there a cat at the flat?
+    a1: Yes, a grey cat named Vellum. She came from the lifeboat station.
+    u2: Where did Vellum like to sleep?
+    keys: [paper drawer, drawer]
 
   # --- asked, abrupt topic shift ----------------------------------------------
   - id: shift-dog-name

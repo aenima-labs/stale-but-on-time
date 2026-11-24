@@ -1,0 +1,36 @@
+id: abstain-when-silent/abs-rosalind-university
+title: By the way, which university did Mum study at?
+description: abstain after a abrupt lead-in.
+targets:
+- abstain-when-silent
+polarity: negative
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: I still have one of her fisherman's jumpers.
+    - role: assistant
+      content: She knitted one each winter, always in undyed wool, and never made two alike.
+    lead_in_gap_s: 2.57
+actions:
+- kind: message
+  role: user
+  content: By the way, which university did Mum study at?
+expected_outcomes:
+- Say that the memories do not contain the answer.
+evaluators: []
+selftests: []
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:abstain
+- continuity:abrupt

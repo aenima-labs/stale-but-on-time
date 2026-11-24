@@ -1,0 +1,60 @@
+id: recall-when-asked/carry-hives
+title: How many hives did she end up with?
+description: asked-carry after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: Grandma kept bees, didn't she?
+    - role: assistant
+      content: She did. She started in 1980 and talked to them every morning, telling them the family
+        news first.
+    lead_in_gap_s: 2.29
+actions:
+- kind: message
+  role: user
+  content: How many hives did she end up with?
+expected_outcomes:
+- 'Mention a fact from: b-bees.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - six
+    - 6 hives
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: She kept bees from 1980, eventually six hives at the end of the garden. She talked to them
+      every morning and told them the family news first.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-carry
+- continuity:continuing
+- gold:b-bees

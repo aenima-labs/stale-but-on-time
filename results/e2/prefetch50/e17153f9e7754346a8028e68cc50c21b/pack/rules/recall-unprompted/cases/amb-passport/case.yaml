@@ -1,0 +1,61 @@
+id: recall-unprompted/amb-passport
+title: Anyway, I'm in a panic. We fly on Friday and I can't find my passport anywhere.
+description: unprompted after a abrupt lead-in.
+targets:
+- recall-unprompted
+polarity: normal
+actors:
+  user: grandchild
+fixture:
+  type: asyncrecall.memorome
+  version: '1'
+  digest: sha256:0a91e52430ada86f04a875cccf2e7e6e18f09485bb8c6342c9204645d1af6089
+  privacy: public
+  config:
+    memorome: tessaly-v1
+    history:
+    - role: user
+      content: The garden is finally looking decent.
+    - role: assistant
+      content: That's good to hear.
+actions:
+- kind: message
+  role: user
+  content: Anyway, I'm in a panic. We fly on Friday and I can't find my passport anywhere.
+expected_outcomes:
+- 'Mention a fact from: t-passport.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - consulate
+    - consul
+    - '1983'
+    - Port Saverne
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: On a holiday in Port Saverne in 1983 she lost her passport on the second day and spent the
+      rest of the week visiting the consulate. She said the consul's waiting room had the best coffee
+      of the trip.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:unprompted
+- continuity:abrupt
+- gold:t-passport

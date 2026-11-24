@@ -43,6 +43,21 @@ RUNS = {"run2": "e3-kodama", "run1": "e3-kodama-run1", "hosted": "e3-kodama-host
 PAIRED = ("run2", "hosted", "hosted1")  # runs whose conditions are compared case by case
 # The first hosted run has no bundle for the last condition (see its NOTE.md).
 RUN_CONDITIONS = {"hosted1": CONDITIONS[:4]}
+# Runs made later, on the version of the reported hosted run, to answer an independent
+# review. "carry": the ten control cases (class asked-carry, pack 1.1.0), five conditions.
+# "bringup": a sixth condition on the 40 original cases, the search tool as shipped plus
+# the sentence that lets the model bring a memory up unasked (see the folders' NOTE.md).
+BRINGUP = "a2-tool-bringup"
+ADDONS = {
+    "carry": ("e3-kodama-carry", CONDITIONS),
+    "hosted_carry": ("e3-kodama-hosted-carry", CONDITIONS),
+    # The search tool as shipped, run again on the local model on the version of the sixth
+    # condition (the reported local run is on an earlier version of the product).
+    "bringup_baseline": ("e3-kodama-toolprompt-baseline", ("a-tool",)),
+    "bringup": ("e3-kodama-toolprompt", (BRINGUP,)),
+    "hosted_bringup": ("e3-kodama-hosted-toolprompt", (BRINGUP,)),
+}
+NEW_NEED = ("asked-continuing", "asked-shift", "unprompted")
 PAIRS = (
     ("c-blocking", "b-backthought"),
     ("c-blocking", "a-tool"),
@@ -79,7 +94,7 @@ def key_patterns(bundle: Path) -> dict[str, re.Pattern]:
                 parts.append(config["regex"])
         if parts:
             patterns[case["id"].split("/")[-1]] = re.compile(
-                r"(?<![A-Za-z])(?:" + "|".join(parts) + ")", re.IGNORECASE
+                r"(?<![A-Za-z0-9])(?:" + "|".join(parts) + ")", re.IGNORECASE
             )
     return patterns
 
@@ -170,6 +185,15 @@ def median_ms(rows: list[dict], key: str) -> float | None:
     return float(np.median(values)) if values else None
 
 
+def unsupported_passes(rows: list[dict]) -> dict:
+    """Unprompted passes that cannot rest on a memory: no gold page in working
+    memory and no search. Such a reply holds a key word without the memory behind it."""
+    unprompted = [r for r in rows if r["class"] == "unprompted"]
+    loose = [r for r in unprompted if r["passed"] and not r["gold_in_wm"] and not r["searched"]]
+    return {"trials": len(unprompted), "passed": sum(r["passed"] for r in unprompted),
+            "unsupported": len(loose), "unsupported_cases": sorted({r["case"] for r in loose})}
+
+
 def summarise(rows: list[dict], rng: np.random.Generator, conditions: tuple[str, ...] = CONDITIONS) -> dict:
     out: dict = {}
     for condition in conditions:
@@ -198,6 +222,7 @@ def summarise(rows: list[dict], rng: np.random.Generator, conditions: tuple[str,
                 if key in abstain[0]
             },
         }
+        entry["unprompted_support"] = unsupported_passes(sub)
         for cls in CLASSES:
             part = [r for r in sub if r["class"] == cls]
             entry["by_class"][cls] = {
@@ -208,6 +233,48 @@ def summarise(rows: list[dict], rng: np.random.Generator, conditions: tuple[str,
         without = [r["passed"] for r in recall if not r["gold_in_wm"]]
         entry["pass_given_gold"] = [float(np.mean(with_gold)) if with_gold else None, len(with_gold)]
         entry["pass_given_no_gold"] = [float(np.mean(without)) if without else None, len(without)]
+        out[condition] = entry
+    return out
+
+
+def summarise_addon(rows: list[dict], rng: np.random.Generator, conditions: tuple[str, ...]) -> dict:
+    """Pass rates of a later run, by class; the classes it has are the ones it reports."""
+    out: dict = {}
+    classes = sorted({r["class"] for r in rows})
+    for condition in conditions:
+        sub = [r for r in rows if r["condition"] == condition]
+        entry: dict = {
+            "trials": len(sub),
+            "errors": sum(bool(r["error"]) for r in sub),
+            "templated": sum(r["templated"] for r in sub),
+            "regraded_recall_to_fail": sum(r["regraded"] for r in sub if r["class"] != "abstain"),
+            "searched_rate": float(np.mean([r["searched"] for r in sub])),
+            "path_ms_median": float(np.nanmedian([r["path_ms"] for r in sub])),
+            "by_class": {},
+        }
+        for cls in classes:
+            part = [r for r in sub if r["class"] == cls]
+            cases: dict[str, list[bool]] = {}
+            for r in part:
+                cases.setdefault(r["case"], []).append(bool(r["gold_in_wm"]))
+            entry["by_class"][cls] = {
+                "pass": case_boot(part, "passed", rng),
+                "searched": float(np.mean([r["searched"] for r in part])),
+                "gold_in_wm": float(np.mean([r["gold_in_wm"] for r in part])),
+                "gold_cases": int(sum(np.mean(v) > 0.5 for v in cases.values())),
+                "cases": len(cases),
+            }
+        new_need = [r for r in sub if r["class"] in NEW_NEED]
+        if new_need:
+            entry["recall_pass"] = case_boot(new_need, "passed", rng)
+            entry["unprompted_support"] = unsupported_passes(sub)
+        abstain = [r for r in sub if r["class"] == "abstain"]
+        if abstain:
+            entry["abstain"] = {key: float(np.mean([r[key] for r in abstain]))
+                                for key in ("abstain_recorded", "abstain_text", "declined_any") if key in abstain[0]}
+            entry["abstain"]["errors"] = sum(bool(r["error"]) for r in abstain)
+            entry["abstain"]["trials"] = len(abstain)
+            entry["abstain"]["abstain_tool_count"] = sum(r["abstain_recorded"] for r in abstain)
         out[condition] = entry
     return out
 
@@ -242,6 +309,48 @@ def main() -> None:
                 "pass_given_no_gold": [float(np.mean([r["passed"] for r in loaded if not r["gold_in_wm"]])),
                                        sum(not r["gold_in_wm"] for r in loaded)],
             }
+    # Later runs. They come after the runs above so that the bootstrap draws of those
+    # runs, and with them every published interval, stay what they were.
+    kept: dict[str, list[dict]] = {}
+    for name, (folder, conditions) in ADDONS.items():
+        if not (ROOT / "results" / folder / "trials.csv").exists():
+            continue
+        rows, meta = load(ROOT / "results" / folder, conditions)
+        kept[name] = rows
+        changed += [
+            {"run": folder, "condition": r["condition"], "case": r["case"], "attempt": r["attempt"],
+             "passed_sealed": r["passed_sealed"], "passed": r["passed"], "reply": r["reply"]}
+            for r in rows if r["regraded"]
+        ]
+        result[name] = {"n_trials": len(rows), "meta": meta, "by_condition": summarise_addon(rows, rng, conditions)}
+        cost = load_cost(ROOT / "results" / folder, conditions)
+        if cost:
+            result[name]["cost"] = cost
+        if len(conditions) > 1:
+            result[name]["paired_diff"] = {f"{a}|{b}": paired_diff(rows, a, b, rng) for a, b in PAIRS}
+    # The sixth condition against the search tool as shipped, case by case, on the
+    # new-need cases and on the unprompted class alone. The two were run at different times.
+    for name, base in (("bringup", "run2"), ("hosted_bringup", "hosted")):
+        if name not in kept:
+            continue
+        shipped = [r for r in load(ROOT / "results" / RUNS[base], RUN_CONDITIONS.get(base, CONDITIONS))[0]
+                   if r["condition"] == "a-tool"]
+        if name == "bringup" and "bringup_baseline" in kept:
+            shipped = kept["bringup_baseline"]
+        result[name]["shipped_from"] = "same version" if name != "bringup" or "bringup_baseline" in kept else "earlier version"
+        both = kept[name] + shipped
+        result[name]["against_shipped"] = {
+            "new_need": paired_diff([r for r in both if r["class"] in NEW_NEED], BRINGUP, "a-tool", rng),
+            "unprompted": paired_diff([r for r in both if r["class"] == "unprompted"], BRINGUP, "a-tool", rng),
+        }
+        blocking = [r for r in load(ROOT / "results" / RUNS[base], RUN_CONDITIONS.get(base, CONDITIONS))[0]
+                    if r["condition"] == "c-blocking"]
+        result[name]["blocking_against_bringup"] = {
+            "new_need": paired_diff([r for r in kept[name] + blocking if r["class"] in NEW_NEED],
+                                    "c-blocking", BRINGUP, rng),
+            "unprompted": paired_diff([r for r in kept[name] + blocking if r["class"] == "unprompted"],
+                                      "c-blocking", BRINGUP, rng),
+        }
     (ROOT / "results" / "e3_summary.json").write_text(json.dumps(result, indent=1))
     with open(ROOT / "results" / "e3_regraded.csv", "w", newline="") as handle:
         writer = csv.DictWriter(
@@ -261,6 +370,18 @@ def main() -> None:
                 + f"  regr {e['regraded_recall_to_fail']:2d}  tmpl {e['templated']:3d}  path {e['path_ms']['median']:5.0f}/{e['path_ms']['p90']:5.0f}"
                 + f"  abst {e['abstain']}  |gold {e['pass_given_gold']}  |no gold {e['pass_given_no_gold']}"
             )
+    for name in ADDONS:
+        if name not in result:
+            continue
+        print(name)
+        for condition, e in result[name]["by_condition"].items():
+            print(f"  {condition:24s} " + "  ".join(
+                f"{cls} {100 * c['pass'][0]:5.1f} [{100 * c['pass'][1]:3.0f},{100 * c['pass'][2]:3.0f}] gold {c['gold_cases']}/{c['cases']}"
+                for cls, c in e["by_class"].items())
+                + f"  srch {100 * e['searched_rate']:3.0f}  tmpl {e['templated']}  err {e['errors']}  path {e['path_ms_median']:5.0f}")
+        for key in ("paired_diff", "against_shipped", "blocking_against_bringup"):
+            if key in result[name]:
+                print("  ", key, {k: [round(100 * x) for x in v] for k, v in result[name][key].items()})
     for name in PAIRED:
         print(name, "paired:", {k: [round(100 * x) for x in v] for k, v in result[name]["paired_recall_diff"].items()})
         print(name, "loaded conditions:", result[name]["loaded_conditions"])

@@ -1,0 +1,61 @@
+id: recall-unprompted/amb-quarrel
+title: We haven't spoken in weeks, and I keep going to bed angry about it.
+description: unprompted after a continuing lead-in.
+targets:
+- recall-unprompted
+polarity: normal
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: Things have been tense with my sister since the funeral.
+    - role: assistant
+      content: I'm sorry. That sounds hard.
+    lead_in_gap_s: 4.0
+actions:
+- kind: message
+  role: user
+  content: We haven't spoken in weeks, and I keep going to bed angry about it.
+expected_outcomes:
+- 'Mention a fact from: v-grudges.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - cup of tea
+    - Ansel
+    - two years
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Her advice on quarrels was never to go to bed on an argument you can end with a cup of tea.
+      She did not speak to her brother Ansel for two years after their father's funeral and regretted
+      it.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:unprompted
+- continuity:continuing
+- gold:v-grudges

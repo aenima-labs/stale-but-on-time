@@ -1,18 +1,20 @@
 # Stale but on Time
 
 Paper and experiments: what asynchronous (never-wait) memory recall costs a
-real-time conversational agent. Target venue: TMLR.
+conversational agent. Target venue: TMLR.
 
 - Manuscript: `paper/main.tex` → `paper/main.pdf` (TMLR style, preprint option).
   The compiled PDF of the latest draft is committed here and attached to the release.
-- Every number, table and data figure in the manuscript is generated from the
-  result files; nothing is typed by hand.
+- Every measured result in the manuscript (numbers, tables, data figures) is generated
+  from the result files by `src/make_numbers.py` and `src/figures.py`. Descriptions of
+  the set-up are typed: model sizes, counts of cases and notes, the number of replies
+  that were read against their grades, and the assumed speaking rates.
 
 ## Layout
 
 | Path | What it is |
 |---|---|
-| `pack-src/tessaly.yaml` | Source of the fictional memorome (48 notes) and the 40 cases |
+| `pack-src/tessaly.yaml` | Source of the fictional memorome (48 notes) and the 50 cases: five classes of ten. The control class `asked-carry` (answer in the note already in play) was added in pack 1.1.0 on 16 November, after an independent review, and committed before any trial ran on it |
 | `pack/`, `fixtures/` | Generated Circumstances pack (format v4) and memorome fixture |
 | `src/retrieval.py` | Hybrid BM25 + embedding retriever with reciprocal rank fusion |
 | `src/e1_replay.py`, `src/e1_analyze.py` | Experiment 1: staleness replay on LoCoMo, analysis, timing model |
@@ -24,7 +26,7 @@ real-time conversational agent. Target venue: TMLR.
 | `tests/` | Unit tests (`uv run inv e2.test`) |
 | `src/e3_analyze.py` | Experiment 3: analysis of the pack run against the product (bundles in `results/e3-kodama`, first run in `results/e3-kodama-run1`, run on hosted models in `results/e3-kodama-hosted`) |
 | `src/figures.py`, `src/make_numbers.py` | Figures, table bodies and number macros for the paper |
-| `results/` | Per-utterance retrievals (E1), sealed run bundles (E2: `e2` main run, `e2-think` reasoning on, `e2-qwen3` second model, `e2-anthropic` hosted model), summaries, audit sample, provenance notes (`*_NOTES.md`) |
+| `results/` | Per-utterance retrievals (E1), sealed run bundles (E2: `e2` main run on the 50 cases, `e2-run1` first run on the 40 original cases, `e2-think` reasoning on, `e2-qwen3` second model, `e2-anthropic` hosted model; the last three on the 40 original cases), summaries, samples for a human audit, provenance notes (`*_NOTES.md`) |
 | `tasks/`, `src/fetch_data.py` | [Invoke](https://www.pyinvoke.org) tasks for every step; data download |
 
 "Memorome", in file names, code and result events, is the term of Xiao et al. (2026),
@@ -55,7 +57,7 @@ uv sync
 uv run inv analyze
 ```
 
-Everything from scratch (about 30 minutes: E1 replay ~12 min without the cache, E2 1,200 trials ~18 min):
+Everything from scratch (about 35 minutes: E1 replay ~12 min without the cache, E2 1,500 trials ~22 min):
 
 ```bash
 uv sync
@@ -108,8 +110,11 @@ code and keep the sealed grades, so they show 39% to 41% for that condition wher
 paper reports 37%.
 
 A rerun will not reproduce the stored trials bit for bit; the sealed bundles in
-`results/e2`, `results/e2-think`, `results/e2-qwen3` and `results/e2-anthropic` are the
-record the paper reports. Part of the reasoning run shared the GPU with another
+`results/e2`, `results/e2-run1`, `results/e2-think`, `results/e2-qwen3` and
+`results/e2-anthropic` are the record the paper reports. `results/e2` is the main run
+(16 November, pack 1.1.0, 50 cases). `results/e2-run1` is the first full run of the
+same setting (10 November, pack 1.0.0, 40 cases, other seeds); the paper gives its
+results in the appendix as a repeat. Part of the reasoning run shared the GPU with another
 process; `results/e2-think_NOTES.md` gives the window, and `src/make_numbers.py`
 leaves those trials out of every latency figure.
 
@@ -131,6 +136,19 @@ The hosted run has a history, told in the `NOTE.md` of each folder:
 | `results/e3-kodama-hosted-aborted` | That run's two stopped attempts at the last condition, the analysis of the defect in the product that stopped them, and local checks of the fix |
 | `results/e3-kodama-hosted` | The reported run, all five conditions on the fixed product |
 | `results/e3-kodama-hosted-aborted-3101c5b` | An attempt of the reported run that ended when Docker restarted on the host |
+
+Later runs, added after a review of a draft (pack 1.1.0), on the product version of
+the hosted run:
+
+| Folder | What it holds |
+|---|---|
+| `results/e3-kodama-carry` | The ten control cases in all five conditions, local model |
+| `results/e3-kodama-toolprompt` | The sixth condition (search tool plus one sentence), local model |
+| `results/e3-kodama-toolprompt-baseline` | The search tool as shipped on the same product version, local model, for comparison with the sixth condition |
+| `results/e3-kodama-hosted-carry` | The ten control cases in all five conditions, hosted models; the conditions ran on three days |
+| `results/e3-kodama-hosted-carry-aborted` | Three attempts of that run that are not reported: one stopped by stalled embedding requests, two affected by the host going to sleep |
+| `results/e3-kodama-hosted-toolprompt` | The sixth condition, hosted models |
+| `results/e3-kodama-hosted-toolprompt-aborted` | Its first attempt, stopped after nine trials by a network failure |
 
 Exploratory runs against the product, kept for the record and **not reported in
 the paper**: spoken trials with one trial per case (`results/e3-kodama-voice`,
@@ -225,10 +243,11 @@ uv run inv paper.anon     # needs git, uv, tectonic
 ```
 
 It writes `dist/stale-but-on-time-anon.pdf` (the paper built in double-blind mode),
-`dist/stale-but-on-time-anon.zip` (the supplementary archive, ~4 MB) and the
+`dist/stale-but-on-time-anon.zip` (the supplementary archive, ~35 MB) and the
 unpacked tree in `dist/anon/`. The copy has no git history, an anonymous
 `paper/identity.tex`, names and URLs replaced, the Circumstances framework vendored
-at the pinned commit, and the sealed bundles re-sealed and re-verified. The script
+at the pinned commit and renamed (its name leads to this organisation), and the sealed
+bundles re-sealed and verified again with the renamed copy. The script
 fails if any identifying string is left in any file or in the PDF. It was checked by
 running the full analysis, figures, numbers and paper build inside the copy; the
 numbers are identical. The product name in the quoted system prompt appears as
@@ -246,6 +265,5 @@ Code, pack and results: Apache-2.0 (`LICENSE`). The TMLR style files in
 
 ## Before submission
 
-- A human should re-read `results/e2_audit_sample.csv` against the grades.
-- Confirm two reference details: the 210 words/min figure attributed to Tauroza & Allison (1990), and volume/pages of Robertson & Zaragoza (2009).
+- A human should read `results/e2-run1_audit_sample.csv` and `results/e3_audit_sample.csv` against the grades and fill in the verdict columns. So far only AI assistants have read them, and the paper says so.
 - Submit the paper and archive produced by `inv paper.anon`, not the files in this repository, and do not link this repository from the submission.

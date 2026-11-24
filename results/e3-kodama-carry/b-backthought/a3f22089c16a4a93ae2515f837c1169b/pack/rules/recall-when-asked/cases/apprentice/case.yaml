@@ -1,0 +1,58 @@
+id: recall-when-asked/apprentice
+title: Did anyone work there with her?
+description: asked-continuing after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: Tell me about her bookbinding shop.
+    - role: assistant
+      content: She opened The Gilded Signature on Tanner's Row in 1974 and ran it for twenty-nine years.
+    lead_in_gap_s: 1.71
+actions:
+- kind: message
+  role: user
+  content: Did anyone work there with her?
+expected_outcomes:
+- 'Mention a fact from: w-corwin.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - Corwin
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: She trained one apprentice, Corwin Hale, who started by sweeping the shop floor at sixteen.
+      He took over her tools when she retired and sent her a hand-bound diary every December.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-continuing
+- continuity:continuing
+- gold:w-corwin

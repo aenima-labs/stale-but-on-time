@@ -1,0 +1,70 @@
+{
+  "condition": "e-backthought-tool",
+  "mode": "text",
+  "recall": {
+    "backthought": "on",
+    "blocking": "off",
+    "tool": "on"
+  },
+  "speech": {
+    "clauses": "off"
+  },
+  "sampling": {
+    "provider": "openai",
+    "model": "gpt-5.6-luna",
+    "sent": {}
+  },
+  "settings_id": "7f268f41-9380-4cd3-9b7d-d5da0694a20d",
+  "settings_document": {
+    "models": {
+      "stt": {
+        "model": "whisper-1",
+        "language": "en",
+        "provider": "openai"
+      },
+      "tts": {
+        "model": "tts-1",
+        "voice": "onyx",
+        "provider": "openai",
+        "fallback_provider": "off"
+      },
+      "vad": {
+        "speech_threshold": 500,
+        "end_silence_frames": 45
+      },
+      "recall": {
+        "tool": "on",
+        "blocking": "off",
+        "backthought": "on"
+      },
+      "speech": {
+        "clauses": "off"
+      },
+      "realtime": {
+        "model": "gpt-5.6-luna",
+        "provider": "openai"
+      },
+      "memorizer": {
+        "model": "gpt-5.6-luna",
+        "provider": "openai"
+      }
+    },
+    "prompts": {
+      "friend": 1,
+      "interviewer": 1,
+      "schema_default": 1
+    }
+  },
+  "friend_prompt_version": 1,
+  "started_at": "2026-11-17T12:26:28+00:00",
+  "finished_at": "2026-11-17T12:51:59+00:00",
+  "seconds": 1531,
+  "trials": 50,
+  "trials_per_case": 5,
+  "stop_after": 3,
+  "passed": 50,
+  "bundle": "54a2b393742942309aad8308a39e86bd",
+  "seal_problems": [],
+  "backend_commit": "3101c5b",
+  "api": "http://127.0.0.1:18081"
+}

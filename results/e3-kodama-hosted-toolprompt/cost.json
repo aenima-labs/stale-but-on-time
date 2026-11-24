@@ -1,0 +1,103 @@
+{
+  "prices_usd_per_mtok": {
+    "gpt-5.6-luna": {
+      "input": 0.2,
+      "cached_input": 0.02,
+      "output": 1.2
+    },
+    "text-embedding-3-small": {
+      "input": 0.02,
+      "cached_input": 0.02,
+      "output": 0.0
+    },
+    "claude-sonnet-5": {
+      "input": 2.0,
+      "cached_input": 0.2,
+      "output": 10.0
+    }
+  },
+  "price_source": {
+    "openai": "https://developers.openai.com/api/docs/pricing (standard tier), read 2026-11-13",
+    "anthropic": "https://platform.claude.com/docs/en/about-claude/pricing, read 2026-11-13"
+  },
+  "unmetered_call_upper_bound": {
+    "input_tokens": {
+      "openai check": 931,
+      "openai reply": 2759
+    },
+    "output_tokens": "max_output_tokens (OpenAI) or max_tokens (Anthropic) of the call"
+  },
+  "request_fields_sent": {
+    "openai check": [
+      {
+        "effort": "none",
+        "temperature": null
+      }
+    ],
+    "openai reply": [
+      {
+        "effort": null,
+        "temperature": null
+      }
+    ]
+  },
+  "conditions": {
+    "a2-tool-bringup": {
+      "model_calls": 1240,
+      "unmetered_calls": 400,
+      "input_tokens": 1602132,
+      "cached_input_tokens": 1325780,
+      "output_tokens": 33814,
+      "reasoning_tokens": 5679,
+      "trials": 199,
+      "by_provider": {
+        "openai": {
+          "calls": 1240,
+          "input_tokens": 1602132,
+          "cached_input_tokens": 1325780,
+          "output_tokens": 33814,
+          "cost_usd": 0.1224
+        }
+      },
+      "cost_usd": 0.1224,
+      "cost_usd_upper": 0.2589,
+      "cost_usd_per_trial": 0.000615
+    }
+  },
+  "run": {
+    "model_calls": 1240,
+    "unmetered_calls": 400,
+    "input_tokens": 1602132,
+    "cached_input_tokens": 1325780,
+    "output_tokens": 33814,
+    "reasoning_tokens": 5679,
+    "trials": 199,
+    "by_provider": {
+      "openai": {
+        "calls": 1240,
+        "input_tokens": 1602132,
+        "cached_input_tokens": 1325780,
+        "output_tokens": 33814,
+        "cost_usd": 0.1224
+      }
+    },
+    "cost_usd": 0.1224,
+    "cost_usd_upper": 0.2589,
+    "cost_usd_per_trial": 0.000615
+  },
+  "embeddings_estimate": {
+    "tokens": 669759,
+    "cost_usd": 0.0134,
+    "method": "fixture memorome characters per trial plus twice the case's user-line characters, at 4 characters per token"
+  },
+  "total_usd": 0.1358,
+  "total_usd_upper": 0.2723,
+  "trials_without_spans": [
+    {
+      "condition": "a2-tool-bringup",
+      "case": "abs-rosalind-first-word",
+      "attempt": 5,
+      "error": "trial timed out"
+    }
+  ]
+}

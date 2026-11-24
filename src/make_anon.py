@@ -16,7 +16,10 @@ What changes in the copy:
   * the product name is replaced everywhere: "[PRODUCT NAME]" where it stands as a word
     (prompts, replies), "product" inside identifiers, and in file and folder names
     (results/e3-kodama becomes results/e3-product);
-  * the Circumstances framework is vendored from the pinned commit, with its authorship removed;
+  * the Circumstances framework is vendored from the pinned commit, with its authorship removed,
+    and renamed to "evalframework" everywhere (package, imports, identifiers in stored trials),
+    because its name leads to the public repository; the stored bundles are then verified
+    again with the renamed copy;
   * README and pyproject.toml are replaced by anonymous versions, and src/fetch_data.py loses
     its release URL (the review copy has no release);
   * the final scan fails the build if any identifying string is left in any file or in the PDF.
@@ -61,7 +64,15 @@ PRODUCT = [
     (re.compile(r"\bAnton\b"), "the author"),
 ]
 VENDORED = [(re.compile(r"kodama", re.IGNORECASE), "product")]
-IDENTIFYING = re.compile(rb"aenima|kodama|chernov|lebeg|\banton\b|/Users/", re.IGNORECASE)
+# The framework's name, applied last, to every text file and path of the copy.
+FRAMEWORK_NAME = "evalframework"
+FRAMEWORK_PROSE = {".md", ".tex", ".txt"}  # here the capitalised name is a word in a sentence
+FRAMEWORK = [
+    (re.compile(r"CIRCUMSTANCES"), FRAMEWORK_NAME.upper()),
+    (re.compile(r"Circumstances"), FRAMEWORK_NAME.capitalize()),
+    (re.compile(r"circumstances"), FRAMEWORK_NAME),
+]
+IDENTIFYING = re.compile(rb"aenima|kodama|chernov|lebeg|\banton\b|/Users/|circumstances", re.IGNORECASE)
 TEXT_SUFFIXES = {".py", ".md", ".tex", ".yaml", ".yml", ".toml", ".sh", ".json", ".jsonl",
                   ".bib", ".txt", ".csv", ".log", ".cff", ".tf", ".hcl", ".go", ".mod", ".sum"}
 TEXT_NAMES = {"LICENSE", "Dockerfile"}
@@ -96,10 +107,10 @@ from its bundles but not re-run.
 
 | Path | What it is |
 |---|---|
-| `pack-src/`, `pack/`, `fixtures/` | Fictional memory store and the 40-case test pack |
+| `pack-src/`, `pack/`, `fixtures/` | Fictional memory store and the 50-case test pack |
 | `src/` | Retriever, Experiment 1 (LoCoMo replay), Experiment 2 (reference agent and runner), Experiment 3 (analysis of the runs against the product), figures |
-| `results/` | Per-utterance retrievals (E1), sealed run bundles with every trial (E2: `e2`, `e2-think`, `e2-qwen3`, `e2-anthropic`; E3: `e3-product`, `e3-product-run1`, `e3-product-hosted`, with the pilot, the first run and the stopped attempts of the hosted run in the other `e3-product-hosted-*` folders, each with a `NOTE.md`), summaries |
-| `vendor/circumstances/` | The evaluation framework, vendored at the commit used |
+| `results/` | Per-utterance retrievals (E1), sealed run bundles with every trial (E2: `e2` main run, `e2-run1` first run, `e2-think`, `e2-qwen3`, `e2-anthropic`; E3: `e3-product`, `e3-product-run1`, `e3-product-hosted`, the later runs of the control cases and of the sixth condition in `e3-product-carry`, `e3-product-hosted-carry`, `e3-product-toolprompt`, `e3-product-toolprompt-baseline`, `e3-product-hosted-toolprompt`, and the pilot, the first run and the stopped attempts of the hosted runs in the other `e3-product-hosted-*` folders, each with a `NOTE.md`), summaries |
+| `vendor/evalframework/` | The evaluation framework, vendored at the commit used and renamed |
 | `paper/` | LaTeX sources, generated tables, number macros |
 
 "Memorome", in file names, code and result events, is the term of Xiao et al. (2026),
@@ -187,7 +198,7 @@ def anonymise_pyproject() -> None:
     text = path.read_text()
     text = re.sub(
         r"^circumstances = \{ git = .*\}$",
-        'circumstances = { path = "vendor/circumstances", editable = true }',
+        'circumstances = { path = "vendor/circumstances", editable = true }',  # renamed afterwards
         text,
         flags=re.MULTILINE,
     )
@@ -208,6 +219,43 @@ def reseal_bundles() -> int:
             raise SystemExit(f"{seal.parent}: {problems}")
         count += 1
     return count
+
+
+def rename_framework() -> None:
+    """Replace the framework's name in every text file and in every path of the copy."""
+    for path in sorted(OUT.rglob("*")):
+        if not path.is_file() or (path.suffix not in TEXT_SUFFIXES and path.name not in TEXT_NAMES):
+            continue
+        old = path.read_text(encoding="utf-8")
+        new = old
+        if path.suffix in FRAMEWORK_PROSE:
+            new = re.sub(r"(?<![A-Za-z_./`-])Circumstances(?![A-Za-z_./`-])", "the evaluation framework", new)
+        for pattern, repl in FRAMEWORK:
+            new = pattern.sub(repl, new)
+        if new != old:
+            path.write_text(new, encoding="utf-8")
+    # Deepest paths first, so that a renamed folder does not move what is still to be renamed.
+    for path in sorted(OUT.rglob("*"), key=lambda q: len(q.parts), reverse=True):
+        if "circumstances" in path.name.lower():
+            path.rename(path.with_name(re.sub("circumstances", FRAMEWORK_NAME, path.name, flags=re.IGNORECASE)))
+
+
+def verify_renamed_bundles() -> int:
+    """Verify every stored bundle with the vendored, renamed framework, in the copy's own
+    environment. This also shows that the copy installs and imports."""
+    code = (
+        "import sys; from pathlib import Path; "
+        f"from {FRAMEWORK_NAME}.artifacts import verify_bundle; "
+        "seals = sorted(Path('results').glob('*/*/*/seal.json')) + sorted(Path('results').glob('*/*/seal.json')); "
+        "bad = [(str(s.parent), verify_bundle(s.parent)) for s in seals]; "
+        "bad = [b for b in bad if b[1]]; "
+        "print(len(seals)); sys.exit(1 if bad else 0)"
+    )
+    done = subprocess.run(["uv", "run", "--quiet", "python", "-c", code], cwd=OUT, capture_output=True, text=True)
+    if done.returncode != 0:
+        raise SystemExit(f"bundles do not verify with the renamed framework:\n{done.stdout}\n{done.stderr}")
+    shutil.rmtree(OUT / ".venv", ignore_errors=True)
+    return int(done.stdout.strip().splitlines()[-1])
 
 
 def build_pdf() -> Path:
@@ -265,8 +313,11 @@ def main() -> None:
     vendor_circumstances(pin)
     anonymise_pyproject()
     sealed = reseal_bundles()
-    if shutil.which("uv"):
-        run(["uv", "lock"], cwd=OUT)
+    rename_framework()
+    run(["uv", "lock"], cwd=OUT)
+    verified = verify_renamed_bundles()
+    if verified != sealed:
+        raise SystemExit(f"{sealed} bundles were sealed but {verified} were verified after the rename")
     pdf = build_pdf()
 
     hits = audit(pdf)
@@ -279,7 +330,7 @@ def main() -> None:
         for path in sorted(OUT.rglob("*")):
             if path.is_file() and ".venv" not in path.parts:
                 z.write(path, Path("stale-but-on-time") / path.relative_to(OUT))
-    print(f"re-sealed and verified {sealed} bundles")
+    print(f"re-sealed {sealed} bundles and verified them with the renamed framework")
     print(f"{pdf.relative_to(ROOT)}  {pdf.stat().st_size // 1024} KB")
     print(f"{archive.relative_to(ROOT)}  {archive.stat().st_size / 1e6:.1f} MB")
 

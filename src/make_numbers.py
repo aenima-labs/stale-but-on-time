@@ -18,6 +18,10 @@ e1 = json.loads((ROOT / "results" / "e1_summary.json").read_text())
 e2 = json.loads((ROOT / "results" / "e2_summary.json").read_text())
 extra = json.loads((ROOT / "results" / "e2_extra.json").read_text())
 trials = list(csv.DictReader(open(ROOT / "results" / "e2_trials.csv")))
+# The main run without its control class: the 40 cases that every other run also has.
+# Shares of trials with a search and times to a reply are taken from these, so that
+# they compare with the other runs.
+trials40 = [r for r in trials if r["class"] != "asked-carry"]
 
 macros: dict[str, str] = {}
 
@@ -46,6 +50,12 @@ def signed(x: float) -> str:
 
 def pctci(t: list[float]) -> str:
     return f"[{100 * t[1]:.0f}, {100 * t[2]:.0f}]"
+
+
+def pct_with_ci(t: list[float]) -> str:
+    """A rate with its interval for a table cell; the interval is left out when every
+    case gave the same result and it has no width."""
+    return pct(t[0]) if t[1] == t[2] else f"{pct(t[0])} {pctci(t)}"
 
 
 # ---------------------------------------------------------------- Experiment 1
@@ -115,7 +125,7 @@ for cond, tag in TAG.items():
     put(f"Rec{tag}CI", pctci(e["recall_pass"]))
     put(f"Gold{tag}", pct(e["gold_in_context"][0]))
     put(f"Abst{tag}", pct(e["by_class"]["abstain"]["pass"][0]))
-    put(f"Srch{tag}", pct(e["searched_rate"]))
+    put(f"Srch{tag}", pct(float(np.mean([r["searched"] == "True" for r in trials40 if r["condition"] == cond]))))
     for cls, ctag in (("asked-continuing", "Cont"), ("asked-shift", "Shift"), ("unprompted", "Unp")):
         put(f"{ctag}{tag}", pct(e["by_class"][cls]["pass"][0]))
     o = e["asked_outcomes"]
@@ -157,6 +167,74 @@ put("SrchUnpTool", rate("tool", "unprompted", "searched"))
 put("SrchUnpHyb", rate("hybrid", "unprompted", "searched"))
 put("SrchContHyb", rate("hybrid", "asked-continuing", "searched"))
 
+# The control class of pack 1.1.0 (answer in the note in play); never pooled into "recall".
+CARRY = "asked-carry"
+put("EtwoCases", str(len({r["case"] for r in trials})))
+put("EtwoPerCondition", str(e2["n_trials"] // len(TAG)))
+for cond, tag in TAG.items():
+    c = bc[cond]["by_class"][CARRY]
+    put(f"Carry{tag}", pct(c["pass"][0]))
+    put(f"Carry{tag}CI", pctci(c["pass"]))
+    put(f"CarryGold{tag}", pct(c["gold_in_context"]))
+    put(f"CarrySrch{tag}", pct(c["searched"]))
+for name, tag in (("blocking-lag1", "BlockLag"), ("blocking-prefetch50", "BlockPre"), ("blocking-tool", "BlockTool")):
+    d = e2["paired_carry_diff"][name]
+    put(f"CarryDiff{tag}", signed(100 * d[0]))
+    put(f"CarryDiff{tag}CI", f"[{signed(100 * d[1])}, {signed(100 * d[2])}]")
+put("CarryPassGivenGold", pct(extra["carry_pooled"]["pass_given_gold"][0]))
+put("CarryPassGivenGoldN", str(extra["carry_pooled"]["pass_given_gold"][1]))
+put("CarryNoGoldN", str(extra["carry_pooled"]["pass_given_no_gold"][1]))
+put("CarryNoGoldPassed", str(round((extra["carry_pooled"]["pass_given_no_gold"][0] or 0)
+                                   * extra["carry_pooled"]["pass_given_no_gold"][1])))
+
+
+def gold_cases(rows: list[dict], cond: str, classes: tuple[str, ...]) -> tuple[int, int]:
+    """Cases in which the target note was in context, and cases in all. Local retrieval
+    is deterministic, so a case has the note in all of its trials or in none."""
+    by_case: dict[str, list[bool]] = {}
+    for r in rows:
+        if r["condition"] == cond and r["class"] in classes:
+            by_case.setdefault(r["case"], []).append(r["gold_in_context"] == "True")
+    # A hosted embedding model need not return the same vector twice, so a case
+    # counts when the note was there in most of its trials.
+    return sum(np.mean(v) > 0.5 for v in by_case.values()), len(by_case)
+
+
+NEW_NEED = ("asked-continuing", "asked-shift", "unprompted")
+for cond, tag in (("lag1", "Lag"), ("prefetch50", "Pre"), ("blocking", "Block")):
+    put(f"GoldCases{tag}", str(gold_cases(trials, cond, NEW_NEED)[0]))
+    put(f"CarryGoldCases{tag}", str(gold_cases(trials, cond, (CARRY,))[0]))
+for name, tag in (("blocking-lag1", "BlockLag"), ("blocking-prefetch50", "BlockPre"), ("blocking-tool", "BlockTool")):
+    c = e2["case_level"][name]
+    put(f"CaseAhead{tag}", str(c["ahead"]))
+    put(f"CaseBehind{tag}", str(c["behind"]))
+    put(f"CaseLevel{tag}", str(c["level"]))
+    put(f"CaseP{tag}", "< 0.001" if c["sign_flip_p"] < 0.001 else f"= {c['sign_flip_p']:.2f}")
+
+# The first full run of the main setting (pack 1.0.0, 40 cases, 10 November): prefix Fr.
+fr = json.loads((ROOT / "results" / "e2-run1_summary.json").read_text())
+put("FrTrials", f"{fr['n_trials']:,}")
+for cond, tag in TAG.items():
+    put(f"FrRec{tag}", pct(fr["by_condition"][cond]["recall_pass"][0]))
+d = fr["paired_recall_diff"]["blocking-lag1"]
+put("FrDiffBlockLag", signed(100 * d[0]))
+put("FrDiffBlockLagCI", f"[{signed(100 * d[1])}, {signed(100 * d[2])}]")
+put("FrMaxDiff", f"{max(abs(100 * (fr['by_condition'][c]['recall_pass'][0] - bc[c]['recall_pass'][0])) for c in TAG):.0f}")
+
+
+def new_need_rate(cond: str, without: str) -> float:
+    """New-need pass rate of a condition with one case left out (mean over cases)."""
+    by_case: dict[str, list[bool]] = {}
+    for r in trials:
+        if r["condition"] == cond and r["class"] in NEW_NEED and r["case"] != without:
+            by_case.setdefault(r["case"], []).append(r["passed"] == "True")
+    return float(np.mean([np.mean(v) for v in by_case.values()]))
+
+
+# The case that the review judged unfair (a second note fits the remark as well).
+put("NoApprRecBlock", pct(new_need_rate("blocking", "amb-apprenticeship")))
+put("NoApprRecLag", pct(new_need_rate("lag1", "amb-apprenticeship")))
+
 # ------------------------------------------------- robustness runs (Section 6.3)
 # Same pack, same seeds, a different model setting. The reasoning run shared the
 # GPU with another process for part of its duration (results/e2-think_NOTES.md);
@@ -185,7 +263,7 @@ def class_rate(rows: list[dict], cond: str, cls: str, field: str) -> str:
     return pct(float(np.mean([r[field] == "True" for r in sub])))
 
 
-robust = {"e2": (e2, trials)}
+robust = {"e2": (e2, trials40)}
 for run, prefix in ROBUST.items():
     summary, rows = load_run(run)
     robust[run] = (summary, rows)
@@ -231,7 +309,7 @@ for run, prefix in ROBUST.items():
     put(f"{prefix}RegradedRecall", str(sum(rb[c]["regraded"]["recall_to_fail"] for c in rb)))
     put(f"{prefix}RegradedAbstain", str(sum(rb[c]["regraded"]["abstain_to_pass"] for c in rb)))
 for cond, tag in TAG.items():
-    put(f"Reply{tag}", f"{reply_seconds('e2', trials, cond):.1f}")
+    put(f"Reply{tag}", f"{reply_seconds('e2', trials40, cond):.1f}")
 put("RegradedRecall", str(sum(bc[c]["regraded"]["recall_to_fail"] for c in bc)))
 put("RegradedAbstain", str(sum(bc[c]["regraded"]["abstain_to_pass"] for c in bc)))
 put("RobustRuns", str(len(ROBUST)))
@@ -250,6 +328,8 @@ no_gold = [json.loads((ROOT / "results" / f"{run}_extra.json").read_text())["poo
 put("AllNoGoldN", f"{sum(n for _, n in no_gold):,}")
 put("AllNoGoldPassed", str(round(sum(rate * n for rate, n in no_gold))))
 put("AllTrials", f"{sum(summary['n_trials'] for summary, _ in robust.values()):,}")
+for cond, tag in (("lag1", "Lag"), ("prefetch50", "Pre"), ("blocking", "Block")):
+    put(f"HsGoldCases{tag}", str(gold_cases(robust["e2-anthropic"][1], cond, NEW_NEED)[0]))
 
 # ------------------------------------------------ Experiment 3 (the product)
 e3 = json.loads((ROOT / "results" / "e3_summary.json").read_text())
@@ -322,6 +402,10 @@ put("KHAbstToolMax", pct(max(kh_tool)))
 put("KHBlockMs", f"{kh['by_condition']['c-blocking']['blocking_ms_median']:.0f}")
 put("KHCostRun", f"{kh['cost']['total_usd']:.2f}")
 put("KHCostRunUpper", f"{kh['cost']['total_usd_upper']:.2f}")
+# All hosted runs of Experiment 3 that the paper reports: the main one and the later ones.
+put("KHCostAll", f"{kh['cost']['total_usd'] + sum(e3[k]['cost']['total_usd'] for k in ('hosted_carry', 'hosted_bringup') if k in e3):.2f}")
+# The pilot and the first hosted run, which the paper names but does not report as results.
+put("KHCostEarlier", f"{e3['hosted1']['cost']['total_usd'] + e3['pilot']['cost']['total_usd']:.2f}")
 # The first hosted run: four conditions on the product commit before the queue fix.
 kf = e3["hosted1"]
 put("KHFirstTrials", f"{kf['n_trials']:,}")
@@ -346,6 +430,63 @@ put("KPilotTrials", str(kp["n_trials"]))
 put("KPilotRecBlock", pct(kp["by_condition"]["c-blocking"]["recall_pass"][0]))
 put("KPilotRecLag", pct(kp["by_condition"]["b-backthought"]["recall_pass"][0]))
 
+# ----------------- later runs of Experiment 3: control cases and the sixth condition
+# A run that has not been delivered yet shows as "??" in the manuscript.
+MISSING = r"\textbf{??}"
+BRINGUP = "a2-tool-bringup"
+for key, prefix in (("carry", "KCarry"), ("hosted_carry", "KHCarry")):
+    run = e3.get(key)
+    put(f"{prefix}Trials", str(run["n_trials"]) if run else MISSING)
+    put(f"{prefix}Errors", str(sum(e["errors"] for e in run["by_condition"].values())) if run else MISSING)
+    for cond, tag in KTAG.items():
+        c = run["by_condition"][cond]["by_class"]["asked-carry"] if run else None
+        put(f"{prefix}{tag}", pct(c["pass"][0]) if c else MISSING)
+        put(f"{prefix}{tag}CI", pctci(c["pass"]) if c else "")
+        put(f"{prefix}GoldCases{tag}", str(c["gold_cases"]) if c else MISSING)
+    d = run["paired_diff"]["c-blocking|b-backthought"] if run else None
+    put(f"{prefix}DiffBlockLag", signed(100 * d[0]) if d else MISSING)
+    put(f"{prefix}DiffBlockLagCI", f"[{signed(100 * d[1])}, {signed(100 * d[2])}]" if d else "")
+for key, prefix in (("bringup", "KBring"), ("hosted_bringup", "KHBring")):
+    run = e3.get(key)
+    e = run["by_condition"][BRINGUP] if run else None
+    put(f"{prefix}Trials", str(run["n_trials"]) if run else MISSING)
+    put(f"{prefix}Rec", pct(e["recall_pass"][0]) if e else MISSING)
+    put(f"{prefix}RecCI", pctci(e["recall_pass"]) if e else "")
+    put(f"{prefix}Unp", pct(e["by_class"]["unprompted"]["pass"][0]) if e else MISSING)
+    put(f"{prefix}SrchUnp", pct(e["by_class"]["unprompted"]["searched"]) if e else MISSING)
+    put(f"{prefix}Path", f"{e['path_ms_median'] / 1000:.1f}" if e else MISSING)
+    put(f"{prefix}Guess", pct(1 - e["abstain"]["declined_any"]) if e else MISSING)
+    # Unprompted passes as counts, and those with neither the memory nor a search behind them.
+    u = e["unprompted_support"] if e else None
+    put(f"{prefix}UnpPassed", str(u["passed"]) if u else MISSING)
+    put(f"{prefix}UnpTrials", str(u["trials"]) if u else MISSING)
+    put(f"{prefix}UnpLoose", str(u["unsupported"]) if u else MISSING)
+    put(f"{prefix}UnpSupported", str(u["passed"] - u["unsupported"]) if u else MISSING)
+    ab = e["abstain"] if e else None
+    put(f"{prefix}AbstErrors", str(ab["errors"]) if ab else MISSING)
+    put(f"{prefix}AbstTool", pct(ab["abstain_recorded"]) if ab else MISSING)
+    put(f"{prefix}AbstToolRan", pct(ab["abstain_tool_count"] / (ab["trials"] - ab["errors"])) if ab else MISSING)
+    for name, tag in (("against_shipped", "VsShipped"), ("blocking_against_bringup", "BlockVs")):
+        for part, ptag in (("new_need", "Rec"), ("unprompted", "Unp")):
+            d = run[name][part] if run else None
+            put(f"{prefix}{tag}{ptag}", signed(100 * d[0]) if d else MISSING)
+            put(f"{prefix}{tag}{ptag}CI", f"[{signed(100 * d[1])}, {signed(100 * d[2])}]" if d else "")
+# The same count in the reported runs, over all five conditions.
+for macro, run in (("KLooseMain", k2), ("KHLooseMain", kh)):
+    loose = sum(e["unprompted_support"]["unsupported"] for e in run["by_condition"].values())
+    put(macro, str(loose) if loose else "none")
+# The share of unprompted trials with a search in the shipped condition, for comparison.
+put("KSrchUnpTool", pct(k2["by_condition"]["a-tool"]["by_class"]["unprompted"]["searched"]))
+# The shipped search tool on the version of the sixth condition, once that run is delivered;
+# until then, and for the hosted models (one version throughout), the reported run.
+base = e3.get("bringup_baseline")
+ship = base["by_condition"]["a-tool"] if base else k2["by_condition"]["a-tool"]
+put("KShipUnp", pct(ship["by_class"]["unprompted"]["pass"][0]))
+put("KShipSrchUnp", pct(ship["by_class"]["unprompted"]["searched"]))
+put("KShipRec", pct(ship["recall_pass"][0]))
+put("KShipVersion", "on the same version" if base else "in the reported run, on an earlier version")
+put("KHSrchUnpTool", pct(kh["by_condition"]["a-tool"]["by_class"]["unprompted"]["searched"]))
+
 # ------------------------------------ what waiting costs in time (Section 8)
 # One row per set-up: the wait for recall on the reply path, and the median time
 # to a complete reply in the four conditions that load or search memories.
@@ -354,7 +495,7 @@ import figures  # noqa: E402  (the set-ups and the curve of Figure "correct by t
 CLOUD = "e2-cloudrun-l4-timing"  # one trial per case on a cloud GPU; timing only
 deploy = [
     ("Agent, local models, laptop", bc["blocking"]["pre_generation_ms"]["median"],
-     [reply_seconds("e2", trials, c) for c in ("lag1", "blocking", "tool", "hybrid")]),
+     [reply_seconds("e2", trials40, c) for c in ("lag1", "blocking", "tool", "hybrid")]),
 ]
 if (ROOT / "results" / f"{CLOUD}_summary.json").exists():
     cloud_summary, cloud_rows = load_run(CLOUD)
@@ -420,17 +561,20 @@ put("LagCeilMax", f"{max(lag_ceilings):.0f}")
 
 # ---------------------------------------------------------------- tables
 NAMES = {"none": "No memory", "tool": "Search tool", "blocking": "Blocking retrieval",
-         "prefetch50": "Async, prefetch 50\\%", "lag1": "Async, lag 1",
-         "hybrid": "Async lag 1 + search"}
+         "prefetch50": "Prefetch 50\\%", "lag1": "Lag 1",
+         "hybrid": "Lag 1 + search"}
 ORDER = ["none", "tool", "blocking", "prefetch50", "lag1", "hybrid"]
 
 rows = []
 for cond in ORDER:
     e = bc[cond]
-    cells = [NAMES[cond], f"{pct(e['recall_pass'][0])} {pctci(e['recall_pass'])}"]
-    cells += [pct(e["by_class"][c]["pass"][0]) for c in ("asked-continuing", "asked-shift", "unprompted", "abstain")]
-    cells += [pct(e["gold_in_context"][0]) if cond != "none" else "--",
-              f"{e['pre_generation_ms']['median']:.0f}", f"{e['pre_generation_ms']['p90']:.0f}"]
+    carry = e["by_class"][CARRY]["pass"]
+    cells = [NAMES[cond], pct_with_ci(e["recall_pass"])]
+    cells += [pct(e["by_class"][c]["pass"][0]) for c in ("asked-continuing", "asked-shift", "unprompted")]
+    cells += [pct_with_ci(carry), pct(e["by_class"]["abstain"]["pass"][0])]
+    cells += ([str(gold_cases(trials, cond, NEW_NEED)[0]), str(gold_cases(trials, cond, (CARRY,))[0])]
+              if cond in ("blocking", "prefetch50", "lag1", "hybrid") else ["--", "--"])
+    cells += [f"{e['pre_generation_ms']['median']:.0f}"]
     rows.append(" & ".join(cells) + r" \\")
 (PAPER / "tab-e2.tex").write_text("\n".join(rows) + "\n")
 
@@ -452,9 +596,9 @@ rows = []
 for cond in ORDER:
     e = bc[cond]
     cells = [NAMES[cond]]
-    for c in ("asked-continuing", "asked-shift", "unprompted", "abstain"):
+    for c in (CARRY, "asked-continuing", "asked-shift", "unprompted", "abstain"):
         b = e["by_class"][c]
-        cells.append(f"{pct(b['pass'][0])} {pctci(b['pass'])}")
+        cells.append(pct_with_ci(b["pass"]))
         cells.append(pct(b["pass_all_5"]))
     rows.append(" & ".join(cells) + r" \\")
 (PAPER / "tab-e2-classes.tex").write_text("\n".join(rows) + "\n")
@@ -488,24 +632,54 @@ for run, (summary, run_rows) in robust.items():
         cells += [pct(e["by_class"][c]["pass"][0])
                   for c in ("asked-continuing", "asked-shift", "unprompted", "abstain")]
         cells += [pct(e["asked_outcomes"]["other_answer"]),
-                  pct(e["searched_rate"]) if cond in ("tool", "hybrid") else "--",
+                  pct(float(np.mean([r["searched"] == "True" for r in run_rows if r["condition"] == cond])))
+                  if cond in ("tool", "hybrid") else "--",
                   f"{sec:.1f}" if sec is not None else r"--$^{\dagger}$"]
         rows.append(" & ".join(cells) + r" \\")
 (PAPER / "tab-robust.tex").write_text("\n".join(rows) + "\n")
 
-KNAMES = {"a-tool": "Search tool (shipped)", "b-backthought": "Async, lag 1",
-          "c-blocking": "Blocking retrieval", "d-blocking-backthought": "Blocking + async",
-          "e-backthought-tool": "Async lag 1 + search"}
+KNAMES = {"a-tool": "Search tool (shipped)", "b-backthought": "Lag 1",
+          "c-blocking": "Blocking retrieval", "d-blocking-backthought": "Blocking + lag 1",
+          "e-backthought-tool": "Lag 1 + search"}
+def carry_cell(key: str, cond: str) -> str:
+    run = e3.get(key)
+    return pct(run["by_condition"][cond]["by_class"]["asked-carry"]["pass"][0]) if run else MISSING
+
+
+def bringup_row(key: str, hosted: bool, cond: str = BRINGUP, label: str = "Search tool + sentence",
+                space: bool = True) -> list[str]:
+    """A later run of one search-tool condition as a table row, or nothing while it is not delivered."""
+    run = e3.get(key)
+    if not run:
+        return []
+    e = run["by_condition"][cond]
+    cells = [label, f"{pct(e['recall_pass'][0])} {pctci(e['recall_pass'])}"]
+    cells += [pct(e["by_class"][c]["pass"][0]) for c in ("asked-continuing", "asked-shift", "unprompted")]
+    cells += ["--", "--", pct(e["searched_rate"])]
+    if hosted:
+        c = run["cost"]["conditions"][cond]
+        cells += [pct(e["abstain"]["abstain_recorded"]), f"{e['path_ms_median'] / 1000:.1f}",
+                  f"{c['model_calls_per_trial']:.1f}", f"{100 * c['cost_usd_per_trial']:.2f}"]
+    else:
+        cells += [pct(e["abstain"]["abstain_recorded"]), pct(e["abstain"]["abstain_text"]),
+                  f"{e['path_ms_median'] / 1000:.1f}"]
+    return ([r"\addlinespace[2pt]"] if space else []) + [" & ".join(cells) + r" \\"]
+
+
 rows = []
 for cond in ("a-tool", "c-blocking", "b-backthought", "d-blocking-backthought", "e-backthought-tool"):
     e = k2["by_condition"][cond]
     cells = [KNAMES[cond], f"{pct(e['recall_pass'][0])} {pctci(e['recall_pass'])}"]
     cells += [pct(e["by_class"][c]["pass"][0]) for c in ("asked-continuing", "asked-shift", "unprompted")]
+    cells += [carry_cell("carry", cond)]
     cells += [pct(e["gold_in_wm"][0]) if cond != "a-tool" else "--",
               pct(e["searched_rate"]) if "tool" in cond else "--",
               pct(e["abstain"]["abstain_recorded"]), pct(e["abstain"]["abstain_text"]),
               f"{e['path_ms']['median'] / 1000:.1f}"]
     rows.append(" & ".join(cells) + r" \\")
+# The matched pair on the later product version: the search tool as shipped, then with the sentence.
+baseline = bringup_row("bringup_baseline", hosted=False, cond="a-tool", label="Search tool (later)")
+rows += baseline + bringup_row("bringup", hosted=False, space=not baseline)
 (PAPER / "tab-e3.tex").write_text("\n".join(rows) + "\n")
 
 rows = []
@@ -514,12 +688,14 @@ for cond in ("a-tool", "c-blocking", "b-backthought", "d-blocking-backthought", 
     c = kh["cost"]["conditions"][cond]
     cells = [KNAMES[cond], f"{pct(e['recall_pass'][0])} {pctci(e['recall_pass'])}"]
     cells += [pct(e["by_class"][cls]["pass"][0]) for cls in ("asked-continuing", "asked-shift", "unprompted")]
+    cells += [carry_cell("hosted_carry", cond)]
     cells += [pct(e["gold_in_wm"][0]) if cond != "a-tool" else "--",
               pct(e["searched_rate"]) if "tool" in cond else "--",
               pct(e["abstain"]["abstain_recorded"]),
               f"{e['path_ms']['median'] / 1000:.1f}",
               f"{c['model_calls_per_trial']:.1f}", f"{100 * c['cost_usd_per_trial']:.2f}"]
     rows.append(" & ".join(cells) + r" \\")
+rows += bringup_row("hosted_bringup", hosted=True)
 (PAPER / "tab-e3-hosted.tex").write_text("\n".join(rows) + "\n")
 
 rows = []

@@ -1,0 +1,60 @@
+id: recall-unprompted/amb-honey-show
+title: He entered his honey in the county show this year and came nowhere, poor man.
+description: unprompted after a continuing lead-in.
+targets:
+- recall-unprompted
+polarity: normal
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: My neighbour has started keeping bees.
+    - role: assistant
+      content: Tessaly would have understood that. She kept six hives at the end of the garden.
+    lead_in_gap_s: 4.29
+actions:
+- kind: message
+  role: user
+  content: He entered his honey in the county show this year and came nowhere, poor man.
+expected_outcomes:
+- 'Mention a fact from: b-honey.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - second prize
+    - Dunmere
+    - added sugar
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Her heather honey won second prize at the Dunmere fair in 1991. She maintained that the winner
+      had added sugar.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:unprompted
+- continuity:continuing
+- gold:b-honey

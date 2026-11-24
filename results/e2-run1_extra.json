@@ -1,0 +1,72 @@
+{
+ "none": {
+  "pass_given_gold": [
+   null,
+   0
+  ],
+  "pass_given_no_gold": [
+   0.0,
+   150
+  ]
+ },
+ "tool": {
+  "pass_given_gold": [
+   0.968503937007874,
+   127
+  ],
+  "pass_given_no_gold": [
+   0.0,
+   23
+  ]
+ },
+ "blocking": {
+  "pass_given_gold": [
+   0.896,
+   125
+  ],
+  "pass_given_no_gold": [
+   0.0,
+   25
+  ]
+ },
+ "lag1": {
+  "pass_given_gold": [
+   0.8285714285714286,
+   35
+  ],
+  "pass_given_no_gold": [
+   0.0,
+   115
+  ]
+ },
+ "prefetch50": {
+  "pass_given_gold": [
+   0.8666666666666667,
+   75
+  ],
+  "pass_given_no_gold": [
+   0.0,
+   75
+  ]
+ },
+ "hybrid": {
+  "pass_given_gold": [
+   0.9014084507042254,
+   71
+  ],
+  "pass_given_no_gold": [
+   0.0,
+   79
+  ]
+ },
+ "pooled": {
+  "pass_given_gold": [
+   0.9076212471131639,
+   433
+  ],
+  "pass_given_no_gold": [
+   0.0,
+   317
+  ]
+ }
+}

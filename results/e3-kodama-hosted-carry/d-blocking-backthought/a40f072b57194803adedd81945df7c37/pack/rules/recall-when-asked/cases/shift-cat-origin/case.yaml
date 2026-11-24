@@ -1,0 +1,60 @@
+id: recall-when-asked/shift-cat-origin
+title: Oh, and where did her cat Vellum come from originally?
+description: asked-shift after a abrupt lead-in.
+targets:
+- recall-when-asked
+polarity: recovery
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: Her quilt is on my bed now.
+    - role: assistant
+      content: It was pieced from offcuts of her mother's dressmaking, including a square from her own
+        wedding dress.
+    lead_in_gap_s: 2.86
+actions:
+- kind: message
+  role: user
+  content: Oh, and where did her cat Vellum come from originally?
+expected_outcomes:
+- 'Mention a fact from: l-cat.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - lifeboat
+    - slipway
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Her last companion was a grey cat named Vellum, who slept in the paper drawer. Vellum came
+      from the lifeboat station, where she had been living under the slipway.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-shift
+- continuity:abrupt
+- gold:l-cat

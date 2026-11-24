@@ -1,6 +1,120 @@
-{"condition": "none", "trials": 200, "passed": 50, "seconds": 97, "bundle": "results/e2/none/24c4a805ea394d8eb69bb87d48aaeb40", "seal_problems": []}
-{"condition": "tool", "trials": 200, "passed": 165, "seconds": 280, "bundle": "results/e2/tool/adc4af111d234a549b0a28d99914e2e9", "seal_problems": []}
-{"condition": "blocking", "trials": 200, "passed": 157, "seconds": 147, "bundle": "results/e2/blocking/5b1fb27c9ac54dec970b97404fe959d7", "seal_problems": []}
-{"condition": "lag1", "trials": 200, "passed": 74, "seconds": 121, "bundle": "results/e2/lag1/161dc368beda46b6b4365e9e2eb76a02", "seal_problems": []}
-{"condition": "prefetch50", "trials": 200, "passed": 112, "seconds": 131, "bundle": "results/e2/prefetch50/e533482ff62d4aae9750b578f82ee12d", "seal_problems": []}
-{"condition": "hybrid", "trials": 200, "passed": 109, "seconds": 284, "bundle": "results/e2/hybrid/ef2e9d60203746beb21111d0e2db6a50", "seal_problems": []}
+# Estimate: `e2`
+
+- Chat model: ollama/gemma4:e4b; embeddings: ollama/nomic-embed-text
+- Trials: 1500 in 6 condition(s)
+- Profile: telemetry of results/e2-cloudrun-l4-timing
+- Prices on 2026-11-16: chat $0.0/$0.0 per M in/out (local inference, no per-token charge, read 2026-11-13)
+
+Expected [low–high]. The high end of a wide range is a ceiling, not a likely value.
+
+| condition | trials | model calls | tokens in | tokens out | embed tokens | model spend | duration |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| none | 250 | 250 [225–275] | 63,056 [56,751–69,362] | 4,912 [4,421–5,404] | 0 [0–0] | $0.0000 [$0.0000–$0.0000] | 110 s [99 s–2 min] |
+| tool | 250 | 494 [444–543] | 181,300 [163,170–199,430] | 12,138 [10,924–13,351] | 2,494 [2,244–2,743] | $0.0000 [$0.0000–$0.0000] | 4 min [4 min–5 min] |
+| blocking | 250 | 250 [225–275] | 97,850 [88,065–107,635] | 7,481 [6,733–8,229] | 11,919 [10,727–13,111] | $0.0000 [$0.0000–$0.0000] | 3 min [2 min–3 min] |
+| lag1 | 250 | 250 [225–275] | 97,350 [87,615–107,085] | 5,819 [5,237–6,401] | 8,531 [7,678–9,384] | $0.0000 [$0.0000–$0.0000] | 2 min [2 min–3 min] |
+| prefetch50 | 250 | 250 [225–275] | 97,312 [87,581–107,044] | 6,344 [5,709–6,978] | 10,206 [9,186–11,227] | $0.0000 [$0.0000–$0.0000] | 2 min [2 min–3 min] |
+| hybrid | 250 | 406 [366–447] | 189,469 [170,522–208,416] | 11,000 [9,900–12,100] | 9,294 [8,364–10,223] | $0.0000 [$0.0000–$0.0000] | 4 min [4 min–4 min] |
+| **total** | 1500 | 1,900 [1,710–2,090] | 726,338 [653,704–798,971] | 47,694 [42,924–52,463] | 53,652 [49,407–57,896] | $0.0000 [$0.0000–$0.0000] | 18 min [16 min–20 min] |
+
+**No spend** (local models, local machine).
+
+{"condition": "none", "trials": 250, "passed": 50, "seconds": 113, "bundle": "results/e2/none/1b99aeafa5704eb59712ebd4caaf893c", "seal_problems": []}
+{"condition": "tool", "trials": 250, "passed": 207, "seconds": 313, "bundle": "results/e2/tool/1be2897e2564451c82f6fa8062d3f3de", "seal_problems": []}
+{"condition": "blocking", "trials": 250, "passed": 208, "seconds": 180, "bundle": "results/e2/blocking/09b28265dac84cedadbb387030b2c30f", "seal_problems": []}
+{"condition": "lag1", "trials": 250, "passed": 125, "seconds": 154, "bundle": "results/e2/lag1/55a6a01bf9214cb8b462a5bd76b5b49d", "seal_problems": []}
+{"condition": "prefetch50", "trials": 250, "passed": 162, "seconds": 182, "bundle": "results/e2/prefetch50/e17153f9e7754346a8028e68cc50c21b", "seal_problems": []}
+{"condition": "hybrid", "trials": 250, "passed": 158, "seconds": 359, "bundle": "results/e2/hybrid/2cf84d436f3340dc827f7f60d178e7e3", "seal_problems": []}
+# Telemetry summary: `e2`
+
+Per trial: mean (median). Latency: median / 90th percentile, ms.
+
+| condition | trials | model calls | tokens in | tokens out | embed tokens | cost / trial | cost (run) | trial ms (p50 / p90) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| none | 250 | 1.00 (1.00) | 252 (252) | 20 (16) | 0 (0) | $0.0000 | $0.0000 | 412 / 639 |
+| tool | 250 | 1.99 (2.00) | 729 (735) | 49 (50) | 11 (11) | $0.0000 | $0.0000 | 1,256 / 1,665 |
+| blocking | 250 | 1.00 (1.00) | 391 (391) | 30 (30) | 47 (48) | $0.0000 | $0.0000 | 705 / 1,021 |
+| lag1 | 250 | 1.00 (1.00) | 390 (390) | 24 (21) | 35 (35) | $0.0000 | $0.0000 | 595 / 963 |
+| prefetch50 | 250 | 1.00 (1.00) | 390 (391) | 27 (24) | 41 (40) | $0.0000 | $0.0000 | 642 / 1,080 |
+| hybrid | 250 | 1.62 (2.00) | 768 (874) | 45 (43) | 39 (38) | $0.0000 | $0.0000 | 1,305 / 2,271 |
+
+Run: 1500 trials, 1904 model calls, 729,880 tokens in, 48,454 tokens out, 54,145 embedding tokens, cost $0.0000, 21.7 min of trial time.
+
+## Latency per span kind (ms, median / p90, n)
+
+| span kind | none | tool | blocking | lag1 | prefetch50 | hybrid |
+|---|---:|---:|---:|---:|---:|---:|
+| chat:reply | 411 / 639 (250) | 781 / 1,092 (248) | 691 / 999 (250) | 582 / 937 (250) | 626 / 1,054 (250) | 935 / 1,362 (156) |
+| chat:tool_offer |  | 424 / 637 (250) |  |  |  | 648 / 1,144 (250) |
+| embeddings:index | 934 / 934 (1) | 675 / 675 (1) | 706 / 706 (1) | 697 / 697 (1) | 810 / 810 (1) | 897 / 897 (1) |
+| embeddings:query |  | 11 / 24 (246) | 12 / 24 (250) | 11 / 25 (250) | 12 / 30 (250) | 13 / 33 (349) |
+| execute_tool |  | 11 / 24 (246) |  |  |  | 10 / 29 (99) |
+| recall:off_path |  |  |  | 12 / 25 (250) | 12 / 30 (250) | 13 / 34 (250) |
+| recall:reply_path |  |  | 12 / 25 (250) |  |  |  |
+| recall:tool |  | 11 / 24 (246) |  |  |  | 10 / 29 (99) |
+| reply_path | 411 / 639 (250) | 1,255 / 1,656 (250) | 704 / 1,014 (250) | 582 / 937 (250) | 626 / 1,054 (250) | 1,278 / 2,246 (250) |
+| trial | 412 / 639 (250) | 1,256 / 1,665 (250) | 705 / 1,021 (250) | 595 / 963 (250) | 642 / 1,080 (250) | 1,305 / 2,271 (250) |
+
+## Notes
+
+- none: indexing the memorome took 1 embedding call(s), 1,868 tokens, $0.0000 (in the run cost, not per trial).
+- tool: indexing the memorome took 1 embedding call(s), 1,868 tokens, $0.0000 (in the run cost, not per trial).
+- blocking: indexing the memorome took 1 embedding call(s), 1,868 tokens, $0.0000 (in the run cost, not per trial).
+- lag1: indexing the memorome took 1 embedding call(s), 1,868 tokens, $0.0000 (in the run cost, not per trial).
+- prefetch50: 1 model or embedding call(s) took over 5× the median of their kind (longest 10,071 ms).
+- prefetch50: indexing the memorome took 1 embedding call(s), 1,868 tokens, $0.0000 (in the run cost, not per trial).
+- hybrid: 3 model or embedding call(s) took over 5× the median of their kind (longest 10,114 ms).
+- hybrid: indexing the memorome took 1 embedding call(s), 1,868 tokens, $0.0000 (in the run cost, not per trial).
+
+Prices: `pricing/prices.yaml` (each entry has its source and the date it was read).
+
+# Estimate and actual: `e2`
+
+Estimate as expected [low–high]; actual from the run's telemetry. ⚠ marks an actual outside the estimated range.
+
+| condition | quantity | estimate | actual |
+|---|---|---:|---:|
+| none | trials | 250 | 250 |
+| none | chat_calls | 250 [225–275] | 250 |
+| none | input_tokens | 63,056 [56,751–69,362] | 63,000 |
+| none | output_tokens | 4,912 [4,421–5,404] | 4,992 |
+| none | embed_tokens | 0 [0–0] | 0 |
+| none | cost_usd | $0.0000 [$0.0000–$0.0000] | $0.0000 |
+| none | duration_s | 110 s [99 s–2 min] | 112 s |
+| tool | trials | 250 | 250 |
+| tool | chat_calls | 494 [444–543] | 498 |
+| tool | input_tokens | 181,300 [163,170–199,430] | 182,205 |
+| tool | output_tokens | 12,138 [10,924–13,351] | 12,269 |
+| tool | embed_tokens | 2,494 [2,244–2,743] | 2,658 |
+| tool | cost_usd | $0.0000 [$0.0000–$0.0000] | $0.0000 |
+| tool | duration_s | 4 min [4 min–5 min] | ⚠ 5 min |
+| blocking | trials | 250 | 250 |
+| blocking | chat_calls | 250 [225–275] | 250 |
+| blocking | input_tokens | 97,850 [88,065–107,635] | 97,800 |
+| blocking | output_tokens | 7,481 [6,733–8,229] | 7,395 |
+| blocking | embed_tokens | 11,919 [10,727–13,111] | 11,785 |
+| blocking | cost_usd | $0.0000 [$0.0000–$0.0000] | $0.0000 |
+| blocking | duration_s | 3 min [2 min–3 min] | ⚠ 3 min |
+| lag1 | trials | 250 | 250 |
+| lag1 | chat_calls | 250 [225–275] | 250 |
+| lag1 | input_tokens | 97,350 [87,615–107,085] | 97,495 |
+| lag1 | output_tokens | 5,819 [5,237–6,401] | 6,023 |
+| lag1 | embed_tokens | 8,531 [7,678–9,384] | 8,630 |
+| lag1 | cost_usd | $0.0000 [$0.0000–$0.0000] | $0.0000 |
+| lag1 | duration_s | 2 min [2 min–3 min] | ⚠ 3 min |
+| prefetch50 | trials | 250 | 250 |
+| prefetch50 | chat_calls | 250 [225–275] | 250 |
+| prefetch50 | input_tokens | 97,312 [87,581–107,044] | 97,475 |
+| prefetch50 | output_tokens | 6,344 [5,709–6,978] | 6,628 |
+| prefetch50 | embed_tokens | 10,206 [9,186–11,227] | 10,180 |
+| prefetch50 | cost_usd | $0.0000 [$0.0000–$0.0000] | $0.0000 |
+| prefetch50 | duration_s | 2 min [2 min–3 min] | ⚠ 3 min |
+| hybrid | trials | 250 | 250 |
+| hybrid | chat_calls | 406 [366–447] | 406 |
+| hybrid | input_tokens | 189,469 [170,522–208,416] | 191,905 |
+| hybrid | output_tokens | 11,000 [9,900–12,100] | 11,147 |
+| hybrid | embed_tokens | 9,294 [8,364–10,223] | 9,684 |
+| hybrid | cost_usd | $0.0000 [$0.0000–$0.0000] | $0.0000 |
+| hybrid | duration_s | 4 min [4 min–4 min] | ⚠ 6 min |
+
+EXIT=0
