@@ -1,0 +1,59 @@
+id: recall-when-asked/carry-flat-things
+title: What did she take with her from the house?
+description: asked-carry after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: I visited her flat on Quay Street a few times near the end.
+    - role: assistant
+      content: She moved there in 2016, to the second floor, with a view of the harbour mouth.
+    lead_in_gap_s: 2.57
+actions:
+- kind: message
+  role: user
+  content: What did she take with her from the house?
+expected_outcomes:
+- 'Mention a fact from: l-flat.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - clock
+    - press
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: In 2016 she moved from the house to a second-floor flat on Quay Street with a view of the
+      harbour mouth. She took the ship's clock and the press and little else.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-carry
+- continuity:continuing
+- gold:l-flat
