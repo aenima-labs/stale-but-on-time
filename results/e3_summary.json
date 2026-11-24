@@ -103,6 +103,14 @@
      "abstain_text": 0.36,
      "declined_any": 0.5
     },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 5,
+     "unsupported": 1,
+     "unsupported_cases": [
+      "amb-quarrel"
+     ]
+    },
     "pass_given_gold": [
      null,
      0
@@ -174,6 +182,12 @@
      "abstain_recorded": 0.12,
      "abstain_text": 0.74,
      "declined_any": 0.88
+    },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 18,
+     "unsupported": 0,
+     "unsupported_cases": []
     },
     "pass_given_gold": [
      0.86,
@@ -247,6 +261,12 @@
      "abstain_text": 0.64,
      "declined_any": 0.72
     },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 37,
+     "unsupported": 0,
+     "unsupported_cases": []
+    },
     "pass_given_gold": [
      0.9,
      140
@@ -319,6 +339,12 @@
      "abstain_text": 0.72,
      "declined_any": 0.74
     },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 36,
+     "unsupported": 0,
+     "unsupported_cases": []
+    },
     "pass_given_gold": [
      0.8943661971830986,
      142
@@ -390,6 +416,12 @@
      "abstain_recorded": 0.3,
      "abstain_text": 0.58,
      "declined_any": 0.62
+    },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 11,
+     "unsupported": 0,
+     "unsupported_cases": []
     },
     "pass_given_gold": [
      0.7,
@@ -539,6 +571,12 @@
     "abstain": {
      "abstain_tool": 0.24
     },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 9,
+     "unsupported": 0,
+     "unsupported_cases": []
+    },
     "pass_given_gold": [
      null,
      0
@@ -607,6 +645,12 @@
     },
     "abstain": {
      "abstain_tool": 0.08
+    },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 0,
+     "unsupported": 0,
+     "unsupported_cases": []
     },
     "pass_given_gold": [
      0.38,
@@ -677,6 +721,12 @@
     "abstain": {
      "abstain_tool": 0.1
     },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 4,
+     "unsupported": 0,
+     "unsupported_cases": []
+    },
     "pass_given_gold": [
      0.45714285714285713,
      140
@@ -746,6 +796,12 @@
     "abstain": {
      "abstain_tool": 0.12
     },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 1,
+     "unsupported": 0,
+     "unsupported_cases": []
+    },
     "pass_given_gold": [
      0.3900709219858156,
      141
@@ -814,6 +870,12 @@
     },
     "abstain": {
      "abstain_tool": 0.28
+    },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 11,
+     "unsupported": 0,
+     "unsupported_cases": []
     },
     "pass_given_gold": [
      0.72,
@@ -929,6 +991,12 @@
      "abstain_text": 0.82,
      "declined_any": 0.84
     },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 0,
+     "unsupported": 0,
+     "unsupported_cases": []
+    },
     "pass_given_gold": [
      null,
      0
@@ -1000,6 +1068,12 @@
      "abstain_recorded": 0.9,
      "abstain_text": 0.88,
      "declined_any": 0.9
+    },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 35,
+     "unsupported": 0,
+     "unsupported_cases": []
     },
     "pass_given_gold": [
      1.0,
@@ -1073,6 +1147,12 @@
      "abstain_text": 0.9,
      "declined_any": 0.9
     },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 49,
+     "unsupported": 0,
+     "unsupported_cases": []
+    },
     "pass_given_gold": [
      0.9930555555555556,
      144
@@ -1145,6 +1225,12 @@
      "abstain_text": 0.9,
      "declined_any": 0.9
     },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 50,
+     "unsupported": 0,
+     "unsupported_cases": []
+    },
     "pass_given_gold": [
      1.0,
      145
@@ -1216,6 +1302,12 @@
      "abstain_recorded": 0.78,
      "abstain_text": 0.84,
      "declined_any": 0.88
+    },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 35,
+     "unsupported": 0,
+     "unsupported_cases": []
     },
     "pass_given_gold": [
      1.0,
@@ -1415,6 +1507,14 @@
      "abstain_text": 0.86,
      "declined_any": 0.86
     },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 1,
+     "unsupported": 1,
+     "unsupported_cases": [
+      "amb-passport"
+     ]
+    },
     "pass_given_gold": [
      null,
      0
@@ -1486,6 +1586,12 @@
      "abstain_recorded": 0.9,
      "abstain_text": 0.9,
      "declined_any": 0.9
+    },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 35,
+     "unsupported": 0,
+     "unsupported_cases": []
     },
     "pass_given_gold": [
      1.0,
@@ -1559,6 +1665,12 @@
      "abstain_text": 0.86,
      "declined_any": 0.88
     },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 50,
+     "unsupported": 0,
+     "unsupported_cases": []
+    },
     "pass_given_gold": [
      1.0,
      145
@@ -1630,6 +1742,12 @@
      "abstain_recorded": 0.9,
      "abstain_text": 0.9,
      "declined_any": 0.9
+    },
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 49,
+     "unsupported": 0,
+     "unsupported_cases": []
     },
     "pass_given_gold": [
      0.993103448275862,
@@ -1817,6 +1935,12 @@
      "abstain_text": 0.8,
      "declined_any": 0.9
     },
+    "unprompted_support": {
+     "trials": 10,
+     "passed": 0,
+     "unsupported": 0,
+     "unsupported_cases": []
+    },
     "pass_given_gold": [
      null,
      0
@@ -1888,6 +2012,12 @@
      "abstain_recorded": 0.9,
      "abstain_text": 0.9,
      "declined_any": 0.9
+    },
+    "unprompted_support": {
+     "trials": 10,
+     "passed": 7,
+     "unsupported": 0,
+     "unsupported_cases": []
     },
     "pass_given_gold": [
      1.0,
@@ -1961,6 +2091,12 @@
      "abstain_text": 0.9,
      "declined_any": 0.9
     },
+    "unprompted_support": {
+     "trials": 10,
+     "passed": 10,
+     "unsupported": 0,
+     "unsupported_cases": []
+    },
     "pass_given_gold": [
      1.0,
      29
@@ -2033,6 +2169,12 @@
      "abstain_text": 0.9,
      "declined_any": 0.9
     },
+    "unprompted_support": {
+     "trials": 10,
+     "passed": 10,
+     "unsupported": 0,
+     "unsupported_cases": []
+    },
     "pass_given_gold": [
      1.0,
      29
@@ -2104,6 +2246,14 @@
      "abstain_recorded": 0.9,
      "abstain_text": 0.9,
      "declined_any": 0.9
+    },
+    "unprompted_support": {
+     "trials": 10,
+     "passed": 8,
+     "unsupported": 1,
+     "unsupported_cases": [
+      "amb-passport"
+     ]
     },
     "pass_given_gold": [
      1.0,
@@ -2468,10 +2618,19 @@
      0.48000000000000004,
      0.7799999999999999
     ],
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 5,
+     "unsupported": 0,
+     "unsupported_cases": []
+    },
     "abstain": {
      "abstain_recorded": 0.2,
      "abstain_text": 0.46,
-     "declined_any": 0.52
+     "declined_any": 0.52,
+     "errors": 0,
+     "trials": 50,
+     "abstain_tool_count": 10
     }
    }
   },
@@ -2498,7 +2657,7 @@
    "new_need": [
     3.7007434154171884e-18,
     -0.04666666666666666,
-    0.05333333333333334
+    0.046666666666666676
    ],
    "unprompted": [
     0.0,
@@ -2509,13 +2668,145 @@
   "blocking_against_bringup": {
    "new_need": [
     0.20666666666666664,
-    0.03333333333333333,
-    0.37333333333333335
+    0.039999999999999994,
+    0.37999999999999995
    ],
    "unprompted": [
     0.6399999999999999,
     0.41999999999999993,
-    0.86
+    0.8400000000000001
+   ]
+  }
+ },
+ "hosted_bringup": {
+  "n_trials": 200,
+  "meta": {
+   "a2-tool-bringup": {
+    "backend_commit": "3101c5b",
+    "started_at": "2026-11-24T11:11:54+00:00",
+    "finished_at": "2026-11-24T12:30:23+00:00",
+    "trials": 200,
+    "model": "gpt-5.6-luna"
+   }
+  },
+  "by_condition": {
+   "a2-tool-bringup": {
+    "trials": 200,
+    "errors": 2,
+    "templated": 0,
+    "regraded_recall_to_fail": 0,
+    "searched_rate": 0.745,
+    "path_ms_median": 9098.5,
+    "by_class": {
+     "abstain": {
+      "pass": [
+       0.8400000000000001,
+       0.62,
+       1.0
+      ],
+      "searched": 0.96,
+      "gold_in_wm": 0.0,
+      "gold_cases": 0,
+      "cases": 10
+     },
+     "asked-continuing": {
+      "pass": [
+       0.96,
+       0.9,
+       1.0
+      ],
+      "searched": 1.0,
+      "gold_in_wm": 0.0,
+      "gold_cases": 0,
+      "cases": 10
+     },
+     "asked-shift": {
+      "pass": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "searched": 1.0,
+      "gold_in_wm": 0.0,
+      "gold_cases": 0,
+      "cases": 10
+     },
+     "unprompted": {
+      "pass": [
+       0.08,
+       0.0,
+       0.20000000000000004
+      ],
+      "searched": 0.02,
+      "gold_in_wm": 0.0,
+      "gold_cases": 0,
+      "cases": 10
+     }
+    },
+    "recall_pass": [
+     0.6799999999999999,
+     0.52,
+     0.8333333333333334
+    ],
+    "unprompted_support": {
+     "trials": 50,
+     "passed": 4,
+     "unsupported": 3,
+     "unsupported_cases": [
+      "amb-passport"
+     ]
+    },
+    "abstain": {
+     "abstain_recorded": 0.84,
+     "abstain_text": 0.86,
+     "declined_any": 0.86,
+     "errors": 2,
+     "trials": 50,
+     "abstain_tool_count": 42
+    }
+   }
+  },
+  "cost": {
+   "conditions": {
+    "a2-tool-bringup": {
+     "trials": 199,
+     "model_calls_per_trial": 6.231155778894473,
+     "input_tokens_per_trial": 8050.914572864322,
+     "output_tokens_per_trial": 169.91959798994975,
+     "cost_usd_per_trial": 0.0006148844221105529,
+     "cost_usd": 0.122362,
+     "cost_usd_upper": 0.258927
+    }
+   },
+   "cost_usd": 0.122362,
+   "cost_usd_upper": 0.258927,
+   "embeddings_usd": 0.0134,
+   "total_usd": 0.1358,
+   "total_usd_upper": 0.2723
+  },
+  "shipped_from": "same version",
+  "against_shipped": {
+   "new_need": [
+    0.03333333333333333,
+    -0.006666666666666665,
+    0.08666666666666667
+   ],
+   "unprompted": [
+    0.08,
+    0.0,
+    0.2
+   ]
+  },
+  "blocking_against_bringup": {
+   "new_need": [
+    0.2733333333333333,
+    0.09333333333333332,
+    0.4533333333333333
+   ],
+   "unprompted": [
+    0.9,
+    0.78,
+    1.0
    ]
   }
  }

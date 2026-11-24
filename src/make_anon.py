@@ -109,7 +109,7 @@ from its bundles but not re-run.
 |---|---|
 | `pack-src/`, `pack/`, `fixtures/` | Fictional memory store and the 50-case test pack |
 | `src/` | Retriever, Experiment 1 (LoCoMo replay), Experiment 2 (reference agent and runner), Experiment 3 (analysis of the runs against the product), figures |
-| `results/` | Per-utterance retrievals (E1), sealed run bundles with every trial (E2: `e2` main run, `e2-run1` first run, `e2-think`, `e2-qwen3`, `e2-anthropic`; E3: `e3-product`, `e3-product-run1`, `e3-product-hosted`, the later runs of the control cases and of the sixth condition in `e3-product-carry`, `e3-product-hosted-carry`, `e3-product-toolprompt`, `e3-product-hosted-toolprompt`, and the pilot, the first run and the stopped attempts of the hosted run in the other `e3-product-hosted-*` folders, each with a `NOTE.md`), summaries |
+| `results/` | Per-utterance retrievals (E1), sealed run bundles with every trial (E2: `e2` main run, `e2-run1` first run, `e2-think`, `e2-qwen3`, `e2-anthropic`; E3: `e3-product`, `e3-product-run1`, `e3-product-hosted`, the later runs of the control cases and of the sixth condition in `e3-product-carry`, `e3-product-hosted-carry`, `e3-product-toolprompt`, `e3-product-toolprompt-baseline`, `e3-product-hosted-toolprompt`, and the pilot, the first run and the stopped attempts of the hosted runs in the other `e3-product-hosted-*` folders, each with a `NOTE.md`), summaries |
 | `vendor/evalframework/` | The evaluation framework, vendored at the commit used and renamed |
 | `paper/` | LaTeX sources, generated tables, number macros |
 

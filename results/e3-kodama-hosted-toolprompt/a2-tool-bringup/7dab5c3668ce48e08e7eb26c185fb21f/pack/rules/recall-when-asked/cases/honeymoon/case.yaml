@@ -1,0 +1,59 @@
+id: recall-when-asked/honeymoon
+title: Where did they go afterwards, for the honeymoon?
+description: asked-continuing after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: I found their wedding photo yesterday. It looks like it had been raining.
+    - role: assistant
+      content: It rained all morning on 14 May 1964 and cleared just as they walked out of St Brannoc
+        chapel.
+    lead_in_gap_s: 2.29
+actions:
+- kind: message
+  role: user
+  content: Where did they go afterwards, for the honeymoon?
+expected_outcomes:
+- 'Mention a fact from: h-honeymoon.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - Vessant
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: For their honeymoon they took the night train to Vessant and stayed five days. Edmund lost
+      his hat out of the carriage window on the first evening.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-continuing
+- continuity:continuing
+- gold:h-honeymoon

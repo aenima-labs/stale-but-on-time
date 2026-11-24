@@ -1,0 +1,65 @@
+id: recall-when-asked/carry-steps
+title: How many steps was it up to the lamp room?
+description: asked-carry after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: kodama.memorome
+  privacy: public
+  config:
+    memorome: donor-tessaly
+    patches: []
+    wait_embedded: true
+    history:
+    - role: user
+      content: What was her childhood like, out at the lighthouse?
+    - role: assistant
+      content: Her father Wilmot kept the light at Carrow Point, and she went up to the lamp room with
+        him every evening.
+    lead_in_gap_s: 2.86
+actions:
+- kind: message
+  role: user
+  content: How many steps was it up to the lamp room?
+expected_outcomes:
+- 'Mention a fact from: c-lighthouse.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    regex: (?:112|hundred\ and\ twelve|hundred\ twelve|one[-\s]+hundred[-\s]+twelve|one[-\s]+hundred[-\s]+and[-\s]+twelve|a[-\s]+hundred[-\s]+and[-\s]+twelve|a[-\s]+hundred[-\s]+twelve)
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Her father, Wilmot, kept the lighthouse at Carrow Point. As a girl Tessaly counted the 112
+      steps to the lamp room every evening and wound the mechanism with him.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I think it was One Hundred Twelve.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:asked-carry
+- continuity:continuing
+- gold:c-lighthouse

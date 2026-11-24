@@ -404,6 +404,8 @@ put("KHCostRun", f"{kh['cost']['total_usd']:.2f}")
 put("KHCostRunUpper", f"{kh['cost']['total_usd_upper']:.2f}")
 # All hosted runs of Experiment 3 that the paper reports: the main one and the later ones.
 put("KHCostAll", f"{kh['cost']['total_usd'] + sum(e3[k]['cost']['total_usd'] for k in ('hosted_carry', 'hosted_bringup') if k in e3):.2f}")
+# The pilot and the first hosted run, which the paper names but does not report as results.
+put("KHCostEarlier", f"{e3['hosted1']['cost']['total_usd'] + e3['pilot']['cost']['total_usd']:.2f}")
 # The first hosted run: four conditions on the product commit before the queue fix.
 kf = e3["hosted1"]
 put("KHFirstTrials", f"{kf['n_trials']:,}")
@@ -454,11 +456,25 @@ for key, prefix in (("bringup", "KBring"), ("hosted_bringup", "KHBring")):
     put(f"{prefix}SrchUnp", pct(e["by_class"]["unprompted"]["searched"]) if e else MISSING)
     put(f"{prefix}Path", f"{e['path_ms_median'] / 1000:.1f}" if e else MISSING)
     put(f"{prefix}Guess", pct(1 - e["abstain"]["declined_any"]) if e else MISSING)
+    # Unprompted passes as counts, and those with neither the memory nor a search behind them.
+    u = e["unprompted_support"] if e else None
+    put(f"{prefix}UnpPassed", str(u["passed"]) if u else MISSING)
+    put(f"{prefix}UnpTrials", str(u["trials"]) if u else MISSING)
+    put(f"{prefix}UnpLoose", str(u["unsupported"]) if u else MISSING)
+    put(f"{prefix}UnpSupported", str(u["passed"] - u["unsupported"]) if u else MISSING)
+    ab = e["abstain"] if e else None
+    put(f"{prefix}AbstErrors", str(ab["errors"]) if ab else MISSING)
+    put(f"{prefix}AbstTool", pct(ab["abstain_recorded"]) if ab else MISSING)
+    put(f"{prefix}AbstToolRan", pct(ab["abstain_tool_count"] / (ab["trials"] - ab["errors"])) if ab else MISSING)
     for name, tag in (("against_shipped", "VsShipped"), ("blocking_against_bringup", "BlockVs")):
         for part, ptag in (("new_need", "Rec"), ("unprompted", "Unp")):
             d = run[name][part] if run else None
             put(f"{prefix}{tag}{ptag}", signed(100 * d[0]) if d else MISSING)
             put(f"{prefix}{tag}{ptag}CI", f"[{signed(100 * d[1])}, {signed(100 * d[2])}]" if d else "")
+# The same count in the reported runs, over all five conditions.
+for macro, run in (("KLooseMain", k2), ("KHLooseMain", kh)):
+    loose = sum(e["unprompted_support"]["unsupported"] for e in run["by_condition"].values())
+    put(macro, str(loose) if loose else "none")
 # The share of unprompted trials with a search in the shipped condition, for comparison.
 put("KSrchUnpTool", pct(k2["by_condition"]["a-tool"]["by_class"]["unprompted"]["searched"]))
 # The shipped search tool on the version of the sixth condition, once that run is delivered;

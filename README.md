@@ -137,6 +137,19 @@ The hosted run has a history, told in the `NOTE.md` of each folder:
 | `results/e3-kodama-hosted` | The reported run, all five conditions on the fixed product |
 | `results/e3-kodama-hosted-aborted-3101c5b` | An attempt of the reported run that ended when Docker restarted on the host |
 
+Later runs, added after a review of a draft (pack 1.1.0), on the product version of
+the hosted run:
+
+| Folder | What it holds |
+|---|---|
+| `results/e3-kodama-carry` | The ten control cases in all five conditions, local model |
+| `results/e3-kodama-toolprompt` | The sixth condition (search tool plus one sentence), local model |
+| `results/e3-kodama-toolprompt-baseline` | The search tool as shipped on the same product version, local model, for comparison with the sixth condition |
+| `results/e3-kodama-hosted-carry` | The ten control cases in all five conditions, hosted models; the conditions ran on three days |
+| `results/e3-kodama-hosted-carry-aborted` | Three attempts of that run that are not reported: one stopped by stalled embedding requests, two affected by the host going to sleep |
+| `results/e3-kodama-hosted-toolprompt` | The sixth condition, hosted models |
+| `results/e3-kodama-hosted-toolprompt-aborted` | Its first attempt, stopped after nine trials by a network failure |
+
 Exploratory runs against the product, kept for the record and **not reported in
 the paper**: spoken trials with one trial per case (`results/e3-kodama-voice`,
 `results/e3-kodama-voice-dtx`, and `results/e3-kodama-voice-aborted`, a run

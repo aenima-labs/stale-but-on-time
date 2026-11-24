@@ -98,3 +98,21 @@ def test_case_level_finds_nothing_in_balanced_noise():
 def test_control_class_is_not_pooled_into_recall():
     assert a.CARRY not in a.NEW_NEED
     assert set(a.NEW_NEED) == {"asked-continuing", "asked-shift", "unprompted"}
+
+
+# ---------------------------------------------------------------- Experiment 3
+def test_unsupported_unprompted_passes_are_counted():
+    import e3_analyze as e3
+
+    def row(case, passed, gold, searched, cls="unprompted"):
+        return {"case": case, "class": cls, "passed": passed, "gold_in_wm": gold, "searched": searched}
+
+    rows = [
+        row("x", True, True, False),    # the memory was loaded
+        row("x", True, False, True),    # the model searched
+        row("y", True, False, False),   # a key word with nothing behind it
+        row("y", False, False, False),  # a failure is not a loose pass
+        row("z", True, False, False, cls="asked-shift"),  # other classes are not counted
+    ]
+    out = e3.unsupported_passes(rows)
+    assert out == {"trials": 4, "passed": 3, "unsupported": 1, "unsupported_cases": ["y"]}

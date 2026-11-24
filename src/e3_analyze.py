@@ -185,6 +185,15 @@ def median_ms(rows: list[dict], key: str) -> float | None:
     return float(np.median(values)) if values else None
 
 
+def unsupported_passes(rows: list[dict]) -> dict:
+    """Unprompted passes that cannot rest on a memory: no gold page in working
+    memory and no search. Such a reply holds a key word without the memory behind it."""
+    unprompted = [r for r in rows if r["class"] == "unprompted"]
+    loose = [r for r in unprompted if r["passed"] and not r["gold_in_wm"] and not r["searched"]]
+    return {"trials": len(unprompted), "passed": sum(r["passed"] for r in unprompted),
+            "unsupported": len(loose), "unsupported_cases": sorted({r["case"] for r in loose})}
+
+
 def summarise(rows: list[dict], rng: np.random.Generator, conditions: tuple[str, ...] = CONDITIONS) -> dict:
     out: dict = {}
     for condition in conditions:
@@ -213,6 +222,7 @@ def summarise(rows: list[dict], rng: np.random.Generator, conditions: tuple[str,
                 if key in abstain[0]
             },
         }
+        entry["unprompted_support"] = unsupported_passes(sub)
         for cls in CLASSES:
             part = [r for r in sub if r["class"] == cls]
             entry["by_class"][cls] = {
@@ -257,10 +267,14 @@ def summarise_addon(rows: list[dict], rng: np.random.Generator, conditions: tupl
         new_need = [r for r in sub if r["class"] in NEW_NEED]
         if new_need:
             entry["recall_pass"] = case_boot(new_need, "passed", rng)
+            entry["unprompted_support"] = unsupported_passes(sub)
         abstain = [r for r in sub if r["class"] == "abstain"]
         if abstain:
             entry["abstain"] = {key: float(np.mean([r[key] for r in abstain]))
                                 for key in ("abstain_recorded", "abstain_text", "declined_any") if key in abstain[0]}
+            entry["abstain"]["errors"] = sum(bool(r["error"]) for r in abstain)
+            entry["abstain"]["trials"] = len(abstain)
+            entry["abstain"]["abstain_tool_count"] = sum(r["abstain_recorded"] for r in abstain)
         out[condition] = entry
     return out
 
