@@ -37,7 +37,7 @@ for the whole collection of one person's memories. Here it is the store of 48 no
 
 | What | Where | Needed for |
 |---|---|---|
-| Per-utterance retrievals (E1), sealed run bundles with every trial (E2), summaries, audit sample | in git, `results/` (~17 MB) | Re-running the analysis, figures and the paper. No model needed. |
+| Per-utterance retrievals (E1), sealed run bundles with every trial (E2), summaries, audit sample | in git, `results/` (~105 MB) | Re-running the analysis, figures and the paper. No model needed. |
 | Embedding cache for LoCoMo (`data/cache`, ~180 MB archive) | [Release `v0.1.0`](https://github.com/aenima-labs/stale-but-on-time/releases/tag/v0.1.0), fetched by `inv data.fetch` | Skipping the ~12 min embedding step of E1. Optional; regenerated if absent. |
 | LoCoMo conversations | Downloaded from its authors by `inv data.fetch` | E1 replay. CC BY-NC 4.0, not redistributed here. |
 | Latest compiled paper | `paper/main.pdf` (also attached to the release) | Reading. |

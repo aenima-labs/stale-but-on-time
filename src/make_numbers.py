@@ -88,6 +88,9 @@ for tag, key in (("Fresh", "L0"), ("Lone", "L1"), ("Lthree", "L3"), ("Phalf", "P
     put(f"Hind{tag}", f"{h[key][0]:.3f}")
     put(f"Hind{tag}CI", f"[{h[key][1]:.3f}, {h[key][2]:.3f}]")
 put("HindRetained", pct((h["L1"][0] - h["RAND"][0]) / (h["L0"][0] - h["RAND"][0])))
+for key, tag in (("neither_holds_any", "Neither"), ("fresh_ahead", "FreshAhead"), ("lag_ahead", "LagAhead"),
+                 ("level_above_zero", "Level")):
+    put(f"HindTurn{tag}", pct(h["per_turn_L1"][key]))
 # Two fresh retrievals that differ only in the window: the reference for the overlap.
 wc = e1["window_change"]
 put("OvFreshWfive", f2(wc["w3_vs_w5"][0]))
