@@ -109,6 +109,17 @@ def main() -> None:
             for cond in ["L0", *conditions]
         },
     }
+    # The same measure utterance by utterance, fresh against lag 1 (no resampling):
+    # in how many utterances does either hold anything of the hindsight set, and
+    # which of the two holds more.
+    fresh = np.array([overlap(r["topk"]["w3/L0"], r["topk"]["NEXT"], 5) for r in sub])
+    lagged = np.array([overlap(r["topk"]["w3/L1"], r["topk"]["NEXT"], 5) for r in sub])
+    out["hindsight"]["per_turn_L1"] = {
+        "neither_holds_any": float(np.mean((fresh == 0) & (lagged == 0))),
+        "fresh_ahead": float(np.mean(fresh > lagged)),
+        "lag_ahead": float(np.mean(lagged > fresh)),
+        "level_above_zero": float(np.mean((fresh == lagged) & (fresh > 0))),
+    }
 
     # 4. Timing model. words[d] is the length of utterance i-d; utterance i is
     #    the listener's, i-1 the agent's previous reply, and so on. A recall job
