@@ -1,0 +1,181 @@
+{
+  "n_trials": 200,
+  "by_condition": {
+    "a-tool": {
+      "recall_settings": {
+        "backthought": "off",
+        "blocking": "off",
+        "tool": "on"
+      },
+      "started_at": "2026-11-24T12:59:51+00:00",
+      "finished_at": "2026-11-24T13:26:01+00:00",
+      "trials": 200,
+      "errors": 0,
+      "recall_pass": [
+        0.6533333333333334,
+        0.49333333333333335,
+        0.8
+      ],
+      "overall_pass": [
+        0.545,
+        0.40499999999999997,
+        0.6799999999999999
+      ],
+      "gold_in_wm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "searched_rate": 0.8,
+      "cited_rate": 0.46,
+      "text_cited_rate": 0.0,
+      "abstain_tool_rate": 0.085,
+      "templated_rate": 0.065,
+      "silent_rate": 0.0,
+      "withheld_tool_called": 0,
+      "wm_pages_mean": 0.0,
+      "wm_dropped_trials": 0,
+      "backthought_state": {},
+      "backthought_lag": {},
+      "pass_given_gold_in_wm": null,
+      "pass_given_gold_absent": 0.6533333333333333,
+      "n_gold_in_wm": 0,
+      "n_gold_absent": 150,
+      "path_ms": {
+        "n": 200,
+        "median": 4457.5,
+        "p90": 5231.0,
+        "mean": 4146.045
+      },
+      "llm_total_ms": {
+        "n": 200,
+        "median": 2998.5,
+        "p90": 3709.0,
+        "mean": 2754.495
+      },
+      "recall_collect_ms": {
+        "n": 200,
+        "median": 0.0,
+        "p90": 0.0,
+        "mean": 0.0
+      },
+      "blocking_ms": null,
+      "offpath_recall_ms": null,
+      "voice": null,
+      "by_class": {
+        "asked-continuing": {
+          "trials": 50,
+          "pass": [
+            0.8400000000000001,
+            0.62,
+            1.0
+          ],
+          "gold_in_wm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "searched_rate": 1.0,
+          "delivered_abstention": [
+            0.1,
+            0.0,
+            0.3
+          ],
+          "abstain_recorded": [
+            0.1,
+            0.0,
+            0.3
+          ],
+          "abstain_text": [
+            0.1,
+            0.0,
+            0.26
+          ]
+        },
+        "asked-shift": {
+          "trials": 50,
+          "pass": [
+            0.9800000000000001,
+            0.9400000000000001,
+            1.0
+          ],
+          "gold_in_wm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "searched_rate": 0.98,
+          "delivered_abstention": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_recorded": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "abstain_text": [
+            0.02,
+            0.0,
+            0.06000000000000001
+          ]
+        },
+        "unprompted": {
+          "trials": 50,
+          "pass": [
+            0.13999999999999999,
+            0.0,
+            0.27999999999999997
+          ],
+          "gold_in_wm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "searched_rate": 0.22,
+          "delivered_abstention": [
+            0.28,
+            0.16,
+            0.42000000000000004
+          ],
+          "abstain_recorded": [
+            0.28,
+            0.16,
+            0.42000000000000004
+          ],
+          "abstain_text": [
+            0.26,
+            0.14,
+            0.4
+          ]
+        },
+        "abstain": {
+          "trials": 50,
+          "pass": [
+            0.22000000000000003,
+            0.06,
+            0.42000000000000004
+          ],
+          "gold_in_wm": null,
+          "searched_rate": 1.0,
+          "delivered_abstention": [
+            0.22000000000000003,
+            0.04,
+            0.42000000000000004
+          ],
+          "abstain_recorded": [
+            0.22000000000000003,
+            0.06,
+            0.42000000000000004
+          ],
+          "abstain_text": [
+            0.4,
+            0.2,
+            0.6
+          ]
+        }
+      }
+    }
+  }
+}

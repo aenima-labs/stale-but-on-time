@@ -243,7 +243,7 @@ uv run inv paper.anon     # needs git, uv, tectonic
 ```
 
 It writes `dist/stale-but-on-time-anon.pdf` (the paper built in double-blind mode),
-`dist/stale-but-on-time-anon.zip` (the supplementary archive, ~4 MB) and the
+`dist/stale-but-on-time-anon.zip` (the supplementary archive, ~35 MB) and the
 unpacked tree in `dist/anon/`. The copy has no git history, an anonymous
 `paper/identity.tex`, names and URLs replaced, the Circumstances framework vendored
 at the pinned commit and renamed (its name leads to this organisation), and the sealed

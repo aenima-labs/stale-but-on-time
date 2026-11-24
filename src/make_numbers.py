@@ -646,23 +646,24 @@ def carry_cell(key: str, cond: str) -> str:
     return pct(run["by_condition"][cond]["by_class"]["asked-carry"]["pass"][0]) if run else MISSING
 
 
-def bringup_row(key: str, hosted: bool) -> list[str]:
-    """The sixth condition as a table row, or nothing while its run is not delivered."""
+def bringup_row(key: str, hosted: bool, cond: str = BRINGUP, label: str = "Search tool + sentence",
+                space: bool = True) -> list[str]:
+    """A later run of one search-tool condition as a table row, or nothing while it is not delivered."""
     run = e3.get(key)
     if not run:
         return []
-    e = run["by_condition"][BRINGUP]
-    cells = ["Search tool + sentence", f"{pct(e['recall_pass'][0])} {pctci(e['recall_pass'])}"]
+    e = run["by_condition"][cond]
+    cells = [label, f"{pct(e['recall_pass'][0])} {pctci(e['recall_pass'])}"]
     cells += [pct(e["by_class"][c]["pass"][0]) for c in ("asked-continuing", "asked-shift", "unprompted")]
     cells += ["--", "--", pct(e["searched_rate"])]
     if hosted:
-        c = run["cost"]["conditions"][BRINGUP]
+        c = run["cost"]["conditions"][cond]
         cells += [pct(e["abstain"]["abstain_recorded"]), f"{e['path_ms_median'] / 1000:.1f}",
                   f"{c['model_calls_per_trial']:.1f}", f"{100 * c['cost_usd_per_trial']:.2f}"]
     else:
         cells += [pct(e["abstain"]["abstain_recorded"]), pct(e["abstain"]["abstain_text"]),
                   f"{e['path_ms_median'] / 1000:.1f}"]
-    return [r"\addlinespace[2pt]", " & ".join(cells) + r" \\"]
+    return ([r"\addlinespace[2pt]"] if space else []) + [" & ".join(cells) + r" \\"]
 
 
 rows = []
@@ -676,7 +677,9 @@ for cond in ("a-tool", "c-blocking", "b-backthought", "d-blocking-backthought", 
               pct(e["abstain"]["abstain_recorded"]), pct(e["abstain"]["abstain_text"]),
               f"{e['path_ms']['median'] / 1000:.1f}"]
     rows.append(" & ".join(cells) + r" \\")
-rows += bringup_row("bringup", hosted=False)
+# The matched pair on the later product version: the search tool as shipped, then with the sentence.
+baseline = bringup_row("bringup_baseline", hosted=False, cond="a-tool", label="Search tool (later)")
+rows += baseline + bringup_row("bringup", hosted=False, space=not baseline)
 (PAPER / "tab-e3.tex").write_text("\n".join(rows) + "\n")
 
 rows = []
