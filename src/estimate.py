@@ -35,8 +35,11 @@ from pricing import PriceTable, machine_cost, token_cost
 from telemetry_summary import load_run, summarise_run, trial_records
 
 ROOT = Path(__file__).resolve().parents[1]
-MAX_CALLS = {"none": 1, "tool": 2, "blocking": 1, "lag1": 1, "prefetch50": 1, "hybrid": 2}
-RECALLS_MAX = {"none": 0, "tool": 1, "blocking": 1, "lag1": 1, "prefetch50": 1, "hybrid": 2}
+MAX_CALLS = {"none": 1, "tool": 2, "blocking": 1, "lag1": 1, "prefetch50": 1, "hybrid": 2,
+             # slow recall: one model call per candidate note, then the reply
+             "deep": 17, "deep_stale": 17, "both": 17}
+RECALLS_MAX = {"none": 0, "tool": 1, "blocking": 1, "lag1": 1, "prefetch50": 1, "hybrid": 2,
+               "deep": 1, "deep_stale": 1, "both": 2}
 CHARS_PER_TOKEN = 4.0
 # Assumed per-call latency of a hosted chat model when no profile of it exists (s).
 HOSTED_CALL_S = (0.5, 1.2, 3.0)

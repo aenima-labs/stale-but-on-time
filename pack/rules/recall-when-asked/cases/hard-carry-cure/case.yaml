@@ -1,0 +1,58 @@
+id: recall-when-asked/hard-carry-cure
+title: Go on then, what went into it?
+description: hard-carry after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: asyncrecall.memorome
+  version: '1'
+  digest: sha256:0a91e52430ada86f04a875cccf2e7e6e18f09485bb8c6342c9204645d1af6089
+  privacy: public
+  config:
+    memorome: tessaly-v1
+    history:
+    - role: user
+      content: She had her own cure for a cold.
+    - role: assistant
+      content: She did, and she was quite certain of it, whatever anybody else had to say.
+actions:
+- kind: message
+  role: user
+  content: Go on then, what went into it?
+expected_outcomes:
+- 'Mention a fact from: f-soup.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - leek
+    - haddock
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: When anyone was ill she made leek and smoked haddock soup. She believed it cured most things
+      and that embarrassment cured the rest.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:hard-carry
+- continuity:continuing
+- gold:f-soup

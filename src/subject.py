@@ -14,6 +14,14 @@ Conditions
 
 The agent, prompt, retriever, top-k and decoding settings are identical in
 every condition; only where the MEMORIES block comes from differs.
+
+Conditions of the experiment with slow recall (design/slow-recall.md)
+  deep        deeper recall on the reply path: the cheap lookup returns 16
+              candidates and the model rates each of them in its own call
+  deep_stale  asynchronous: the deeper recall ran on the ambience up to the
+              agent's previous reply; its record is loaded only if the job
+              finished in the time the conversation gave it (never waits)
+  both        the deep stale record, and the cheap lookup on the reply path
 """
 
 from __future__ import annotations
@@ -56,8 +64,13 @@ from retrieval import BM25, as_document, as_query, rrf_topk, tokenize
 
 ROOT = Path(__file__).resolve().parents[1]
 CONDITIONS = ("none", "tool", "blocking", "lag1", "prefetch50", "hybrid")
+SLOW_CONDITIONS = ("deep", "deep_stale", "both")
+ALL_CONDITIONS = CONDITIONS + SLOW_CONDITIONS
 WINDOW = 3
 TOP_K = 4
+CANDIDATES = 16  # notes the deeper recall reads
+MIN_SCORE = 2  # a note is loaded if the model rates it at least this
+WORDS_PER_MINUTE = 210  # assumed speaking rate, as in the timing model of the paper
 
 RULES = """You are Kodama, a voice companion that keeps the stories of {name} ({lifespan}) and speaks about her with her family. You are talking with {listener}.
 
@@ -77,6 +90,18 @@ STALE_MEMORIES_SEARCH = (
     "If these memories do not cover what the listener just said, use the memory_search "
     "tool before you answer, and always before saying that you do not know."
 )
+# The deeper recall rates one note per model call. This prompt was written and frozen on
+# the development cases in pack-src/dev-slow-recall.yaml, which are not in the pack.
+JUDGE = """You select memories for a voice companion that speaks about {name} with {listener}. You are given the last lines of their conversation and one note about her. Rate how much the companion needs this note for what it says next.
+
+0 = the note has nothing to do with the conversation
+1 = the note is on a related subject, but not on what is being talked about
+2 = the note is about what is being talked about
+3 = the note answers what the listener just asked or raised
+
+Answer with one JSON object: {{"score": <0, 1, 2 or 3>}}"""
+SPEAKERS = {"user": "Listener", "assistant": "Companion"}
+
 SEARCH_TOOL = {
     "type": "function",
     "function": {
@@ -112,13 +137,13 @@ class Memorome:
         vectors = traced_embed(self.tracer, self.embedder, inputs, purpose)
         return vectors / (np.linalg.norm(vectors, axis=1, keepdims=True) + 1e-12)
 
-    def recall(self, query: str, placement: str) -> list[str]:
+    def recall(self, query: str, placement: str, top_k: int = TOP_K) -> list[str]:
         """Hybrid top-k page ids. The query embedding is computed live."""
         with self.tracer.start_as_current_span("memory.recall") as span:
             span.set_attribute("e2.recall.placement", placement)
-            span.set_attribute("e2.recall.top_k", TOP_K)
+            span.set_attribute("e2.recall.top_k", top_k)
             q = self._embed([as_query(query)], "query")[0]
-            top = rrf_topk(self.bm25.scores(tokenize(query)), self.dense @ q, TOP_K)
+            top = rrf_topk(self.bm25.scores(tokenize(query)), self.dense @ q, top_k)
             pages = [self.ids[i] for i in top]
             span.set_attribute("e2.recall.page_ids", pages)
             return pages
@@ -132,6 +157,19 @@ class Memorome:
 
 def ambience(utterances: list[str]) -> str:
     return " ".join(utterances[-WINDOW:])
+
+
+def speaking_ms(text: str) -> float:
+    """How long an utterance takes to say at the assumed speaking rate."""
+    return len(text.split()) / WORDS_PER_MINUTE * 60_000
+
+
+def select_rated(candidates: list[str], scores: list[int]) -> list[str]:
+    """The notes to load from rated candidates: those rated at least MIN_SCORE, best
+    first, ties in the order of the cheap lookup, at most TOP_K."""
+    rated = [(-score, rank, page) for rank, (page, score) in enumerate(zip(candidates, scores, strict=True))
+             if score >= MIN_SCORE]
+    return [page for _, _, page in sorted(rated)[:TOP_K]]
 
 
 def first_half(text: str) -> str:
@@ -182,6 +220,36 @@ class RecallSession:
             parsed = {"reply": content}  # spoken text without the required wrapper
         return parsed, None
 
+    def _deep_recall(self, turns: list[dict], placement: str) -> tuple[list[str], dict]:
+        """The deeper recall: the cheap lookup's best CANDIDATES notes, each rated by
+        the model in its own call. Returns the notes to load and what was rated."""
+        said = [turn["content"] for turn in turns]
+        candidates = self.memorome.recall(ambience(said), placement, CANDIDATES)
+        lines = "\n".join(f"{SPEAKERS[t['role']]}: {t['content']}" for t in turns[-WINDOW:])
+        system = JUDGE.format(**self.memorome.persona)
+        scores: list[int] = []
+        for page in candidates:
+            note = self.memorome.texts[self.memorome.ids.index(page)]
+            request = ChatRequest(
+                system=system,
+                # The conversation comes first: it is the same in all calls of one recall,
+                # so the model server can reuse what it has already read.
+                messages=[{"role": "user", "content": f"CONVERSATION\n{lines}\n\nNOTE\n{note}"}],
+                tool=None,
+                temperature=0.0,  # recall is not sampled: one rating per note and ambience
+                seed=1,
+                max_tokens=24,
+                think=False,
+            )
+            content = traced_chat(self.subject.tracer, self.subject.chat_client, request, "recall_judge").content
+            start, end = content.find("{"), content.rfind("}")
+            try:
+                score = json.loads(content[start : end + 1]).get("score") if start >= 0 else None
+            except (json.JSONDecodeError, AttributeError):
+                score = None
+            scores.append(score if isinstance(score, int) and not isinstance(score, bool) else 0)
+        return select_rated(candidates, scores), {"candidates": candidates, "scores": scores}
+
     def _turn(self, user: str) -> list[Event]:
         condition = self.subject.condition
         rules = RULES.format(**self.memorome.persona)
@@ -190,6 +258,8 @@ class RecallSession:
         offpath_ms = 0.0
         pages: list[str] = []
         based_on = "nothing"
+        rated: dict = {}
+        judge_calls = 0
 
         # Work done before the listener finished speaking is off the reply path.
         if condition in ("lag1", "prefetch50", "hybrid"):
@@ -203,6 +273,23 @@ class RecallSession:
                 )
                 based_on = "ambience plus the first half of the incoming utterance"
             offpath_ms = (time.perf_counter() - started) * 1000
+        elif condition in ("deep_stale", "both"):
+            started = time.perf_counter()
+            pages, rated = self._deep_recall(self.history, "off_path")
+            offpath_ms = (time.perf_counter() - started) * 1000
+            judge_calls = CANDIDATES
+            based_on = "deeper recall on the ambience up to the previous agent reply"
+            # The job started when the agent's reply existed as text. It had that reply's
+            # speaking time and the listener's utterance to finish; a record that is not
+            # ready is not loaded.
+            available_ms = speaking_ms(said[-1]) + speaking_ms(user)
+            ready = offpath_ms <= available_ms
+            rated = {**rated, "selected": pages, "ready": ready}
+            events.append(ObservationEvent(sequence=0, name="recall.ready", value=ready))
+            events.append(MetricEvent(sequence=0, name="offpath.available_ms", value=available_ms, unit="ms"))
+            if not ready:
+                pages = []
+                based_on = "nothing: the deeper recall was not ready in time"
 
         # ---- reply path starts: the listener has finished speaking ----------
         tracer = self.subject.tracer
@@ -212,6 +299,17 @@ class RecallSession:
             if condition == "blocking":
                 pages = self.memorome.recall(ambience([*said, user]), "reply_path")
                 based_on = "ambience including the incoming utterance"
+            elif condition == "deep":
+                pages, rated = self._deep_recall([*self.history, {"role": "user", "content": user}], "reply_path")
+                rated = {**rated, "selected": pages}
+                llm_calls += CANDIDATES
+                judge_calls = CANDIDATES
+                based_on = "deeper recall on the ambience including the incoming utterance"
+            elif condition == "both":
+                fresh = self.memorome.recall(ambience([*said, user]), "reply_path")
+                # The fresh lookup comes first; the stale record adds what it did not find.
+                pages = fresh + [p for p in pages if p not in fresh]
+                based_on = "cheap lookup on the whole ambience, and the stale deeper recall"
             elif condition in ("tool", "hybrid"):
                 offer = (
                     NO_MEMORIES_SEARCH
@@ -259,6 +357,9 @@ class RecallSession:
                 rules + "\n" + self.memorome.block(pages) + "\n\n" + REPLY_FORMAT, user
             )
             total_ms = (time.perf_counter() - path_started) * 1000
+            if rated:
+                events.append(ObservationEvent(sequence=0, name="recall.rated", value=rated))
+                events.append(MetricEvent(sequence=0, name="recall.judge_calls", value=float(judge_calls), unit="count"))
             return self._finish(
                 events, answer, pages, based_on, pre_generation_ms, total_ms, offpath_ms, llm_calls
             )
@@ -334,7 +435,7 @@ class RecallSubject:
         embed_client: EmbedClient | None = None,
         tracer: trace.Tracer | None = None,
     ) -> None:
-        if condition not in CONDITIONS:
+        if condition not in ALL_CONDITIONS:
             raise ValueError(condition)
         self.condition = condition
         self.chat_client = chat_client or OllamaChat(model)

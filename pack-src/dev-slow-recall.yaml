@@ -1,0 +1,25 @@
+# Development cases for the deeper recall step of the experiment with slow recall.
+# They are not in the pack and are never graded. The rating prompt in src/subject.py
+# (JUDGE) was written and frozen on these four cases, on notes that no test case
+# targets. `uv run python src/dev_slow_recall.py` prints what the step rates and loads.
+cases:
+  - id: dev-first-job        # in play, cheap lookup misses (rank 15 on the lead-in, 12 on all)
+    gold: [w-first-book]
+    u1: She started out by doing someone a kindness.
+    a1: She would not take a penny.
+    u2: What was the job?
+  - id: dev-rival            # new need, cheap lookup misses (rank 12 on all)
+    gold: [g-chess]
+    u1: The garden is finally looking decent.
+    a1: That's good to hear.
+    u2: Did she have a regular rival at any game?
+  - id: dev-told-off         # in play, cheap lookup finds it
+    gold: [c-school]
+    u1: She got told off at school once.
+    a1: She did mention that.
+    u2: What had she done?
+  - id: dev-rule             # new need, cheap lookup finds it
+    gold: [w-motto]
+    u1: She loved her tea.
+    a1: Black, with a slice of lemon.
+    u2: On another subject, did she have a rule she worked by?

@@ -75,7 +75,8 @@ def test_confirm_refuses_without_terminal(monkeypatch, capsys):
 
 def test_bundle_profile_covers_stored_run():
     p = e.profile_from_bundles(e.ROOT / "results" / "e2")
-    assert set(p["conditions"]) == set(e.MAX_CALLS)
+    # the stored main run has the six conditions of Experiment 2, not those of the slow-recall experiment
+    assert set(p["conditions"]) == set(e.MAX_CALLS) - {"deep", "deep_stale", "both"}
     assert all(len(v) == 250 for v in p["conditions"].values())  # 50 cases, five trials each
     assert all(1 <= r["chat_calls"] <= e.MAX_CALLS[c] for c, v in p["conditions"].items() for r in v)
 
