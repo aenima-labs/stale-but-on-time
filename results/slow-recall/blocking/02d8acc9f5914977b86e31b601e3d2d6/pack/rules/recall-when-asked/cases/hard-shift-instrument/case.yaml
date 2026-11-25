@@ -1,0 +1,57 @@
+id: recall-when-asked/hard-shift-instrument
+title: By the way, was there an instrument she wished she could play?
+description: hard-shift after a abrupt lead-in.
+targets:
+- recall-when-asked
+polarity: recovery
+actors:
+  user: grandchild
+fixture:
+  type: asyncrecall.memorome
+  version: '1'
+  digest: sha256:0a91e52430ada86f04a875cccf2e7e6e18f09485bb8c6342c9204645d1af6089
+  privacy: public
+  config:
+    memorome: tessaly-v1
+    history:
+    - role: user
+      content: I went swimming in the harbour last week.
+    - role: assistant
+      content: She swam there every New Year's Day until she was seventy.
+actions:
+- kind: message
+  role: user
+  content: By the way, was there an instrument she wished she could play?
+expected_outcomes:
+- 'Mention a fact from: v-piano.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - piano
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Her one stated regret was never learning the piano. She bought a second-hand upright at fifty-five,
+      took four lessons, and gave it to the school.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:hard-shift
+- continuity:abrupt
+- gold:v-piano

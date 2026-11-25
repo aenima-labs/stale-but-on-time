@@ -1,0 +1,58 @@
+id: recall-when-asked/hard-carry-boat-pet
+title: How long did it live, do you know?
+description: hard-carry after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: asyncrecall.memorome
+  version: '1'
+  digest: sha256:0a91e52430ada86f04a875cccf2e7e6e18f09485bb8c6342c9204645d1af6089
+  privacy: public
+  config:
+    memorome: tessaly-v1
+    history:
+    - role: user
+      content: There was a pet that went out in the boat with her dad.
+    - role: assistant
+      content: There was, on every single trip, and she talked about it fondly for the rest of her life.
+actions:
+- kind: message
+  role: user
+  content: How long did it live, do you know?
+expected_outcomes:
+- 'Mention a fact from: c-dog.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - fifteen
+    - '15'
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: The family dog was a wire-haired terrier called Pilchard, who rode in the bow of her father's
+      skiff. Pilchard lived to fifteen and is buried under the quince tree.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:hard-carry
+- continuity:continuing
+- gold:c-dog

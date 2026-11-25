@@ -14,19 +14,22 @@ conversational agent. Target venue: TMLR.
 
 | Path | What it is |
 |---|---|
-| `pack-src/tessaly.yaml` | Source of the fictional memorome (48 notes) and the 50 cases: five classes of ten. The control class `asked-carry` (answer in the note already in play) was added in pack 1.1.0 on 16 November, after an independent review, and committed before any trial ran on it |
+| `pack-src/tessaly.yaml` | Source of the fictional memorome (48 notes) and the 70 cases: seven classes of ten. The control class `asked-carry` (answer in the note already in play) was added in pack 1.1.0 on 16 November, after an independent review. The classes `hard-carry` and `hard-shift` (the fast lookup misses the target note) were added in pack 1.2.0 on 25 November for the experiment with slow recall. Both additions were committed before any trial ran on them |
+| `design/slow-recall.md` | Design of the experiment with slow recall (Experiment 3 of the paper), with the expected outcome, committed with its cases and code before the first trial; the outcome is appended |
+| `pack-src/dev-slow-recall.yaml`, `src/dev_slow_recall.py` | The four development cases on which the rating prompt of the deeper recall step was written, and the script that shows what the step rates and loads on them. They are not in the pack |
 | `pack/`, `fixtures/` | Generated Circumstances pack (format v4) and memorome fixture |
 | `src/retrieval.py` | Hybrid BM25 + embedding retriever with reciprocal rank fusion |
 | `src/e1_replay.py`, `src/e1_analyze.py` | Experiment 1: staleness replay on LoCoMo, analysis, timing model |
-| `src/subject.py`, `src/e2_run.py`, `src/e2_analyze.py` | Experiment 2: reference agent (six memory conditions), runner, analysis |
+| `src/subject.py`, `src/e2_run.py`, `src/e2_analyze.py` | Experiment 2: reference agent (six memory conditions, and the three with deep recall of Experiment 3), runner, analysis |
+| `src/slow_analyze.py` | Experiment 3: analysis of the run with slow recall (`results/slow-recall`) |
 | `src/providers.py`, `src/hosted_check.py` | Model providers behind one interface (local Ollama; hosted OpenAI, Gemini on Vertex, Anthropic) and a one-trial connectivity check |
 | `src/telemetry.py`, `src/telemetry_summary.py` | OpenTelemetry tracing of every trial; per-condition summary of latency, tokens, calls and cost |
 | `pricing/prices.yaml`, `src/pricing.py`, `src/estimate.py` | Dated price table with sources; run estimate, confirmation, estimate-vs-actual |
 | `infra/gcp/`, `src/gcp_job.py` | Terraform, image and task for running Experiment 2 as a Cloud Run GPU job |
 | `tests/` | Unit tests (`uv run inv e2.test`) |
-| `src/e3_analyze.py` | Experiment 3: analysis of the pack run against the product (bundles in `results/e3-kodama`, first run in `results/e3-kodama-run1`, run on hosted models in `results/e3-kodama-hosted`) |
+| `src/e3_analyze.py` | The product experiment (an appendix of the paper; files named `e3` date from when it was the third experiment): analysis of the pack run against the product (bundles in `results/e3-kodama`, first run in `results/e3-kodama-run1`, run on hosted models in `results/e3-kodama-hosted`) |
 | `src/figures.py`, `src/make_numbers.py` | Figures, table bodies and number macros for the paper |
-| `results/` | Per-utterance retrievals (E1), sealed run bundles (E2: `e2` main run on the 50 cases, `e2-run1` first run on the 40 original cases, `e2-think` reasoning on, `e2-qwen3` second model, `e2-anthropic` hosted model; the last three on the 40 original cases), summaries, samples for a human audit, provenance notes (`*_NOTES.md`) |
+| `results/` | Per-utterance retrievals (E1), sealed run bundles (E2: `e2` main run on the 50 cases of pack 1.1.0, `e2-run1` first run on the 40 original cases, `e2-think` reasoning on, `e2-qwen3` second model, `e2-anthropic` hosted model; the last three on the 40 original cases; E3: `slow-recall` on the 70 cases), summaries, samples for a human audit, provenance notes (`*_NOTES.md`) |
 | `tasks/`, `src/fetch_data.py` | [Invoke](https://www.pyinvoke.org) tasks for every step; data download |
 
 "Memorome", in file names, code and result events, is the term of Xiao et al. (2026),
@@ -37,7 +40,7 @@ for the whole collection of one person's memories. Here it is the store of 48 no
 
 | What | Where | Needed for |
 |---|---|---|
-| Per-utterance retrievals (E1), sealed run bundles with every trial (E2), summaries, audit sample | in git, `results/` (~105 MB) | Re-running the analysis, figures and the paper. No model needed. |
+| Per-utterance retrievals (E1), sealed run bundles with every trial (E2), summaries, audit sample | in git, `results/` (~140 MB) | Re-running the analysis, figures and the paper. No model needed. |
 | Embedding cache for LoCoMo (`data/cache`, ~180 MB archive) | [Release `v0.1.0`](https://github.com/aenima-labs/stale-but-on-time/releases/tag/v0.1.0), fetched by `inv data.fetch` | Skipping the ~12 min embedding step of E1. Optional; regenerated if absent. |
 | LoCoMo conversations | Downloaded from its authors by `inv data.fetch` | E1 replay. CC BY-NC 4.0, not redistributed here. |
 | Latest compiled paper | `paper/main.pdf` (also attached to the release) | Reading. |
@@ -71,7 +74,19 @@ Tasks are grouped by experiment: `data.fetch`; `e1.replay`, `e1.analyze`; `e2.bu
 Extra options go through `--args`, for example
 `uv run inv e2.run --args="--think --out results/e2-think"`.
 
-`reproduce` runs the main E2 run only. The three further runs of Section 6.3 are
+`reproduce` runs the main E2 run only. The run of Experiment 3 (slow recall) is
+separate and takes about two hours on a laptop, with no hosted model and no cost:
+
+```bash
+uv run inv e2.run-slow
+```
+
+It writes `results/slow-recall`: the 20 new cases with no memory, then the four agents
+on all 70 cases. `uv run inv e2.analyze-slow` analyses it and writes
+`results/slow-recall_summary.json`, `results/slow-recall_trials.csv` and
+`results/slow-recall_audit_sample.csv`.
+
+The three further runs of Experiment 2 (Appendix C of the paper) are also
 separate, because the first is slow and the third costs money:
 
 ```bash
@@ -91,8 +106,8 @@ minutes, and the hosted run about 50 minutes and 3.5 US dollars (it prints an es
 and asks before it starts; `results/e2-anthropic_NOTES.md` lists how it differs from
 the local runs). `e2.analyze` analyses all four runs and the cloud timing pass
 (`src/e2_analyze.py --run <name>`). `results/e2-cloudrun-l4-timing` is that pass: one
-trial per case on a Cloud Run job with an NVIDIA L4, used only for the timings of
-Section 8 (`results/e2-cloudrun-l4-timing_NOTES.md`).
+trial per case on a Cloud Run job with an NVIDIA L4, used only for the timings in the
+appendix on what waiting costs (`results/e2-cloudrun-l4-timing_NOTES.md`).
 
 The analysis applies two corrections to the sealed grades, to every run alike: a key
 must begin a word (the key "Mori" had matched inside "memories"), and a reply that
@@ -100,7 +115,7 @@ left out the JSON reply format is read as text, so that a refusal in words count
 an abstention. `<run>_trials.csv` keeps the sealed grade as `passed_sealed` and marks
 each changed trial as `regraded`; only the hosted run has any.
 
-The first correction also applies to Experiment 3. The product's evaluation matched
+The first correction also applies to the product experiment. The product's evaluation matched
 keys anywhere in the reply, so `src/e3_analyze.py` requires a key to begin a word in
 every run against the product. Only the lag-1 condition of the runs on hosted models
 changes (4 trials in the reported run, 6 in the first hosted run, 1 in the pilot);
@@ -118,7 +133,7 @@ results in the appendix as a repeat. Part of the reasoning run shared the GPU wi
 process; `results/e2-think_NOTES.md` gives the window, and `src/make_numbers.py`
 leaves those trials out of every latency figure.
 
-Experiment 3 runs the same cases against the product itself, which this repository
+The product experiment runs the cases of pack 1.1.0 against the product itself, which this repository
 does not contain. Its sealed bundles and trial tables are in `results/e3-kodama`
 (the reported run on a local model), `results/e3-kodama-run1` (the first run,
 kept for disclosure) and `results/e3-kodama-hosted` (the run on the product's
@@ -265,5 +280,5 @@ Code, pack and results: Apache-2.0 (`LICENSE`). The TMLR style files in
 
 ## Before submission
 
-- A human should read `results/e2-run1_audit_sample.csv` and `results/e3_audit_sample.csv` against the grades and fill in the verdict columns. So far only AI assistants have read them, and the paper says so.
+- A human should read `results/e2-run1_audit_sample.csv`, `results/slow-recall_audit_sample.csv` and `results/e3_audit_sample.csv` against the grades and fill in the verdict columns. So far only AI assistants have read them, and the paper says so.
 - Submit the paper and archive produced by `inv paper.anon`, not the files in this repository, and do not link this repository from the submission.

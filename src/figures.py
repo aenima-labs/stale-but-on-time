@@ -298,10 +298,10 @@ def fig_ontime() -> None:
 
 # ---------------------------------------------------------------- slow recall
 SLOW_CELLS = {  # as in slow_analyze
-    "A": "Memory in play,\ncheap lookup finds it",
-    "B": "New need,\ncheap lookup finds it",
-    "C": "Memory in play,\ncheap lookup misses it",
-    "D": "New need,\ncheap lookup misses it",
+    "A": "Memory in play,\nfast lookup finds it",
+    "B": "New need,\nfast lookup finds it",
+    "C": "Memory in play,\nfast lookup misses it",
+    "D": "New need,\nfast lookup misses it",
 }
 SLOW_STYLE = {  # colour: does the agent wait for what it loads; circles: it loads a stale record
     "blocking": (BLUE, "-", None, "Fast, fresh"),

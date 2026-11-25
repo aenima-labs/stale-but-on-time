@@ -1,0 +1,57 @@
+id: recall-when-asked/hard-shift-tool
+title: On another note, did she have a favourite thing to work with?
+description: hard-shift after a abrupt lead-in.
+targets:
+- recall-when-asked
+polarity: recovery
+actors:
+  user: grandchild
+fixture:
+  type: asyncrecall.memorome
+  version: '1'
+  digest: sha256:0a91e52430ada86f04a875cccf2e7e6e18f09485bb8c6342c9204645d1af6089
+  privacy: public
+  config:
+    memorome: tessaly-v1
+    history:
+    - role: user
+      content: Their honeymoon sounds like fun.
+    - role: assistant
+      content: They took the night train to Vessant and stayed five days.
+actions:
+- kind: message
+  role: user
+  content: On another note, did she have a favourite thing to work with?
+expected_outcomes:
+- 'Mention a fact from: o-bone-folder.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - bone folder
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Her most prized tool was a brass-tipped bone folder given to her by Mr Finch when she finished
+      her apprenticeship. She would not let anyone else use it.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:hard-shift
+- continuity:abrupt
+- gold:o-bone-folder

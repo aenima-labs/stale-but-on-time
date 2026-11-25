@@ -1,0 +1,57 @@
+id: recall-when-asked/hard-carry-needle
+title: What did she make in the cold months, then?
+description: hard-carry after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: asyncrecall.memorome
+  version: '1'
+  digest: sha256:0a91e52430ada86f04a875cccf2e7e6e18f09485bb8c6342c9204645d1af6089
+  privacy: public
+  config:
+    memorome: tessaly-v1
+    history:
+    - role: user
+      content: Her mum worked with a needle too, didn't she?
+    - role: assistant
+      content: She did, all year round, and the work changed with the seasons as far as I know.
+actions:
+- kind: message
+  role: user
+  content: What did she make in the cold months, then?
+expected_outcomes:
+- 'Mention a fact from: c-mother.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - sails
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Her mother, Edrith, was a seamstress who sewed sails in winter and wedding dresses in summer.
+      Tessaly said she learned patience from watching her mother unpick a seam without complaint.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:hard-carry
+- continuity:continuing
+- gold:c-mother

@@ -1,0 +1,58 @@
+id: recall-when-asked/hard-carry-shed
+title: Did he ever get paid for the big one?
+description: hard-carry after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: asyncrecall.memorome
+  version: '1'
+  digest: sha256:0a91e52430ada86f04a875cccf2e7e6e18f09485bb8c6342c9204645d1af6089
+  privacy: public
+  config:
+    memorome: tessaly-v1
+    history:
+    - role: user
+      content: Grandpa was good with his hands, in that shed of his.
+    - role: assistant
+      content: He was, and he spent most of his days out there, by all accounts.
+actions:
+- kind: message
+  role: user
+  content: Did he ever get paid for the big one?
+expected_outcomes:
+- 'Mention a fact from: h-clockmaker.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - refused
+    - town hall
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: Edmund was a clockmaker with a workshop behind the house. He repaired the town hall clock
+      twice and refused payment both times.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:hard-carry
+- continuity:continuing
+- gold:h-clockmaker

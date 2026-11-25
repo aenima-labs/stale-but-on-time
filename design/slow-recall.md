@@ -228,3 +228,26 @@ Also recorded here:
   cases, and timing noise will decide those.
 - **Run:** `none` on the 20 new cases, then `blocking`, `deep`, `deep_stale` and `both`
   on all 70, five trials each, into `results/slow-recall`.
+
+## 12. Outcome (25 November 2026, after the run)
+
+The run of 1,400 trials finished without an error. Percentage of trials passed, from
+`results/slow-recall_summary.json`:
+
+| Cell | Fast, fresh | Deep, fresh | Deep, stale | Both |
+|---|---|---|---|---|
+| A: in play, cheap finds | 100 | 100 | 90 | 100 |
+| B: new need, cheap finds | 75 | 93 | 13 | 75 |
+| C: in play, cheap misses | 0 | 94 | 90 | 88 |
+| D: new need, cheap misses | 0 | 82 | 0 | 0 |
+
+- Every cell agrees with section 5. None of the three outcomes that would have changed
+  the conclusion occurred.
+- The deeper step took 4.9 to 6.7 s (median 5.2 s). The background job was late in 26
+  of 350 trials of the deep stale agent and in 21 of the agent with both. One control
+  case gave the job 5.1 s; its record was late in all five trials of the deep stale
+  agent, which is why that agent has 90 and not 100 in cell A.
+- Median time to a complete reply: 0.5 to 0.6 s for the three agents that do not wait
+  for the deeper step, 6.0 s for the one that does.
+- With no memory loaded, the 20 new cases passed 0 of 100 trials.
+- All four agents passed 90% of the must-abstain trials.

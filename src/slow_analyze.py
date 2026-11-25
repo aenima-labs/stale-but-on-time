@@ -86,6 +86,7 @@ def load() -> list[dict]:
                     "notes_loaded": len(loaded),
                     # the deeper recall: where the cheap lookup ranked the target among the
                     # 16 candidates, how the model rated it, and whether the job selected it
+                    "candidates_read": len(candidates),
                     "gold_candidate_rank": rank,
                     "gold_score": rated["scores"][rank - 1] if rank else None,
                     "gold_selected": bool(gold) and any(g in rated.get("selected", []) for g in gold),
@@ -124,6 +125,7 @@ def main() -> None:
         "trials": len(main_rows),
         "errors": sum(bool(r["error"]) for r in rows),
         "cases": {cell: len({r["case"] for r in main_rows if r["cell"] == cell}) for cell in (*CELLS, "abstain")},
+        "candidates_read": max(r["candidates_read"] for r in main_rows),
         "by_condition": {},
         "contrasts": {},
     }
@@ -203,6 +205,22 @@ def main() -> None:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
+
+    # A sample for reading the replies against the grades: 15 trials of each agent, at random.
+    sample_rng = np.random.default_rng(SEED)
+    sample = []
+    for condition in CONDITIONS:
+        sub = [r for r in main_rows if r["condition"] == condition]
+        sample += [sub[i] for i in sorted(sample_rng.choice(len(sub), size=15, replace=False))]
+    keys = {c["id"]: "|".join(str(k) for k in c.get("keys", []))
+            for c in yaml.safe_load((ROOT / "pack-src" / "tessaly.yaml").read_text())["cases"]}
+    with open(ROOT / "results" / f"{RUN}_audit_sample.csv", "w", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(["condition", "case", "class", "attempt", "passed", "target_note_loaded", "keys", "reply",
+                         "grade_is_right"])
+        for r in sample:
+            writer.writerow([r["condition"], r["case"], r["class"], r["attempt"], r["passed"],
+                             r["gold_in_context"], keys[r["case"]], r["reply"], ""])
 
     print(f"{out['trials']} trials, {out['errors']} errors; no-memory check {out['no_memory_check']}")
     print(f"{'':12s}" + "".join(f"{cell:>22s}" for cell in CELLS) + f"{'abstain':>10s}{'reply s':>9s}{'wait s':>8s}")
