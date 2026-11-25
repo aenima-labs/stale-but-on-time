@@ -1,0 +1,224 @@
+{
+  "plan": {
+    "run": "slow-recall",
+    "conditions": [
+      "blocking",
+      "deep",
+      "deep_stale",
+      "both"
+    ],
+    "trials": {
+      "blocking": 350,
+      "deep": 350,
+      "deep_stale": 350,
+      "both": 350
+    },
+    "provider": "ollama",
+    "model": "gemma4:e4b",
+    "embed_provider": "ollama",
+    "embed_model": "nomic-embed-text",
+    "think": false,
+    "machine": null,
+    "date": "2026-11-25"
+  },
+  "profile": {
+    "source": "telemetry of results/e2",
+    "token_method": "measured",
+    "provider": "ollama",
+    "model": "gemma4:e4b"
+  },
+  "matched_profile": true,
+  "prices": {
+    "chat": {
+      "provider": "ollama",
+      "model": "*",
+      "input_per_mtok": 0.0,
+      "cached_input_per_mtok": 0.0,
+      "output_per_mtok": 0.0,
+      "source": "local inference, no per-token charge",
+      "read_on": "2026-11-13"
+    },
+    "embed": {
+      "provider": "ollama",
+      "model": "*",
+      "input_per_mtok": 0.0,
+      "cached_input_per_mtok": 0.0,
+      "output_per_mtok": 0.0,
+      "source": "local inference, no per-token charge",
+      "read_on": "2026-11-13"
+    }
+  },
+  "conditions": {
+    "blocking": {
+      "trials": 350,
+      "chat_calls": [
+        315.0,
+        350.0,
+        385.0
+      ],
+      "input_tokens": [
+        123228.0,
+        136920.0,
+        150612.0
+      ],
+      "output_tokens": [
+        9317.7,
+        10353.0,
+        11388.3
+      ],
+      "embed_tokens": [
+        14849.1,
+        16499.0,
+        18148.9
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        227.02409477999998,
+        252.2489942,
+        277.47389362
+      ]
+    },
+    "deep": {
+      "trials": 350,
+      "chat_calls": [
+        399.84000000000003,
+        444.2666666666667,
+        488.6933333333334
+      ],
+      "input_tokens": [
+        153274.8,
+        170305.3333333333,
+        187335.86666666664
+      ],
+      "output_tokens": [
+        10175.34,
+        11305.933333333334,
+        12436.526666666668
+      ],
+      "embed_tokens": [
+        9016.77,
+        10018.633333333333,
+        11020.496666666666
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        273.01513386,
+        303.35014873333336,
+        333.68516360666666
+      ]
+    },
+    "deep_stale": {
+      "trials": 350,
+      "chat_calls": [
+        399.84000000000003,
+        444.2666666666667,
+        488.6933333333334
+      ],
+      "input_tokens": [
+        153274.8,
+        170305.3333333333,
+        187335.86666666664
+      ],
+      "output_tokens": [
+        10175.34,
+        11305.933333333334,
+        12436.526666666668
+      ],
+      "embed_tokens": [
+        9016.77,
+        10018.633333333333,
+        11020.496666666666
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        273.01513386,
+        303.35014873333336,
+        333.68516360666666
+      ]
+    },
+    "both": {
+      "trials": 350,
+      "chat_calls": [
+        399.84000000000003,
+        444.2666666666667,
+        488.6933333333334
+      ],
+      "input_tokens": [
+        153274.8,
+        170305.3333333333,
+        187335.86666666664
+      ],
+      "output_tokens": [
+        10175.34,
+        11305.933333333334,
+        12436.526666666668
+      ],
+      "embed_tokens": [
+        9016.77,
+        10018.633333333333,
+        11020.496666666666
+      ],
+      "cost_usd": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_s": [
+        273.01513386,
+        303.35014873333336,
+        333.68516360666666
+      ]
+    }
+  },
+  "totals": {
+    "chat_calls": [
+      1514.52,
+      1682.8,
+      1851.0800000000002
+    ],
+    "input_tokens": [
+      583052.3999999999,
+      647836.0,
+      712619.5999999999
+    ],
+    "output_tokens": [
+      39843.72,
+      44270.8,
+      48697.880000000005
+    ],
+    "embed_tokens": [
+      49371.41,
+      54026.899999999994,
+      58682.39
+    ],
+    "cost_usd": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "duration_s": [
+      1046.06949636,
+      1162.2994404,
+      1278.52938444
+    ]
+  },
+  "machine": null,
+  "spends_money": false,
+  "notes": [
+    "deep: not in the profile; the average of the other conditions is used.",
+    "deep_stale: not in the profile; the average of the other conditions is used.",
+    "both: not in the profile; the average of the other conditions is used."
+  ]
+}

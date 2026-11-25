@@ -1,0 +1,158 @@
+# Estimate: `slow-recall`
+
+- Chat model: ollama/gemma4:e4b; embeddings: ollama/nomic-embed-text
+- Trials: 100 in 1 condition(s)
+- Profile: telemetry of results/e2
+- Prices on 2026-11-25: chat $0.0/$0.0 per M in/out (local inference, no per-token charge, read 2026-11-13)
+
+Expected [low–high]. The high end of a wide range is a ceiling, not a likely value.
+
+| condition | trials | model calls | tokens in | tokens out | embed tokens | model spend | duration |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| none | 100 | 100 [90–110] | 25,200 [22,680–27,720] | 1,997 [1,797–2,196] | 0 [0–0] | $0.0000 [$0.0000–$0.0000] | 45 s [40 s–49 s] |
+| **total** | 100 | 100 [90–110] | 25,200 [22,680–27,720] | 1,997 [1,797–2,196] | 1,868 [1,868–1,868] | $0.0000 [$0.0000–$0.0000] | 45 s [40 s–49 s] |
+
+**No spend** (local models, local machine).
+
+{"condition": "none", "trials": 100, "passed": 0, "seconds": 47, "bundle": "results/slow-recall/none/1e2c562feece45378e475846ac44def2", "seal_problems": []}
+# Telemetry summary: `slow-recall`
+
+Per trial: mean (median). Latency: median / 90th percentile, ms.
+
+| condition | trials | model calls | tokens in | tokens out | embed tokens | cost / trial | cost (run) | trial ms (p50 / p90) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| none | 100 | 1.00 (1.00) | 246 (246) | 18 (16) | 0 (0) | $0.0000 | $0.0000 | 385 / 678 |
+
+Run: 100 trials, 100 model calls, 24,580 tokens in, 1,794 tokens out, 1,868 embedding tokens, cost $0.0000, 0.8 min of trial time.
+
+## Latency per span kind (ms, median / p90, n)
+
+| span kind | none |
+|---|---:|
+| chat:reply | 384 / 673 (100) |
+| embeddings:index | 794 / 794 (1) |
+| reply_path | 384 / 673 (100) |
+| trial | 385 / 678 (100) |
+
+## Notes
+
+- none: indexing the memorome took 1 embedding call(s), 1,868 tokens, $0.0000 (in the run cost, not per trial).
+
+Prices: `pricing/prices.yaml` (each entry has its source and the date it was read).
+
+# Estimate and actual: `slow-recall`
+
+Estimate as expected [low–high]; actual from the run's telemetry. ⚠ marks an actual outside the estimated range.
+
+| condition | quantity | estimate | actual |
+|---|---|---:|---:|
+| none | trials | 100 | 100 |
+| none | chat_calls | 100 [90–110] | 100 |
+| none | input_tokens | 25,200 [22,680–27,720] | 24,580 |
+| none | output_tokens | 1,997 [1,797–2,196] | ⚠ 1,794 |
+| none | embed_tokens | 0 [0–0] | 0 |
+| none | cost_usd | $0.0000 [$0.0000–$0.0000] | $0.0000 |
+| none | duration_s | 45 s [40 s–49 s] | 47 s |
+
+=== none done: exit 0
+# Estimate: `slow-recall`
+
+- Chat model: ollama/gemma4:e4b; embeddings: ollama/nomic-embed-text
+- Trials: 1400 in 4 condition(s)
+- Profile: telemetry of results/e2
+- Prices on 2026-11-25: chat $0.0/$0.0 per M in/out (local inference, no per-token charge, read 2026-11-13)
+
+Expected [low–high]. The high end of a wide range is a ceiling, not a likely value.
+
+| condition | trials | model calls | tokens in | tokens out | embed tokens | model spend | duration |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| blocking | 350 | 350 [315–385] | 136,920 [123,228–150,612] | 10,353 [9,318–11,388] | 16,499 [14,849–18,149] | $0.0000 [$0.0000–$0.0000] | 4 min [4 min–5 min] |
+| deep | 350 | 444 [400–489] | 170,305 [153,275–187,336] | 11,306 [10,175–12,437] | 10,019 [9,017–11,020] | $0.0000 [$0.0000–$0.0000] | 5 min [5 min–6 min] |
+| deep_stale | 350 | 444 [400–489] | 170,305 [153,275–187,336] | 11,306 [10,175–12,437] | 10,019 [9,017–11,020] | $0.0000 [$0.0000–$0.0000] | 5 min [5 min–6 min] |
+| both | 350 | 444 [400–489] | 170,305 [153,275–187,336] | 11,306 [10,175–12,437] | 10,019 [9,017–11,020] | $0.0000 [$0.0000–$0.0000] | 5 min [5 min–6 min] |
+| **total** | 1400 | 1,683 [1,515–1,851] | 647,836 [583,052–712,620] | 44,271 [39,844–48,698] | 54,027 [49,371–58,682] | $0.0000 [$0.0000–$0.0000] | 19 min [17 min–21 min] |
+
+**No spend** (local models, local machine).
+
+Notes:
+- deep: not in the profile; the average of the other conditions is used.
+- deep_stale: not in the profile; the average of the other conditions is used.
+- both: not in the profile; the average of the other conditions is used.
+
+{"condition": "blocking", "trials": 350, "passed": 208, "seconds": 222, "bundle": "results/slow-recall/blocking/02d8acc9f5914977b86e31b601e3d2d6", "seal_problems": []}
+{"condition": "deep", "trials": 350, "passed": 322, "seconds": 2088, "bundle": "results/slow-recall/deep/6b617323ad4f4b679bf61da2a50caa2a", "seal_problems": []}
+{"condition": "deep_stale", "trials": 350, "passed": 155, "seconds": 2003, "bundle": "results/slow-recall/deep_stale/0e575f1f7f7843d8ab0327f875f3aa0c", "seal_problems": []}
+{"condition": "both", "trials": 350, "passed": 252, "seconds": 2006, "bundle": "results/slow-recall/both/64ba1a11a2a14d48a795cb0000356fdd", "seal_problems": []}
+# Telemetry summary: `slow-recall`
+
+Per trial: mean (median). Latency: median / 90th percentile, ms.
+
+| condition | trials | model calls | tokens in | tokens out | embed tokens | cost / trial | cost (run) | trial ms (p50 / p90) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| none | 100 | 1.00 (1.00) | 246 (246) | 18 (16) | 0 (0) | $0.0000 | $0.0000 | 385 / 678 |
+| blocking | 350 | 1.00 (1.00) | 389 (390) | 27 (24) | 46 (46) | $0.0000 | $0.0000 | 615 / 973 |
+| both | 350 | 17.00 (17.00) | 3,832 (3,823) | 141 (142) | 79 (80) | $0.0000 | $0.0000 | 5,728 / 6,054 |
+| deep | 350 | 17.00 (17.00) | 3,983 (3,969) | 144 (144) | 46 (46) | $0.0000 | $0.0000 | 5,954 / 6,296 |
+| deep_stale | 350 | 17.00 (17.00) | 3,723 (3,719) | 136 (132) | 33 (35) | $0.0000 | $0.0000 | 5,685 / 6,028 |
+
+Run: 1500 trials, 18300 model calls, 4,198,726 tokens in, 158,442 tokens out, 80,660 embedding tokens, cost $0.0000, 106.1 min of trial time.
+
+## Latency per span kind (ms, median / p90, n)
+
+| span kind | none | blocking | both | deep | deep_stale |
+|---|---:|---:|---:|---:|---:|
+| chat:recall_judge |  |  | 317 / 332 (5600) | 326 / 346 (5600) | 324 / 338 (5600) |
+| chat:reply | 384 / 673 (100) | 603 / 956 (350) | 613 / 941 (350) | 695 / 980 (350) | 533 / 835 (350) |
+| embeddings:index | 794 / 794 (1) | 618 / 618 (1) | 591 / 591 (1) | 777 / 777 (1) | 623 / 623 (1) |
+| embeddings:query |  | 11 / 14 (350) | 13 / 28 (700) | 15 / 18 (350) | 15 / 16 (350) |
+| recall:off_path |  |  | 11 / 12 (350) |  | 16 / 17 (350) |
+| recall:reply_path |  | 11 / 14 (350) | 18 / 34 (350) | 16 / 18 (350) |  |
+| reply_path | 384 / 673 (100) | 614 / 967 (350) | 633 / 965 (350) | 5,953 / 6,292 (350) | 533 / 836 (350) |
+| trial | 385 / 678 (100) | 615 / 973 (350) | 5,728 / 6,054 (350) | 5,954 / 6,296 (350) | 5,685 / 6,028 (350) |
+
+## Notes
+
+- none: indexing the memorome took 1 embedding call(s), 1,868 tokens, $0.0000 (in the run cost, not per trial).
+- blocking: indexing the memorome took 1 embedding call(s), 1,868 tokens, $0.0000 (in the run cost, not per trial).
+- both: indexing the memorome took 1 embedding call(s), 1,868 tokens, $0.0000 (in the run cost, not per trial).
+- deep: indexing the memorome took 1 embedding call(s), 1,868 tokens, $0.0000 (in the run cost, not per trial).
+- deep_stale: indexing the memorome took 1 embedding call(s), 1,868 tokens, $0.0000 (in the run cost, not per trial).
+
+Prices: `pricing/prices.yaml` (each entry has its source and the date it was read).
+
+# Estimate and actual: `slow-recall`
+
+Estimate as expected [low–high]; actual from the run's telemetry. ⚠ marks an actual outside the estimated range.
+
+| condition | quantity | estimate | actual |
+|---|---|---:|---:|
+| blocking | trials | 350 | 350 |
+| blocking | chat_calls | 350 [315–385] | 350 |
+| blocking | input_tokens | 136,920 [123,228–150,612] | 136,235 |
+| blocking | output_tokens | 10,353 [9,318–11,388] | 9,448 |
+| blocking | embed_tokens | 16,499 [14,849–18,149] | 15,960 |
+| blocking | cost_usd | $0.0000 [$0.0000–$0.0000] | $0.0000 |
+| blocking | duration_s | 4 min [4 min–5 min] | ⚠ 4 min |
+| deep | trials | 350 | 350 |
+| deep | chat_calls | 444 [400–489] | ⚠ 5,950 |
+| deep | input_tokens | 170,305 [153,275–187,336] | ⚠ 1,393,935 |
+| deep | output_tokens | 11,306 [10,175–12,437] | ⚠ 50,476 |
+| deep | embed_tokens | 10,019 [9,017–11,020] | ⚠ 15,960 |
+| deep | cost_usd | $0.0000 [$0.0000–$0.0000] | $0.0000 |
+| deep | duration_s | 5 min [5 min–6 min] | ⚠ 35 min |
+| deep_stale | trials | 350 | 350 |
+| deep_stale | chat_calls | 444 [400–489] | ⚠ 5,950 |
+| deep_stale | input_tokens | 170,305 [153,275–187,336] | ⚠ 1,302,881 |
+| deep_stale | output_tokens | 11,306 [10,175–12,437] | ⚠ 47,491 |
+| deep_stale | embed_tokens | 10,019 [9,017–11,020] | ⚠ 11,720 |
+| deep_stale | cost_usd | $0.0000 [$0.0000–$0.0000] | $0.0000 |
+| deep_stale | duration_s | 5 min [5 min–6 min] | ⚠ 33 min |
+| both | trials | 350 | 350 |
+| both | chat_calls | 444 [400–489] | ⚠ 5,950 |
+| both | input_tokens | 170,305 [153,275–187,336] | ⚠ 1,341,095 |
+| both | output_tokens | 11,306 [10,175–12,437] | ⚠ 49,233 |
+| both | embed_tokens | 10,019 [9,017–11,020] | ⚠ 27,680 |
+| both | cost_usd | $0.0000 [$0.0000–$0.0000] | $0.0000 |
+| both | duration_s | 5 min [5 min–6 min] | ⚠ 33 min |
+
+=== main done: exit 0

@@ -38,11 +38,11 @@
 \maketitle
 
 \begin{abstract}
-A voice agent has to reply quickly, and retrieving long-term memories before it replies takes time. One remedy runs recall in the background and lets the reply read whatever result is ready. That result was computed before the listener's latest words. We measure what this staleness costs, in conversations replayed as text, and find that it depends on the turn. In 30 scripted cases whose last utterance needs a memory that is not already in play, an agent that reads a record one utterance old passes \RecLag\% of trials, and an agent that waits for retrieval passes \RecBlock\%. In ten control cases that ask about the memory already in play, written so that the old record holds it, both pass \CarryLag\%. The two agents differ in how often the right memory reaches the model, and hardly in what the model does with it. The gap repeats with a hosted model and in a companion product into which we built the design, where they pass \KHRecLag\% and \KHRecBlock\% of the 30 cases' trials on hosted models. What the agent says when the memory is missing depends on the model: some abstain and one invents. The two sets of cases are built ends of a range, and we did not measure where real conversation lies between them. In every set-up we measured, waiting for retrieval cost between \RecallWaitMin{} and \RecallWaitMax\,ms, so the stale record bought no useful time. Recall that takes seconds, the case the design was made for, remains untested.
+A voice agent has to reply quickly, and retrieving long-term memories before it replies takes time. One remedy runs recall in the background and lets the reply read whatever result is ready. That result was computed before the listener's latest words. We measure what this staleness costs, in three experiments on conversations replayed as text. On LoCoMo, one utterance of lag changes half of the retrieved memories. In scripted cases with a fast lookup, an agent that reads a result one utterance old passes \RecLag\% of trials when the last utterance brings a new need, and an agent that waits passes \RecBlock\%; when the memory is already in play, both pass \CarryLag\%. Waiting cost \PreBlockMed\,ms, so here staleness bought nothing. With a recall step that takes five seconds, the stale result pays on one kind of turn: where the memory is in play and the fast lookup misses it, the agent that reads the stale result passes \SStaleC\% of trials and the fast lookup none. Paired with a fast fresh lookup, it loses nothing on the other kinds. Neither serves a new need that only the slow step can find: there an agent passes \SDeepD\% of trials if it waits five seconds and none if it does not. The cases are built to separate these kinds of turn, and we did not measure how often each occurs in real conversation.
 \end{abstract}
 
 \begingroup
-\renewcommand\thefootnote{}\footnotetext{\textbf{Use of AI.} This paper was produced with an AI assistant (Claude, Anthropic). Under the author's direction the assistant wrote the experiment code and the product changes tested in Experiment~3, authored the fictional test data, ran the experiments, and drafted the text. The author takes responsibility for the content.}
+\renewcommand\thefootnote{}\footnotetext{\textbf{Use of AI.} This paper was produced with an AI assistant (Claude, Anthropic). Under the author's direction the assistant wrote the experiment code and the product changes tested in Appendix~\ref{app:e3}, authored the fictional test data, ran the experiments, and drafted the text. The author takes responsibility for the content.}
 \addtocounter{footnote}{-1}
 \endgroup
 
@@ -63,14 +63,15 @@ There are three ways to place recall in a turn (Figure~\ref{fig:timeline}). \emp
 
 The asynchronous design is attractive, and several recent systems use a version of it \citep{christakopoulou2024talker,qiu2026voiceagentrag,gan2025pmfr,chien2026moshirag,arora2025streamrag}. They report lower latency, cache hit rates, or answer quality close to a slower baseline. We study its limiting case, a reply that never waits and reads a result that already exists. That result was computed from an earlier state of the conversation. Holding everything else fixed, how often is it the wrong one, and what does the agent then say?
 
-We ask this for a voice companion that we are building\ifanon\else, \product{}\fi, which speaks about one person's life from a store of that person's memories. Its design calls for slow recall to run in background jobs, so that a reply never waits for it. We measured what such jobs cost on a reference implementation, then built them into an experimental version of the product and measured again. All our experiments replay conversations as text; none measures speech. After a precise statement of the design (Section~\ref{sec:design}), the paper reports four findings.
+We ask this for a voice companion that we are building\ifanon\else, \product{}\fi, which speaks about one person's life from a store of that person's memories. Its design calls for slow recall to run in background jobs, so that a reply never waits for it. We test that design on a small reference agent, in conversations replayed as text; no experiment measures speech. After a precise statement of the design (Section~\ref{sec:design}), three experiments answer three questions.
 
 \begin{enumerate}[leftmargin=*,itemsep=2pt,topsep=3pt]
-\item \emph{The cost of lag falls on turns that bring a new need.} In 30 scripted cases whose last utterance needs a memory other than the one in play, a record computed one utterance earlier holds that memory in \GoldCasesLag{} cases and the agent passes \RecLag\% of trials; retrieval that waits holds it in \GoldCasesBlock{} cases and passes \RecBlock\%. In ten control cases, written so that the lead-in already retrieves the memory, both pass \CarryLag\% (Section~\ref{sec:e2}).
-\item \emph{The gap repeats in a product, on the same cases.} Built into \product{}, which has its own retriever, the lag-1 record passes \KRecLag\% of the 30 cases' trials and blocking retrieval \KRecBlock\% with a local model, and \KHRecLag\% and \KHRecBlock\% with a hosted one (Section~\ref{sec:e3}).
-\item \emph{What a missing memory leads to depends on the model.} Some models said that they did not know and one sometimes invented an answer. With stale notes loaded, the small local models rarely used a search tool under the reference agent's prompt, though not in the product; a reasoning mode and the hosted models did, at the price of a second model call.
-\item \emph{Waiting was cheap wherever we measured it, and two things remain open.} Retrieval took between \RecallWaitMin{} and \RecallWaitMax\,ms, so the stale record bought no useful time (Section~\ref{sec:time}). We have no count of how often real turns bring a new need, and we did not test recall that takes seconds.
+\item \emph{How far does recall drift in one utterance?} On LoCoMo, a result computed one utterance earlier shares half of its memories with fresh recall (Section~\ref{sec:e1}).
+\item \emph{With a fast lookup, does the drift change what the agent says?} It depends on the turn. In 30 scripted cases whose last utterance brings a new need, an agent that reads the stale result passes \RecLag\% of trials and an agent that waits passes \RecBlock\%. In ten control cases that stay with the memory in play, both pass \CarryLag\%. Waiting cost \PreBlockMed\,ms, so not waiting bought nothing (Section~\ref{sec:e2}).
+\item \emph{With slow recall, does not waiting pay?} On one kind of turn. We add a recall step that takes five seconds and \SNewCases{} cases whose target note the fast lookup misses. Where the memory is in play, the stale result of the slow step passes \SStaleC\% of trials and the fast lookup none. Paired with a fast fresh lookup it loses nothing on the other kinds. On a new need that only the slow step can find, an agent passes \SDeepD\% of trials if it waits five seconds and none if it does not (Section~\ref{sec:slow}).
 \end{enumerate}
+
+The cases are built to separate these kinds of turn; how often each occurs in real conversation we did not measure. The appendix repeats the comparison of Experiment~2 with a search tool, with other models and inside the product, with the same result.
 
 \section{Related work}
 \label{sec:related}
@@ -92,7 +93,7 @@ We ask this for a voice companion that we are building\ifanon\else, \product{}\f
 
 \paragraph{When jobs start.} A job can start whenever the conversation changes. The agent's own reply exists as text before it is spoken, so a job that starts then has the whole of the agent's speech and the listener's next utterance to finish, and yields lag 1. If the speech recogniser streams partial transcripts, a job can also start in the middle of the listener's utterance. Its ambience then holds the first part of $u_t$, which we describe by the fraction $p$ of the words it has seen.
 
-\paragraph{Implementation.} Experiments~1 and~2 use a small reference implementation of these rules, so that each condition can be isolated. For Experiment~3 we built them into an experimental version of \product{}: the blackboard, a recall job that starts after every saved utterance, an assembler slot that reads its record, and, for comparison, the same recall on the reply path. Jobs on partial transcripts are not built there, because the product's speech recogniser returns whole utterances.
+\paragraph{Implementation.} All three experiments use a small reference implementation of these rules, so that each condition can be isolated. Appendix~\ref{app:e3} reports the comparison of Experiment~2 repeated inside a product, into which we built the blackboard, a recall job that starts after every saved utterance, and an assembler slot that reads its record.
 
 \section{Experiment 1: how stale is recall that was computed early?}
 \label{sec:e1}
@@ -145,7 +146,7 @@ The first class is a control, and it was added last. A review of an earlier vers
 
 \paragraph{Grading.} In the four recall classes a trial passes if the reply contains one of a small set of strings that identify the remembered fact, for example a name or a year that appears in the target note and nowhere in the lead-in. A string must begin a word. In the abstain class the agent returns its reply together with a flag that says whether it declined to answer; a trial passes if the flag is set or the reply declines in words. Both grades are automatic. The last paragraph of this section says how far they were checked.
 
-\paragraph{Conditions.} One agent is run six ways; the prompt (Appendix~\ref{app:prompt}), model, retriever, window ($w=3$) and number of notes shown ($k=4$) are the same throughout. With \emph{no memory}, nothing is loaded. With the \emph{search tool}, nothing is loaded and the model may call a search tool once before it replies. \emph{Blocking retrieval} runs recall on the reply path, on the ambience including the incoming utterance. \emph{Lag 1} loads a record computed from the lead-in only, and \emph{prefetch 50\%} one computed from the lead-in and the first half of the incoming utterance. \emph{Lag 1 + search} loads the lag-1 record and also offers the search tool.
+\paragraph{Conditions.} One agent is run four ways; the prompt (Appendix~\ref{app:prompt}), model, retriever, window ($w=3$) and number of notes shown ($k=4$) are the same throughout. With \emph{no memory}, nothing is loaded. \emph{Blocking retrieval} runs recall on the reply path, on the ambience including the incoming utterance. \emph{Lag 1} loads a record computed from the lead-in only, and \emph{prefetch 50\%} one computed from the lead-in and the first half of the incoming utterance. Two more conditions, which give the model a search tool, ran in the same run and are reported in Appendix~\ref{app:e2}.
 
 \paragraph{Model and runs.} The agent is \texttt{gemma4:e4b} (8 billion parameters, 4-bit quantised) served by Ollama on one laptop, at temperature 0.7 with its reasoning mode switched off. Each case runs five times with fixed seeds: \EtwoPerCondition{} trials per condition and \EtwoTrials{} in all. This is the main run. The 40 cases of the other four classes had been run in full six days earlier with other seeds; that first run agrees with the main run to within \FrMaxDiff{} points in every condition (Appendix~\ref{app:e2}). We debugged the harness on four cases before the first run, which led us to switch off the reasoning mode and to use the model's native tool calls; the 40 cases and their evaluators were not changed afterwards.
 
@@ -165,7 +166,7 @@ The first class is a control, and it was added last. A review of an earlier vers
  & New need & Same & New & Un- & Same memory & Must & \multicolumn{2}{c}{Note in context} & Delay \\
 Condition & (30 cases) & topic & topic & prompted & (10 cases) & abstain & of 30 & of 10 & (ms) \\
 \midrule
-\tabinput{tab-e2.tex}
+\tabinput{tab-e2-main.tex}
 \bottomrule
 \end{tabular}
 \end{table}
@@ -179,145 +180,116 @@ Condition & (30 cases) & topic & topic & prompted & (10 cases) & abstain & of 30
 
 \emph{When the utterance brings a new need, the lag-1 record rarely holds the memory.} Retrieval from the lead-in alone returned a target note in \GoldCasesLag{} of the 30 new-need cases. With the first half of the last utterance it returned one in \GoldCasesPre{} cases, and with the whole utterance in \GoldCasesBlock{} (Table~\ref{tab:e2}). The pass rates follow these counts: lag 1 passes \RecLag\% \RecLagCI{} of new-need trials, prefetch at 50\% passes \RecPre\% \RecPreCI{}, and blocking retrieval \RecBlock\% \RecBlockCI{}. Blocking retrieval is ahead of lag 1 in \CaseAheadBlockLag{} cases, behind in \CaseBehindBlockLag{} and level in \CaseLevelBlockLag{}, a difference of \DiffBlockLag{} points \DiffBlockLagCI{} (sign-flip test over cases, $p \CasePBlockLag$). Lag 1 fails every trial with a new topic, as it must. On the same topic it passes \ContLag\%: a lead-in about bees retrieves notes about bees, but the question is about a prize, and the note that answers it is a different one (Figure~\ref{fig:classes}). These numbers describe our cases as much as the design: we wrote the 30 cases so that the last utterance is needed to find the memory.
 
-\emph{When the memory is already in play, lag cost nothing.} In the ten control cases the lag-1 record held the target note in \CarryGoldCasesLag{} cases and blocking retrieval in \CarryGoldCasesBlock{}, and lag 1, prefetch and blocking retrieval each passed \CarryLag\% of the 50 trials. This follows from how the cases were written, since retrieval is deterministic. With no memory loaded the agent passed \CarryNone\%, so the answers were not in the lead-in. The search tool passed \CarryTool\%: in four trials its query missed the note. The cost of never waiting is therefore not one number. It lies between that gap, where the turn brings a new need, and nothing, where the record already holds the memory.
+\emph{When the memory is already in play, lag cost nothing.} In the ten control cases the lag-1 record held the target note in \CarryGoldCasesLag{} cases and blocking retrieval in \CarryGoldCasesBlock{}, and lag 1, prefetch and blocking retrieval each passed \CarryLag\% of the 50 trials. This follows from how the cases were written, since retrieval is deterministic. With no memory loaded the agent passed \CarryNone\%, so the answers were not in the lead-in. The cost of never waiting is therefore not one number. It lies between that gap, where the turn brings a new need, and nothing, where the record already holds the memory.
 
-\emph{Success is decided by what is in context.} Across the five conditions with memory, the model passed \PassGivenGold\% of the \PassGivenGoldN{} new-need trials in which a target note was in its context and none of the \PassGivenNoGoldN{} in which it was not; in the control class it passed \CarryPassGivenGold\% of \CarryPassGivenGoldN{} and \CarryNoGoldPassed{} of \CarryNoGoldN{}. This is a check of the cases, since the facts are invented and cannot be guessed. It also locates the difference between conditions: in how often they deliver the right note, not in what the model does with it.
+\emph{Success is decided by what is in context.} Across the five conditions with memory, the two with a search tool included, the model passed \PassGivenGold\% of the \PassGivenGoldN{} new-need trials in which a target note was in its context and none of the \PassGivenNoGoldN{} in which it was not; in the control class it passed \CarryPassGivenGold\% of \CarryPassGivenGoldN{} and \CarryNoGoldPassed{} of \CarryNoGoldN{}. This is a check of the cases, since the facts are invented and cannot be guessed. It also locates the difference between conditions: in how often they deliver the right note, not in what the model does with it.
 
-\emph{This model said so when the memory was missing.} When the listener asked for a fact and lag 1 did not supply it, the agent said that it did not know: \DeclinedLag\% of the trials of the two new-need classes with a question ended that way and \OtherLag\% gave another answer (Table~\ref{tab:e2detail}). Abstention on the cases built to tempt a guess was between \AbstTool\% and \AbstPre\% in every condition with memory. Section~\ref{sec:robust} shows that this depends on the model.
+\emph{This model said so when the memory was missing.} When the listener asked for a fact and lag 1 did not supply it, the agent said that it did not know: \DeclinedLag\% of the trials of the two new-need classes with a question ended that way and \OtherLag\% gave another answer (Table~\ref{tab:e2detail}). Abstention on the cases built to tempt a guess was between \AbstTool\% and \AbstPre\% in every condition with memory. Appendix~\ref{sec:robust} shows that this depends on the model.
 
-\emph{A search tool matches blocking retrieval and costs a model call.} The search tool passes \RecTool\% \RecToolCI{} of new-need trials, which we cannot distinguish from blocking retrieval (difference \DiffBlockTool{} points \DiffBlockToolCI{}; ahead in \CaseBehindBlockTool{} cases and behind in \CaseAheadBlockTool{}). It adds a median of \PreToolMed\,ms before generation starts on a local model, where blocking retrieval adds \PreBlockMed\,ms.
+\emph{Waiting cost milliseconds.} Blocking retrieval embeds the ambience and searches the store. That took a median of \PreBlockMed\,ms on the laptop, \CloudRecallMs\,ms on a cloud GPU and \HsRecallMs\,ms with a hosted embedding model, where most of it is the network round trip (Appendix~\ref{sec:time}). This wait is all that moving recall off the reply path can save. Here the stale record bought no useful time. Experiment~3 turns to recall that takes seconds.
 
-\emph{Stale notes suppressed search.} We expected a lag-1 record together with a search tool to recover what lag 1 loses. It passes \RecHyb\% \RecHybCI{} of new-need trials, far below the search tool alone. With stale notes already in context, the model searched in \SrchShiftHyb\% of the new-topic trials and \SrchUnpHyb\% of the unprompted ones; with nothing loaded it searched in \SrchShiftTool\% and \SrchUnpTool\%. It treated the loaded notes as the available evidence and declined to answer. Section~\ref{sec:robust} finds the same in a second model, and finds that reasoning removes it.
+\emph{Other models show the same gap, and differ in what they say.} Before the control class existed we ran the 40 other cases three more times, none planned in advance: with the model's reasoning mode on, with a second local model of the same size (\texttt{qwen3:8b}), and with a hosted model (\texttt{claude-sonnet-5}) whose retriever uses a hosted embedding model. The local runs share the retriever, so they repeat one retrieval outcome and test only what another model does with it; the hosted run is a second sample of retrieval on the same cases. Blocking retrieval and lag 1 pass \ThRecBlock\% and \ThRecLag\% of new-need trials with reasoning on, \QwRecBlock\% and \QwRecLag\% with the second model, and \HsRecBlock\% and \HsRecLag\% with the hosted one, a difference of \HsDiffBlockLag{} points \HsDiffBlockLagCI{}. What a model says when the memory is missing differs. With a lag-1 record, \QwOtherLag\% of the second model's trials with a question ended in an invented detail, a flat denial or an unrelated memory, against \OtherLag\% for the first model and \HsOtherLag\% for the hosted one (Appendix~\ref{sec:robust}). Built into the companion product, which has its own retriever and output checks, blocking retrieval and lag 1 pass \KHRecBlock\% and \KHRecLag\% of new-need trials on hosted models (Appendix~\ref{app:e3}).
 
 \paragraph{How far the grades were checked.}
 \label{sec:audit}
 The grades have been read against the replies twice, both times by an AI assistant and not by a person. The assistant that wrote the graders read a stratified random sample of 60 trials of the first run and found no wrong grade. The review, by an assistant in a separate session, read about 120 further replies and judged the recall grades right; it judged one unprompted case unfair, because the text match rejects replies that cite a second note which fits the listener's remark as well as the target does. Without that case blocking retrieval passes \NoApprRecBlock\% of new-need trials and lag 1 \NoApprRecLag\%. Appendix~\ref{app:e2} describes two further limits of the grades. The sampled trials are in the supplementary material for a human audit, which has not been done.
 
-\subsection{Reasoning mode, a second model and a hosted model}
-\label{sec:robust}
+\section{Experiment 3: does not waiting pay when recall is slow?}
+\label{sec:slow}
 
-The main run uses one model with its reasoning mode off. Before the control class existed we ran the 40 other cases three more times: with the reasoning mode of \texttt{gemma4:e4b} on; with a second local model of the same size, \texttt{qwen3:8b} (8.2 billion parameters, 4-bit quantised), reasoning off; and with a hosted model, \texttt{claude-sonnet-5}, whose retriever also takes its embeddings from a hosted provider (\texttt{text-embedding-3-small}). Cases, evaluators, prompt and conditions are unchanged, each run has \ThTrials{} trials, and none was planned in advance. The hosted model accepts neither a temperature nor a seed (Appendix~\ref{app:e2}, with Figure~\ref{fig:robust} and Table~\ref{tab:robust}).
-
-The replies of the hosted run showed two weaknesses in our grading, which we corrected in every run of this paper: a key must begin a word, since ``Mori'' had matched inside ``memories'', and a refusal in plain words counts as an abstention. This changes \HsRegradedRecall{} recall grades and \HsRegradedAbstain{} abstention grades of the hosted run and none of the local runs (Appendix~\ref{app:e2}).
-
-\emph{Other models do the same with the same notes.} The three local runs share the retriever, so each has the same notes in context: they repeat one retrieval outcome and test only what another model setting does with it. Blocking retrieval, prefetch and lag 1 pass \ThRecBlock\%, \ThRecPre\% and \ThRecLag\% of new-need trials with reasoning on and \QwRecBlock\%, \QwRecPre\% and \QwRecLag\% with the second model, against \RecBlock\%, \RecPre\% and \RecLag\% in the main run.
-
-\emph{Another embedding model finds the same gap.} The hosted run retrieves with a different embedding model and is a second sample of retrieval on the same cases. Its lag-1 record held a target note in \HsGoldCasesLag{} of the 30 cases, prefetch in \HsGoldCasesPre{} and blocking retrieval in \HsGoldCasesBlock{}, and the three pass \HsRecLag\%, \HsRecPre\% and \HsRecBlock\%. The hosted model uses the notes it is given better than the local ones, and loses as much when they are stale: blocking retrieval is ahead of lag 1 by \HsDiffBlockLag{} points \HsDiffBlockLagCI{}. Over the four runs, \AllNoGoldPassed{} of the \AllNoGoldN{} new-need trials without a target note in context passed, by citing another note that names the same person.
-
-\emph{What the model does about a missing memory differs.} Two settings made the search tool work beside a stale record. With reasoning on, the local model searched in \ThSrchHyb\% of the trials that combine a lag-1 record with the search tool, against \SrchHyb\% in the main run, and passed \ThRecHyb\% \ThRecHybCI{}; the hosted model searched in \HsSrchHyb\% and passed \HsRecHyb\% \HsRecHybCI{}. The price is a second model call on the reply path: for the hosted model the median complete reply took \HsReplyHyb\,s, against \HsReplyBlock\,s for blocking retrieval, which passed \HsRecBlock\% of trials at \HsCostBlock{} instead of \HsCostHyb{} US cents per reply. Without reasoning the second local model searched as rarely beside stale notes as the first (\QwSrchHyb\% of trials, against \QwSrchTool\% with the search tool alone), and it differed in what it said when the memory was missing. With a lag-1 record, \QwOtherLag\% of its trials with a question ended in an invented detail, a flat denial or an unrelated memory, against \OtherLag\% for the first local model and \HsOtherLag\% for the hosted one. Whether an agent abstains when evidence is missing is thus a property of the model, and stale context makes evidence go missing more often.
-
-\section{Experiment 3: does it hold in the product?}
-\label{sec:e3}
+In Experiment~2 the lookup took \PreBlockMed\,ms, so an agent that did not wait for it could gain nothing. The asynchronous design is meant for recall that takes seconds. Adding a delay to the same lookup would not test it: the agent would see the same notes, later. Recall has to be slow because it does more, and the cases have to leave something for it to find. We wrote down the design of this experiment and the outcome we expected, and committed both with the cases and the code before the first trial; the file is in the supplementary material.
 
 \subsection{Setup}
 
-\paragraph{System.} \Product{} differs from the reference agent in everything except the design under test. It has its own instructions, its own retriever (full-text and embedding search over pages of notes, fused by reciprocal rank), a budgeted working memory, and an output check: a statement about the person that is not tied by a citation to a page the model was given or read is withheld, and a fixed sentence of refusal is spoken instead. It writes numbers as words, because its replies are spoken. As shipped, it loads no memories and gives the model a search tool.
+\paragraph{A deeper recall step.} The lookup of Experiment~2, from here on the \emph{fast lookup}, returns its \SCandidates{} best notes instead of four. The agent's own model then reads each of them in a call of its own, together with the last three utterances, and rates from 0 to 3 how much the reply needs it. Notes rated 2 or 3 are loaded, the best first and at most four; if none is rated that high, none is loaded. On the laptop this \emph{deep recall} took between \SJobMin{} and \SJobMax\,s (median \SJobMedMax\,s). Its prompt (Appendix~\ref{app:slow}) was written once, on four development cases that are not in the test set.
 
-\paragraph{Conditions.} Five settings of the product: the \emph{search tool} as shipped; \emph{lag 1}, where only the background record is loaded; \emph{blocking retrieval} on the reply path; \emph{blocking + lag 1}, with both; and \emph{lag 1 + search}. Recall loads four pages; with both on, the record adds the pages that blocking retrieval did not find.
+\paragraph{Four kinds of turn.} The cases cross two properties of a turn. One is that of Experiment~2: the last utterance stays with the memory \emph{in play}, or it brings a \emph{new need}. The other is whether the fast lookup, given the whole conversation, finds the target note. Where it does, we reuse the cases of Experiment~2: the ten control cases and the 30 new-need cases, in which the fast lookup finds the note in all ten and in \SGoldFastB{} of 30. Where it does not, we wrote \SNewCases{} new cases on the same 48 notes. They are worded away from the note, so that the fast lookup ranks it between 5 and \SCandidates{}: outside what it loads, inside what deep recall reads. In ten of them the lead-in is about the target memory without quoting it, and in ten it is about something else (examples in Appendix~\ref{app:cases}). We fitted the new cases with the fast lookup alone, which needs no model, and never ran deep recall on a test case before the run. With no memory loaded the agent passed \SCheckPassed{} of \SCheckTrials{} trials on them. The ten must-abstain cases run as well.
 
-\paragraph{Runs.} The 48 notes became the product's memory store and the 40 cases of the four original classes ran unchanged. A trial opens a fresh session, posts the lead-in, waits for as long as the final utterance would take to say at an assumed 210 words per minute, and sends the final utterance as text. Each case has five trials. The product sets no sampling temperature for the reply, so the model's default applies; its output checks run at temperature 0. Recall cases are graded by the text match of Experiment~2 on the reply that was delivered, with the spoken forms of numbers added to the keys. The product signals abstention by a tool call, so we report that call and, separately, a match on a fixed list of phrases that decline.
-
-We report two runs of \KTrials{} trials. One uses the local model of Experiment~2; it is the second of two full runs, and Appendix~\ref{app:e3} gives the first and what was changed in between. The other uses the models of the product's hosted configuration, \texttt{gpt-5.6-luna} for the reply and the output checks and \texttt{text-embedding-3-small} for retrieval; it followed a pilot and a first attempt that a defect in the product stopped. Later, on the version of the hosted run and with both models, we ran the ten control cases in all five conditions and a sixth condition that is described with the results.
+\paragraph{Four agents.} \emph{Fast, fresh} is the blocking retrieval of Experiment~2: the fast lookup on the whole conversation. \emph{Deep, fresh} waits for deep recall on the whole conversation. \emph{Deep, stale} never waits: deep recall runs in the background on the lead-in, and the reply loads its record. \emph{Both} loads the fast fresh lookup and adds the notes of the stale deep record. The background job is timed in every trial, and its record is loaded only if the job took no longer than the conversation gave it. That is the time to speak the scripted agent line and the listener's last utterance at 210 words per minute, between \SAvailMin{} and \SAvailMax\,s in these cases. Model, prompt, grading and analysis are those of Experiment~2. Each agent runs the \SCases{} cases five times, \STrials{} trials in all; none ended in an error.
 
 \subsection{Results}
 
 \begin{table}[t]
-\caption{Experiment 3 with the local model: the 40 original cases run against the product (200 trials per condition), and the ten control cases from a later run on the product version of the hosted run (50 trials per condition). Columns as in Table~\ref{tab:e2}; ``Note in context'' is the share of new-need trials with a target note in working memory; ``Searched'' is the share of trials with a search call; ``Declined'' is the share of must-abstain trials in which the agent abstained by tool call or refusal sentence, and in words; ``Reply path'' is the median time from the final utterance to the complete text of the reply. The last two rows also ran later on that version: the search tool as shipped and the sixth condition.}
-\label{tab:e3}
+\caption{Experiment~3: percentage of trials passed by four agents on four kinds of turn, with five trials per case. Brackets are 95\% intervals over cases and are left out where every case gave the same result. The fast lookup finds the target note in all ten and in \SGoldFastB{} of 30 cases of the first two kinds and, by construction, in none of the other two. ``Reply'' is the median time from the end of the listener's utterance to a complete reply.}
+\label{tab:slow}
 \vspace{4pt}
 \centering
 \small
-\setlength{\tabcolsep}{3.4pt}
-\begin{tabular}{@{}lccccccccccr@{}}
+\setlength{\tabcolsep}{4.2pt}
+\begin{tabular}{@{}llcccccr@{}}
 \toprule
- & New need & Same & New & Un- & Same & Note in & Searched & \multicolumn{2}{c}{Declined (\%)} & Reply \\
-Condition & (30 cases) & topic & topic & prompted & memory & context & (\%) & tool & words & path (s) \\
+ & & \multicolumn{2}{c}{Fast lookup finds the note} & \multicolumn{2}{c}{Fast lookup misses it} & & \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}
+ & Reply & In play & New need & In play & New need & Must & Reply \\
+Agent & waits for & (10 cases) & (30 cases) & (10 cases) & (10 cases) & abstain & (s) \\
 \midrule
-\tabinput{tab-e3.tex}
-\bottomrule
-\end{tabular}
-\end{table}
-
-\emph{On new-need turns, lag costs the product what it cost the reference agent.} Blocking retrieval passes \KRecBlock\% \KRecBlockCI{} of new-need trials and the lag-1 record \KRecLag\% \KRecLagCI{}, a difference of \KDiffBlockLag{} points \KDiffBlockLagCI{}; in Experiment~2 the difference was \DiffBlockLag{} (Table~\ref{tab:e3}). The record held a target note in \KGoldLag\% of trials and blocking retrieval in \KGoldBlock\%. Across the three conditions that load memories, the product passed \KPassGivenGold\% of the \KPassGivenGoldN{} new-need trials with a target note in working memory and \KNoGoldPassed{} of the \KNoGoldN{} without.
-
-\emph{On the control cases the lag-1 record was not behind.} It passed \KCarryLag\% of the control trials and blocking retrieval \KCarryBlock\% \KCarryBlockCI{}, with the target note in working memory in every trial of both. Blocking retrieval failed six trials, five of them in one case. After a lead-in about a long walk the listener asks ``How long did that take her?'', and retrieval on that utterance loaded, beside the right page, a page about an apprenticeship of six months; the model answered from it in three trials and the output check withheld two. A short follow-up is a poor query, and fresh retrieval on it can add a distractor that the older record does not have. Ten cases cannot tell this difference of \KCarryDiffBlockLag{} points \KCarryDiffBlockLagCI{} from none.
-
-\emph{Blocking costs a tenth of a second and the search tool costs seconds.} Recall took a median of \KBlockMs\,ms on the reply path when it blocked, and \KOffpathMs\,ms as a background job. With recall this cheap the background record adds nothing: loading it beside blocking retrieval changes the new-need pass rate by \KDiffBothBlock{} point \KDiffBothBlockCI{}. The search tool adds a model call: its replies took a median of \KPathTool\,s, against \KPathBlock\,s for blocking retrieval.
-
-\emph{Under the product's instructions the search tool seldom searches when nobody has asked.} As shipped, the search tool passes \KRecTool\% \KRecToolCI{} of new-need trials, \KDiffBlockTool{} points \KDiffBlockToolCI{} fewer than blocking retrieval, and the whole difference is in the unprompted class (\KUnpTool\% against \KUnpBlock\%), where the model searched in \KSrchUnpTool\% of trials. This comparison was not clean. The product's instructions tell the model that it may bring a memory up without being asked only when recall is switched on, so the shipped condition lacked that sentence. We therefore ran a sixth condition, the search tool with a sentence that allows the model to search and bring a memory up unasked. With the local model it did not help: \KBringUnp\% of unprompted trials passed, against \KShipUnp\% without the sentence \KShipVersion{}, and the model searched in \KBringSrchUnp\% of them against \KShipSrchUnp\%. The sentence settles the confound and no more. It permits a search, where the reference agent's instructions demand one whenever a memory could be relevant; under those the same model searched in \SrchUnpTool\% of unprompted trials and passed \UnpTool\%. The instruction is the likely difference; we did not test a demand in the product.
-
-\emph{Two more results of Experiment~2 did not carry over.} A loaded lag-1 record did not make the model search less under the product's instructions: it searched in \KSrchHyb\% of trials with the record and \KSrchTool\% without. And abstention was weak in every condition: on the must-abstain cases, counting every way of declining, \KGuessMin\% to \KGuessMax\% of trials still ended in a guess (Appendix~\ref{app:e3} reports a reading of 50 trials against their grades).
-
-\emph{On hosted models the cost of lag is the same, and abstention is not weak.} With the hosted models blocking retrieval passes \KHRecBlock\% \KHRecBlockCI{} of new-need trials and the lag-1 record \KHRecLag\% \KHRecLagCI{}, a difference of \KHDiffBlockLag{} points \KHDiffBlockLagCI{} (Table~\ref{tab:e3hosted}); on the control cases they pass \KHCarryBlock\% and \KHCarryLag\%. This model abstained by tool call in \KHAbstToolMin\% to \KHAbstToolMax\% of the must-abstain trials, so the guessing above belongs to the small local model, not to the product. It also searched past a stale record: lag 1 with the search tool passes \KHRecHyb\%, against \KHRecTool\% for the tool alone, at \KHPathHyb\,s a reply against \KHPathBlock\,s with blocking. In the sixth condition it searched in \KHBringSrchUnp\% of unprompted trials and passed \KHBringUnp\%, against \KHUnpTool\% as shipped and \KHUnpBlock\% with blocking retrieval; \KHBringUnpLoose{} of its \KHBringUnpPassed{} passes are general advice that contains a key word (Appendix~\ref{app:e3}).
-
-\section{What waiting costs in time}
-\label{sec:time}
-
-What a never-wait agent loses in correctness depends on which memories are in context, not on the speed of the machine. What it gains is time, which does. Table~\ref{tab:deploy} collects the timings of our set-ups, and Figure~\ref{fig:ontime} shows time and correctness together for the new-need cases.
-
-\begin{table}[t]
-\caption{What waiting costs in each set-up: the median wait for recall when it blocks the reply, and the median time from the end of the listener's utterance to a complete reply. Times of the hosted set-ups include the network round trips to the providers. The cloud GPU is one NVIDIA L4 and ran one trial per case.}
-\label{tab:deploy}
-\vspace{4pt}
-\centering
-\small
-\begin{tabular}{@{}lrcccc@{}}
-\toprule
- & Wait for & \multicolumn{4}{c}{Complete reply (s)} \\
-\cmidrule(l){3-6}
-Set-up & recall (ms) & Lag 1 & Blocking & Search tool & Lag 1 + search \\
-\midrule
-\tabinput{tab-deploy.tex}
+\tabinput{tab-slow.tex}
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\linewidth]{fig-ontime.pdf}
-\caption{Correct answers by time on the 30 new-need cases. Each curve gives the share of the 150 trials of a condition that had received a correct reply by that time. Orange curves with circles load a lag-1 record and blue curves do not; dashes mark a search on the reply path. A faster set-up moves the curves to the left; where a curve ends is set by what the model was shown.}
-\label{fig:ontime}
+\includegraphics[width=\linewidth]{fig-slow.pdf}
+\caption{Correct replies by time in Experiment~3. Each curve gives the share of an agent's trials on one kind of turn that had received a correct, complete reply by that time. Orange curves with circles load the stale deep record; blue curves do not. Where a curve ends is set by the notes the model was shown, and where it rises by what the reply waited for.}
+\label{fig:slow}
 \end{figure}
 
-\emph{The wait is one embedding call.} Blocking retrieval embeds the ambience and searches the store. That took a median of \PreBlockMed\,ms with a local embedding model on the laptop and \CloudRecallMs\,ms on a cloud GPU, \KBlockMs\,ms in the product, and \HsRecallMs{} and \KHBlockMs\,ms with a hosted embedding model in the reference agent and in the product, where most of it is the network round trip. This wait is all that moving recall off the reply path can save. The reply times of the two conditions in Table~\ref{tab:deploy} differ by more, because an answer takes longer to write than a refusal.
+\emph{Every cell came out as we had written down.} Table~\ref{tab:slow} gives the pass rates and Figure~\ref{fig:slow} adds the time of each reply. The zeros of the fast fresh agent in the two kinds of turn on the right are fixed by how those cases were built. Everything else was open. The fast fresh agent, run again here, passed the same \SFastB\% of new-need trials as the blocking retrieval of Experiment~2.
 
-\emph{In these set-ups the lag-1 agent is never usefully ahead.} In every set-up the lag-1 curve leaves the axis together with the blocking curve and stops at \LagCeilMin\% to \LagCeilMax\% of the trials. Its largest lead is \OnTimeLeadMax{} points, \OnTimeLeadMaxAt\,s after the utterance \OnTimeLeadMaxSetup; \OnTimeLeadMaxLost\,s later, blocking retrieval has answered more trials correctly than lag 1 ever does. This outcome was settled by the cost of retrieval and not by the trials: when waiting costs a third of a second at most, there is no time for a design that never waits to win.
+\emph{A stale deep record pays where the memory is in play and the fast lookup misses it.} In those ten cases the record, computed one utterance earlier, held the target note in \SGoldStaleC{}, and the deep stale agent passed \SStaleC\% \SStaleCCI{} of trials without waiting. The fast fresh agent passed none. Where the turn brought a new need, the stale record failed as in Experiment~2: \SStaleB\% of trials in the 30 cases, and none in the ten that the fast lookup misses.
 
-\emph{Slower recall would change the trade, and we did not test it.} What follows is arithmetic on the measurements above. If one recall took $c$ seconds, the blocking curves of Figure~\ref{fig:ontime} would move right by $c$, and the lag-1 curves would stay where they are for as long as a job that starts with the agent's reply finishes before the listener stops, about five seconds in the timing model of Appendix~\ref{sec:timing}. The never-wait agent would then answer $c$ seconds sooner, and be right far less often on our new-need cases and as often on our control cases. Which matters more depends on the mix of turns, on what a missing answer costs, and on how long a listener will wait. None of the three is measured here.
+\emph{A fast fresh lookup beside it repairs what that lookup can reach, and no more.} Where the fast lookup finds the note, the agent with both passed exactly what the fast fresh agent passed, and no case differs. Where the memory was in play and the fast lookup misses it, it passed \SBothC\% \SBothCCI{}. The \SNotesBoth{} notes it loads on average, against four, did not distract the model. On a new need that the fast lookup misses it passed no trial: the stale record was computed before the need existed, and the fresh lookup cannot find the note.
+
+\emph{Waiting for deep recall passes most trials on every kind of turn, five seconds later.} The deep fresh agent passed \SDeepA{}, \SDeepB{}, \SDeepC{} and \SDeepD\% of trials on the four kinds. Its median complete reply came after \SReplyDeep\,s, against \SReplyStale{} to \SReplyFast\,s for the other three agents. Deep recall is also the better retriever on the cases of Experiment~2. In the 30 new-need cases it found the note in \SGoldDeepB{} against \SGoldFastB{} and passed \SDeepB\% against \SFastB\% of trials, a difference of \SDiffDeepFastB{} points \SDiffDeepFastBCI{} (ahead in \SAheadDeepFastB{} cases, behind in \SBehindDeepFastB{}). It can also lose a note: in the case where it is behind, the fast lookup ranks the target note first and the model rated it too low to load.
+
+\emph{The clock decided a few cases.} The background job was late in \SNotReadyTrialsStale{} of 350 trials of the deep stale agent, spread over \SNotReadyCasesStale{} cases, and in \SNotReadyTrialsBoth{} trials of the agent with both. These are the cases that gave the job about five seconds or less, and one trial in which the job took \SJobMax\,s. One of them is a control case, which is why the deep stale agent passes \SStaleA\% there and not 100: its record was late in all five trials. For the agent with both, whose jobs ran about a tenth of a second faster, the same record was in time in all five. The job ran alone on the machine; in a deployed agent it would share the model with the reply and take longer.
+
+\emph{Deep recall did not change guessing, and the grades hold up in a sample.} All four agents passed \SAbstFast\% of the must-abstain trials and failed the same case. Across the four agents the model passed \SPassGivenGold\% of the \SPassGivenGoldN{} recall trials with the target note in context and \SNoGoldPassed{} of the \SNoGoldN{} without it. The assistant read a random sample of 60 trials, 15 of each agent, against their grades and found no wrong grade. No person has read them.
 
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{What the experiments show together.} Our two sets of cases are the built ends of a range. Where the last utterance needs a memory that the lead-in does not retrieve, a lag-1 record seldom holds it: blocking retrieval is \DiffBlockLag{} points ahead in the reference agent and \KDiffBlockLag{} and \KHDiffBlockLag{} points ahead in the product. Where the lead-in already retrieves the memory, blocking retrieval was \CarryDiffBlockLag{}, \KCarryDiffBlockLag{} and \KHCarryDiffBlockLag{} points ahead, which ten cases cannot tell from no difference. The cost in real use lies between nothing and the measured gap. Where it lies depends on the mix of turns and on how the store is cut: with longer notes, or more notes loaded, some follow-ups on the same topic would find their answer in the old record. We measured neither, and Experiment~1 does not count turns. Such a count, on real conversations of the intended use, is the measurement this paper lacks.
+\paragraph{What the experiments show together.} An agent that never waits trades the time recall takes for one utterance of staleness. Whether the trade pays depends on two things about the turn: whether the memory it needs was already in play one utterance earlier, and whether a fast lookup can find it.
+
+\begin{itemize}[leftmargin=*,itemsep=1pt,topsep=3pt]
+\item \emph{A fast lookup can find the memory.} Waiting for that lookup costs milliseconds, and a stale record adds nothing to it (Experiment~2 and the first two kinds of turn in Table~\ref{tab:slow}).
+\item \emph{Only slow recall finds it, and it is in play.} A record one utterance old holds it, and the reply need not wait: the stale agent passed \SStaleC\% of these trials and the fast lookup none.
+\item \emph{Only slow recall finds it, and the need is new.} No record computed earlier holds it. The agent waits about five seconds and passes \SDeepD\% of trials, or does not wait and passes none.
+\end{itemize}
+
+The last kind is a cost of never waiting that no placement of recall removes. How often each kind occurs we did not measure. Our cases are built so that each shows one kind clearly, and Experiment~1 says that the retrieved set drifts by half from one utterance to the next, not how often the drift loses the memory that matters. A count of the kinds of turn, on real conversations of the intended use, is the measurement this paper lacks.
 
 \paragraph{What we take from it.}
 
 \begin{enumerate}[leftmargin=*,itemsep=2pt,topsep=3pt]
-\item \emph{Where retrieval is cheap, keep it on the reply path.} A fresh lookup on the complete utterance took \KBlockMs\,ms in the product and \HsRecallMs\,ms with a hosted embedding model, and a lag-1 record loaded beside it added nothing on the new-need cases.
-\item \emph{Treat a loaded record as possibly stale, and test what the model does when it is.} Under the reference agent's prompt both local models searched less once notes were loaded, which the product did not repeat, and one invented answers when the right note was absent. In the product the local model guessed on up to half of the questions that its memory could not answer, and the hosted model on at most \KHGuessMax\%. Abstention has to be tested on the model that will be deployed.
-\item \emph{Test with turns that bring a new need and with turns that do not, and report them apart.} Our first set of cases had only the former and so could not show where lag is harmless. Remarks without a question matter as well: on these blocking retrieval passed \UnpBlock\% in the reference agent and lag 1 \UnpLag\%, so recall driven by context \citep{xiao2026memory} needs the latest utterance.
+\item \emph{Keep a fast fresh lookup on the reply path.} It took \PreBlockMed\,ms here, and \HsRecallMs\,ms with a hosted embedding model. It is the only recall that serves a new need without a wait.
+\item \emph{Run slow recall in the background beside it, not in place of it.} The agent with both lost nothing against the fast lookup on any kind of turn, and gained \SDiffBothFastC{} points where the memory was in play. Alone, the stale record failed on most new needs. The job must also finish in time: ours was late in \SNotReadyTrialsStale{} of 350 trials.
+\item \emph{Test each kind of turn, report them apart, and test what the model says when the memory is missing.} Our first set of cases had only new needs, and could not show where staleness is harmless or where it helps. When the note was missing, this model nearly always said that it did not know; a second model gave an invented detail, a flat denial or an unrelated memory in \QwOtherLag\% of such trials (Appendix~\ref{sec:robust}).
 \end{enumerate}
 
 \section{Limitations}
 \label{sec:limits}
 
-\emph{The cases are ours.} The 50 cases and the 48 notes are fictional and were written for this study by the author's AI assistant, which also built the harness and the graders. The 30 new-need cases were written so that the last utterance is needed to find the memory, and the ten control cases so that it is not; the size of the gap between lag 1 and blocking retrieval is a property of these cases. Ten cases per class give wide intervals. Only lag 1 and a half-utterance prefix were tested end to end; jobs on partial transcripts were not built into the product, and how soon a record should expire is untested. We do not know what share of turns in real use bring a new need: Experiment~1 measures agreement between retrievals on LoCoMo, not usefulness, and its hindsight measure rests on low scores.
+\emph{The cases are ours.} The \SCases{} cases and the 48 notes are fictional and were written for this study by the author's AI assistant, which also built the harness and the graders. Each kind of turn is built: the new-need cases so that the last utterance is needed to find the memory, the control cases so that it is not, and the \SNewCases{} cases of Experiment~3 so that the fast lookup misses the note. The sizes of the gaps are properties of these cases, and the zeros of the fast fresh agent in Table~\ref{tab:slow} are fixed by them. Ten cases of a kind give wide intervals. We do not know what share of real turns is of each kind: Experiment~1 measures agreement between retrievals on LoCoMo, not usefulness.
+
+\emph{One deeper recall.} Experiment~3 has one deep step, one model and one prompt, on a store of 48 notes of which the step reads a third. The step takes about five seconds, which fits the time one utterance gives in most of our cases. Slower steps would not fit, and we did not test lead-ins of more than two utterances, where a record could be older and still in time. The experiment ran once. Before its first trial we lengthened the scripted agent lines of the ten new in-play cases to the range of the control class, because the first versions gave a background job too little time to finish (Appendix~\ref{app:slow}).
 
 \emph{Grades.} Passing is a text match or a flag. Samples were read against the grades by AI assistants, and no person has audited them (Section~\ref{sec:audit}). The match is strict about which note counts and does not grade unsupported statements outside direct questions.
 
-\emph{Models and runs.} We used two local models of about eight billion parameters and two hosted models, whose runs could not fix temperature or seed. The suppression of search by stale notes may depend on the prompt. The further runs of Section~\ref{sec:robust} were not planned in advance and led to two corrections of the grading. Experiment~3 tests our own product in an experimental version; it was run twice on the local model, with changes to the product and to the grading in between, and on hosted models after a pilot and a stopped first attempt; the control class and the sixth condition were run later than the rest (Appendix~\ref{app:e3}).
+\emph{Models.} The main runs use one local model of eight billion parameters. The further runs of Experiment~2, with a second local model, a hosted model, a search tool and inside the product, were not planned in advance and led to two corrections of the grading (Appendices~\ref{app:e2} and~\ref{app:e3}). Experiment~3 has no such runs.
 
-\emph{Time and speech.} All experiments replay text. None of our agents streams its reply, and the times are for complete replies, which in the product took several seconds; they are not times to first audio. Delays were measured on one laptop and one cloud GPU, with a store of 48 notes, and the timing model assumes a speaking rate. Recall that takes seconds was not tested.
+\emph{Time and speech.} All experiments replay text. No agent streams its reply, and the times are for complete replies, not for the first audio. They were measured on one laptop, and the time a conversation gives a background job is computed from an assumed speaking rate.
 
 \section{Conclusion}
 
-Moving recall off the reply path lets an agent reply without waiting and makes its context stale. What that costs depended, in our tests, on the turn. Where the listener's last utterance needed a memory that was not already in play, a record one utterance old seldom held it, and an agent that read only that record passed far fewer trials than one that waited, in a reference agent and in a product, with local and hosted models. Where the old record already held the memory, as in our ten control cases, the two did about equally well. Waiting cost between \RecallWaitMin{} and \RecallWaitMax\,ms in our set-ups, so there the stale record bought nothing. Two things that decide its value elsewhere remain open: how often real turns bring a new need, and what happens when recall takes seconds.
+Moving recall off the reply path lets an agent reply without waiting and makes its context one utterance stale. Whether that is a good trade depended, in our tests, on the turn and on the recall. With a fast lookup it was a bad one: waiting cost milliseconds, and the stale record lost most turns that brought a new need. With recall that takes five seconds it paid on turns that stayed with a memory the fast lookup could not find, and an agent that paired the stale record with a fast fresh lookup lost nothing on the other turns. One kind of turn is not served without a wait: a new need that only slow recall can find. How often each kind occurs in real conversation remains to be measured.
 
 \subsubsection*{Broader Impact Statement}
 Agents that speak from a store of personal memories can mislead people about someone's life if they recall the wrong thing or invent a detail. In our tests some models abstained when stale context left the right memory out and others sometimes invented an answer, so abstention has to be tested on the model that is deployed. All persons and facts in our test data are fictional.
 
 \subsubsection*{Reproducibility Statement}
-The supplementary material holds the code, the 50 cases and 48 notes, and the stored trials of every run named in this paper, including the first runs, the pilots and the stopped attempts, each with a note. Experiment~3 needs \product{} to run again; its trials can be regraded and analysed without it. Every measured number is written into the manuscript by a script that reads those files. LoCoMo (CC BY-NC 4.0) is downloaded, not redistributed. The local models were served by Ollama 0.40 (0.40.13 and 0.40.16 in the later runs of Experiment~3); the hashes of their files are recorded.
+The supplementary material holds the code, the \SCases{} cases and 48 notes, and the stored trials of every run named in this paper, including the first runs, the pilots and the stopped attempts, each with a note. The design of Experiment~3, with its expected outcome, was committed with its cases and code before the first trial. The product experiment of Appendix~\ref{app:e3} needs \product{} to run again; its trials can be regraded and analysed without it. Every measured number is written into the manuscript by a script that reads those files. LoCoMo (CC BY-NC 4.0) is downloaded, not redistributed. The local models were served by Ollama 0.40 (0.40.13 and 0.40.16 in the later runs of the product experiment); the hashes of their files are recorded.
 
 \bibliography{refs}
 \bibliographystyle{tmlr}
@@ -485,23 +457,155 @@ Condition & (30 cases) & topic & topic & prompted & abstain & answer & (\%) & (s
 \label{fig:robust}
 \end{figure}
 
+\subsection{The search tool}
+\label{app:search}
+
+Two conditions of the main run give the model a search tool. With the \emph{search tool} alone, nothing is loaded and the model may call the tool once before it replies. \emph{Lag 1 + search} loads the lag-1 record and also offers the tool. Table~\ref{tab:e2all} gives all six conditions.
+
+\begin{table}[h]
+\caption{All six conditions of the main run. Columns as in Table~\ref{tab:e2}.}
+\label{tab:e2all}
+\vspace{4pt}
+\centering
+\small
+\setlength{\tabcolsep}{3.6pt}
+\begin{tabular}{@{}lcccccccrr@{}}
+\toprule
+ & New need & Same & New & Un- & Same memory & Must & \multicolumn{2}{c}{Note in context} & Delay \\
+Condition & (30 cases) & topic & topic & prompted & (10 cases) & abstain & of 30 & of 10 & (ms) \\
+\midrule
+\tabinput{tab-e2.tex}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{fig-classes-all.pdf}
+\caption{Trials passed by case class for all six conditions of the main run. Dots and bars as in Figure~\ref{fig:classes}.}
+\label{fig:classesall}
+\end{figure}
+
+\emph{A search tool matches blocking retrieval and costs a model call.} The search tool passes \RecTool\% \RecToolCI{} of new-need trials, which we cannot distinguish from blocking retrieval (difference \DiffBlockTool{} points \DiffBlockToolCI{}; ahead in \CaseBehindBlockTool{} cases and behind in \CaseAheadBlockTool{}). It adds a median of \PreToolMed\,ms before generation starts on a local model, where blocking retrieval adds \PreBlockMed\,ms. On the control cases it passed \CarryTool\%: in four trials its query missed the note.
+
+\emph{Stale notes suppressed search.} We expected a lag-1 record together with a search tool to recover what lag 1 loses. It passes \RecHyb\% \RecHybCI{} of new-need trials, far below the search tool alone. With stale notes already in context, the model searched in \SrchShiftHyb\% of the new-topic trials and \SrchUnpHyb\% of the unprompted ones; with nothing loaded it searched in \SrchShiftTool\% and \SrchUnpTool\%. It treated the loaded notes as the available evidence and declined to answer. Section~\ref{sec:robust} finds the same in a second model, and finds that reasoning removes it.
+
+\subsection{Reasoning mode, a second model and a hosted model}
+\label{sec:robust}
+
+The main run uses one model with its reasoning mode off. Before the control class existed we ran the 40 other cases three more times: with the reasoning mode of \texttt{gemma4:e4b} on; with a second local model of the same size, \texttt{qwen3:8b} (8.2 billion parameters, 4-bit quantised), reasoning off; and with a hosted model, \texttt{claude-sonnet-5}, whose retriever also takes its embeddings from a hosted provider (\texttt{text-embedding-3-small}). Cases, evaluators, prompt and conditions are unchanged, each run has \ThTrials{} trials, and none was planned in advance. The hosted model accepts neither a temperature nor a seed (Appendix~\ref{app:e2}, with Figure~\ref{fig:robust} and Table~\ref{tab:robust}).
+
+The replies of the hosted run showed two weaknesses in our grading, which we corrected in every run of this paper: a key must begin a word, since ``Mori'' had matched inside ``memories'', and a refusal in plain words counts as an abstention. This changes \HsRegradedRecall{} recall grades and \HsRegradedAbstain{} abstention grades of the hosted run and none of the local runs (Appendix~\ref{app:e2}).
+
+\emph{Other models do the same with the same notes.} The three local runs share the retriever, so each has the same notes in context: they repeat one retrieval outcome and test only what another model setting does with it. Blocking retrieval, prefetch and lag 1 pass \ThRecBlock\%, \ThRecPre\% and \ThRecLag\% of new-need trials with reasoning on and \QwRecBlock\%, \QwRecPre\% and \QwRecLag\% with the second model, against \RecBlock\%, \RecPre\% and \RecLag\% in the main run.
+
+\emph{Another embedding model finds the same gap.} The hosted run retrieves with a different embedding model and is a second sample of retrieval on the same cases. Its lag-1 record held a target note in \HsGoldCasesLag{} of the 30 cases, prefetch in \HsGoldCasesPre{} and blocking retrieval in \HsGoldCasesBlock{}, and the three pass \HsRecLag\%, \HsRecPre\% and \HsRecBlock\%. The hosted model uses the notes it is given better than the local ones, and loses as much when they are stale: blocking retrieval is ahead of lag 1 by \HsDiffBlockLag{} points \HsDiffBlockLagCI{}. Over the four runs, \AllNoGoldPassed{} of the \AllNoGoldN{} new-need trials without a target note in context passed, by citing another note that names the same person.
+
+\emph{What the model does about a missing memory differs.} Two settings made the search tool work beside a stale record. With reasoning on, the local model searched in \ThSrchHyb\% of the trials that combine a lag-1 record with the search tool, against \SrchHyb\% in the main run, and passed \ThRecHyb\% \ThRecHybCI{}; the hosted model searched in \HsSrchHyb\% and passed \HsRecHyb\% \HsRecHybCI{}. The price is a second model call on the reply path: for the hosted model the median complete reply took \HsReplyHyb\,s, against \HsReplyBlock\,s for blocking retrieval, which passed \HsRecBlock\% of trials at \HsCostBlock{} instead of \HsCostHyb{} US cents per reply. Without reasoning the second local model searched as rarely beside stale notes as the first (\QwSrchHyb\% of trials, against \QwSrchTool\% with the search tool alone), and it differed in what it said when the memory was missing. With a lag-1 record, \QwOtherLag\% of its trials with a question ended in an invented detail, a flat denial or an unrelated memory, against \OtherLag\% for the first local model and \HsOtherLag\% for the hosted one. Whether an agent abstains when evidence is missing is thus a property of the model, and stale context makes evidence go missing more often.
+
 \paragraph{Settings of the further runs.} The local runs keep the retriever and use the seeds of the first run; the reasoning run has a larger output budget, to leave room for the reasoning tokens. The hosted model accepts neither a temperature nor a seed and has no JSON output mode, so its replies come at the provider's default sampling and the reply format rests on the prompt alone; its run cost \HsCostRun{} US dollars. In the main run, the condition that combines a lag-1 record with the search tool replied without the required structure in \RepairedHyb{} of \EtwoPerCondition{} trials and had to be asked again.
 
 \paragraph{Two corrections to the grading.} Both were found by reading the replies of the hosted run and are applied to every run by the analysis; the stored trials keep the original grades. First, the text match accepted a key anywhere in the reply, and the key ``Mori'', a surname, also occurs inside ``memories''. A key must now begin a word or a number. This turned \HsRegradedRecall{} passes of the hosted run into failures, all of them refusals such as ``I don't have any memories about that'', and changed no trial of the local runs. Second, the abstention flag is a field of the JSON reply, and a reply in plain text has none. Such a reply is now read as text and counts as an abstention if it matches a list of phrases that decline. This turned \HsRegradedAbstain{} failures of the hosted run in the abstain class into passes. We read all 66 plain-text replies of that class: the 60 that matched were refusals, and the six that did not were five guesses and one empty reply. In the local runs \RegradedAbstain{} grades changed, since only one of their replies missed the format.
 
-\section{Further runs of Experiment 3}
+\section{Additional results for Experiment 3}
+\label{app:slow}
+
+\paragraph{The rating prompt.} Deep recall sends the model one request for each of the \SCandidates{} candidate notes: the instructions below, then the last three utterances and the note. The model runs at temperature 0 with its reasoning mode off.
+
+\begin{quote}
+\small
+You select memories for a voice companion that speaks about Tessaly Brackwen with her grandchild. You are given the last lines of their conversation and one note about her. Rate how much the companion needs this note for what it says next.
+
+0 = the note has nothing to do with the conversation\\
+1 = the note is on a related subject, but not on what is being talked about\\
+2 = the note is about what is being talked about\\
+3 = the note answers what the listener just asked or raised
+
+Answer with one JSON object: \{``score'': \textless 0, 1, 2 or 3\textgreater\}
+\end{quote}
+
+\begin{table}[h]
+\caption{Experiment~3: the number of cases in which the target note was among the notes shown to the model, the mean number of notes shown, and the trials in which the background job was late and its record was not loaded.}
+\label{tab:slowdetail}
+\vspace{4pt}
+\centering
+\small
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+ & \multicolumn{2}{c}{Fast lookup finds the note} & \multicolumn{2}{c}{Fast lookup misses it} & Notes & Job \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Agent & In play & New need & In play & New need & shown & late \\
+\midrule
+\tabinput{tab-slow-detail.tex}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{What reached the model.} Table~\ref{tab:slowdetail} gives the counts behind Table~\ref{tab:slow}. Given the whole conversation, deep recall selected the target note in \SDeepSelectedHard{} of the \SNewCases{} cases that the fast lookup misses. Given the lead-in only, it selected the target in \SGoldStaleB{} of the 30 new-need cases of Experiment~2, where the fast lookup on the lead-in had returned it in \GoldCasesLag{}. Deep recall shows the model fewer notes than the fast lookup, which always shows four.
+
+\paragraph{Why this step.} Before the design was fixed we timed four ways of making recall do more, on three throwaway queries each and looking only at durations; these figures are from the design file, not from stored trials. Reranking all \SCandidates{} notes in one call took under a second, too little for the trade to matter. One call that writes a verdict on each note took six to eight seconds and a rerank with the reasoning mode on took twelve to fourteen; a background job gets \SAvailMin{} to \SAvailMax\,s in our cases (median \SAvailMed\,s), so the first would have been ready in about half of them and the second in none. Rating each note in a call of its own was the step that takes seconds and still fits most cases.
+
+\paragraph{Changes to the design before the first trial.} The design file records three, all made with the fast lookup and the four development cases only. The model rates each note from 0 to 3 where the first design had a yes or a no: with a yes or no and a cut after four notes in the order of the fast lookup, a target that the fast lookup ranks low would have been dropped whenever four earlier notes were also judged needed. The step takes about five seconds as built, not three to four as in the timing probe, which used a shorter prompt. And the scripted agent lines of the ten new in-play cases were rewritten. As first written they had a median of 4.5 words, against 15.5 in the control class, and gave a background job 1.7 to 3.7\,s, so that its record could never have been ready on the one kind of turn where we expected it to help. They now have 12 to 21 words, the range of the control class, and were checked again with the fast lookup.
+
+\section{The same comparison in a product}
 \label{app:e3}
+
+The design is planned for a voice companion that we are building\ifanon\else, \product{}\fi, which speaks about one person's life from a store of that person's memories. We built the design into an experimental version of it and ran the cases of Experiment~2 against it, with a local and with a hosted model. This appendix reports those runs. They were made before the experiment with slow recall and do not include it.
+
+\subsection{Setup}
+
+\paragraph{System.} \Product{} differs from the reference agent in everything except the design under test. It has its own instructions, its own retriever (full-text and embedding search over pages of notes, fused by reciprocal rank), a budgeted working memory, and an output check: a statement about the person that is not tied by a citation to a page the model was given or read is withheld, and a fixed sentence of refusal is spoken instead. It writes numbers as words, because its replies are spoken. As shipped, it loads no memories and gives the model a search tool.
+
+\paragraph{Conditions.} Five settings of the product: the \emph{search tool} as shipped; \emph{lag 1}, where only the background record is loaded; \emph{blocking retrieval} on the reply path; \emph{blocking + lag 1}, with both; and \emph{lag 1 + search}. Recall loads four pages; with both on, the record adds the pages that blocking retrieval did not find.
+
+\paragraph{Runs.} The 48 notes became the product's memory store and the 40 cases of the four original classes ran unchanged. A trial opens a fresh session, posts the lead-in, waits for as long as the final utterance would take to say at an assumed 210 words per minute, and sends the final utterance as text. Each case has five trials. The product sets no sampling temperature for the reply, so the model's default applies; its output checks run at temperature 0. Recall cases are graded by the text match of Experiment~2 on the reply that was delivered, with the spoken forms of numbers added to the keys. The product signals abstention by a tool call, so we report that call and, separately, a match on a fixed list of phrases that decline.
+
+We report two runs of \KTrials{} trials. One uses the local model of Experiment~2; it is the second of two full runs, and Section~\ref{app:e3runs} gives the first and what was changed in between. The other uses the models of the product's hosted configuration, \texttt{gpt-5.6-luna} for the reply and the output checks and \texttt{text-embedding-3-small} for retrieval; it followed a pilot and a first attempt that a defect in the product stopped. Later, on the version of the hosted run and with both models, we ran the ten control cases in all five conditions and a sixth condition that is described with the results.
+
+\subsection{Results}
+
+\begin{table}[t]
+\caption{The product experiment with the local model: the 40 original cases run against the product (200 trials per condition), and the ten control cases from a later run on the product version of the hosted run (50 trials per condition). Columns as in Table~\ref{tab:e2}; ``Note in context'' is the share of new-need trials with a target note in working memory; ``Searched'' is the share of trials with a search call; ``Declined'' is the share of must-abstain trials in which the agent abstained by tool call or refusal sentence, and in words; ``Reply path'' is the median time from the final utterance to the complete text of the reply. The last two rows also ran later on that version: the search tool as shipped and the sixth condition.}
+\label{tab:e3}
+\vspace{4pt}
+\centering
+\small
+\setlength{\tabcolsep}{3.4pt}
+\begin{tabular}{@{}lccccccccccr@{}}
+\toprule
+ & New need & Same & New & Un- & Same & Note in & Searched & \multicolumn{2}{c}{Declined (\%)} & Reply \\
+Condition & (30 cases) & topic & topic & prompted & memory & context & (\%) & tool & words & path (s) \\
+\midrule
+\tabinput{tab-e3.tex}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\emph{On new-need turns, lag costs the product what it cost the reference agent.} Blocking retrieval passes \KRecBlock\% \KRecBlockCI{} of new-need trials and the lag-1 record \KRecLag\% \KRecLagCI{}, a difference of \KDiffBlockLag{} points \KDiffBlockLagCI{}; in Experiment~2 the difference was \DiffBlockLag{} (Table~\ref{tab:e3}). The record held a target note in \KGoldLag\% of trials and blocking retrieval in \KGoldBlock\%. Across the three conditions that load memories, the product passed \KPassGivenGold\% of the \KPassGivenGoldN{} new-need trials with a target note in working memory and \KNoGoldPassed{} of the \KNoGoldN{} without.
+
+\emph{On the control cases the lag-1 record was not behind.} It passed \KCarryLag\% of the control trials and blocking retrieval \KCarryBlock\% \KCarryBlockCI{}, with the target note in working memory in every trial of both. Blocking retrieval failed six trials, five of them in one case. After a lead-in about a long walk the listener asks ``How long did that take her?'', and retrieval on that utterance loaded, beside the right page, a page about an apprenticeship of six months; the model answered from it in three trials and the output check withheld two. A short follow-up is a poor query, and fresh retrieval on it can add a distractor that the older record does not have. Ten cases cannot tell this difference of \KCarryDiffBlockLag{} points \KCarryDiffBlockLagCI{} from none.
+
+\emph{Blocking costs a tenth of a second and the search tool costs seconds.} Recall took a median of \KBlockMs\,ms on the reply path when it blocked, and \KOffpathMs\,ms as a background job. With recall this cheap the background record adds nothing: loading it beside blocking retrieval changes the new-need pass rate by \KDiffBothBlock{} point \KDiffBothBlockCI{}. The search tool adds a model call: its replies took a median of \KPathTool\,s, against \KPathBlock\,s for blocking retrieval.
+
+\emph{Under the product's instructions the search tool seldom searches when nobody has asked.} As shipped, the search tool passes \KRecTool\% \KRecToolCI{} of new-need trials, \KDiffBlockTool{} points \KDiffBlockToolCI{} fewer than blocking retrieval, and the whole difference is in the unprompted class (\KUnpTool\% against \KUnpBlock\%), where the model searched in \KSrchUnpTool\% of trials. This comparison was not clean. The product's instructions tell the model that it may bring a memory up without being asked only when recall is switched on, so the shipped condition lacked that sentence. We therefore ran a sixth condition, the search tool with a sentence that allows the model to search and bring a memory up unasked. With the local model it did not help: \KBringUnp\% of unprompted trials passed, against \KShipUnp\% without the sentence \KShipVersion{}, and the model searched in \KBringSrchUnp\% of them against \KShipSrchUnp\%. The sentence settles the confound and no more. It permits a search, where the reference agent's instructions demand one whenever a memory could be relevant; under those the same model searched in \SrchUnpTool\% of unprompted trials and passed \UnpTool\%. The instruction is the likely difference; we did not test a demand in the product.
+
+\emph{Two more results of Experiment~2 did not carry over.} A loaded lag-1 record did not make the model search less under the product's instructions: it searched in \KSrchHyb\% of trials with the record and \KSrchTool\% without. And abstention was weak in every condition: on the must-abstain cases, counting every way of declining, \KGuessMin\% to \KGuessMax\% of trials still ended in a guess (Section~\ref{app:e3runs} reports a reading of 50 trials against their grades).
+
+\emph{On hosted models the cost of lag is the same, and abstention is not weak.} With the hosted models blocking retrieval passes \KHRecBlock\% \KHRecBlockCI{} of new-need trials and the lag-1 record \KHRecLag\% \KHRecLagCI{}, a difference of \KHDiffBlockLag{} points \KHDiffBlockLagCI{} (Table~\ref{tab:e3hosted}); on the control cases they pass \KHCarryBlock\% and \KHCarryLag\%. This model abstained by tool call in \KHAbstToolMin\% to \KHAbstToolMax\% of the must-abstain trials, so the guessing above belongs to the small local model, not to the product. It also searched past a stale record: lag 1 with the search tool passes \KHRecHyb\%, against \KHRecTool\% for the tool alone, at \KHPathHyb\,s a reply against \KHPathBlock\,s with blocking. In the sixth condition it searched in \KHBringSrchUnp\% of unprompted trials and passed \KHBringUnp\%, against \KHUnpTool\% as shipped and \KHUnpBlock\% with blocking retrieval; \KHBringUnpLoose{} of its \KHBringUnpPassed{} passes are general advice that contains a key word (Appendix~\ref{app:e3}).
+
+\subsection{Further runs}
+\label{app:e3runs}
 
 \paragraph{The first run on the local model.} In the first full run against the product, the model often wrote its citation as a line of text instead of calling the citation tool. The output check then withheld the statement, and \KfTemplated{} of 1,000 replies became the sentence of refusal, most of them correct answers. The loss was uneven: the check withheld \KfTmplBlock{} of the 200 replies with blocking retrieval and \KfTmplTool{} with the search tool, so that in this run the search tool passed \KfRecTool\% of new-need trials and blocking retrieval \KfRecBlock\%; lag 1 passed \KfRecLag\%, blocking with lag 1 \KfRecBoth\% and lag 1 with the search tool \KfRecHyb\%. We changed the product to accept a written citation of a page that is loaded, added the spoken forms of numbers to the keys and the match on phrases that decline, and ran once more. Nothing else changed.
 
 \paragraph{Reading of the grades of the reported local run.} The assistant read a stratified sample of 50 trials against their grades. Of 35 recall grades, 33 matched the reply, and in the other two the agent used a relevant memory that the keys do not cover. The tool-call grade was recorded correctly in all 15 abstention trials, and in 8 of the 11 it failed the agent had declined in words or had written the tool call out as text. No person has audited these grades, and the runs on hosted models have had no such reading.
 
-\paragraph{The word-start rule in Experiment~3.} The product's evaluation matched keys anywhere in the reply. The analysis applies the word-start rule of Appendix~\ref{app:e2} to every run of Experiment~3. It changes \KRegraded{} trials of the two local runs. In the hosted run it turns \KHRegraded{} passes of the lag-1 condition into failures, in the first hosted run \KHFirstRegraded{} and in the pilot \KPilotRegraded{}. All are refusals such as ``The memories here don't say who she studied with'', in the two cases whose keys include ``Mori''. The stored trials keep the original grades, and the supplementary material lists the changed ones.
+\paragraph{The word-start rule in the product experiment.} The product's evaluation matched keys anywhere in the reply. The analysis applies the word-start rule of Appendix~\ref{app:e2} to every run of the product experiment. It changes \KRegraded{} trials of the two local runs. In the hosted run it turns \KHRegraded{} passes of the lag-1 condition into failures, in the first hosted run \KHFirstRegraded{} and in the pilot \KPilotRegraded{}. All are refusals such as ``The memories here don't say who she studied with'', in the two cases whose keys include ``Mori''. The stored trials keep the original grades, and the supplementary material lists the changed ones.
 
 \paragraph{The run on hosted models.} Table~\ref{tab:e3hosted} gives the run with the models of the product's hosted configuration: \KHTrials{} trials, \KHTrialsPerCase{} per case. Besides the models it differs from the reported local run in three ways. Two of the product's output checks stop as soon as their verdict is decided, which changes their duration and not their decisions; the product records the tokens of every model request; and the worker that indexes new memories was repaired, as described below. No sampling temperature is sent for the reply, and the provider does not accept a seed. The conditions ran one after another in the order search tool, lag 1 with search, lag 1, blocking, blocking with lag 1, the first on one set of containers and the others on a second set built from the same images, so small differences in time between conditions are not protected against order. The output check replaced \KHTemplated{} replies by the sentence of refusal, and \KHErrors{} trials ended in an error, a check whose request to the provider timed out, and count as failures. The run cost \KHCostRun{} US dollars at the providers' list prices, with an estimate for the embedding requests (at most \KHCostRunUpper{} if the checks that were stopped early, which report no token counts, are billed in full).
 
 \begin{table}[!ht]
-\caption{Experiment 3 on hosted models (\texttt{gpt-5.6-luna}; 200 trials per condition on the 40 original cases, and 50 per condition on the control cases from a later run). Columns as in Table~\ref{tab:e3}; ``Declined'' is by tool call or refusal sentence; ``Calls'' is the mean number of model requests per trial and ``Cost'' the mean cost of a trial in US cents. The last row is the sixth condition, run later.}
+\caption{The product experiment on hosted models (\texttt{gpt-5.6-luna}; 200 trials per condition on the 40 original cases, and 50 per condition on the control cases from a later run). Columns as in Table~\ref{tab:e3}; ``Declined'' is by tool call or refusal sentence; ``Calls'' is the mean number of model requests per trial and ``Cost'' the mean cost of a trial in US cents. The last row is the sixth condition, run later.}
 \label{tab:e3hosted}
 \vspace{4pt}
 \centering
@@ -519,13 +623,48 @@ Condition & (30 cases) & topic & topic & prompted & memory & context & (\%) & (\
 
 Two attempts preceded this run. A pilot of \KPilotTrials{} trials with one trial per case passed \KPilotRecBlock\% of its new-need trials with blocking retrieval and \KPilotRecLag\% with lag 1. A first full run then completed four conditions without an error (\KHFirstTrials{} trials): the search tool alone passed \KHFirstRecTool\%, lag 1 \KHFirstRecLag\%, blocking retrieval \KHFirstRecBlock\% and blocking retrieval with lag 1 \KHFirstRecBoth\%, and blocking retrieval led lag 1 by \KHFirstDiffBlockLag{} points \KHFirstDiffBlockLagCI. Its fifth condition stopped twice because of a defect in the product: the worker that indexes new memories lost its queue subscription and did not subscribe again, so no later trial could index its memory. We repaired the worker, which is not on the reply path, and ran all five conditions again; that is the run reported here. The supplementary material holds the trials of the pilot, of the first run and of every stopped attempt, each with a note on what happened.
 
-\paragraph{The control cases and the sixth condition.} Both were added after the review named in Section~\ref{sec:e2} and ran later than the five conditions, on the product version of the hosted run. The reported local run used an earlier version, so for the local model we also ran the search tool as shipped on the later one; the comparison of the sixth condition in Section~\ref{sec:e3} uses that run. It passed \KShipRec\% of new-need trials and the sixth condition \KBringRec\%, a difference of \KBringVsShippedRec{} points \KBringVsShippedRecCI; on the unprompted class the difference is \KBringVsShippedUnp{} points \KBringVsShippedUnpCI. In both, every unprompted pass followed a search. The two runs are eight days apart, and the model server had been updated in between (Ollama 0.40.13 and 0.40.16) while the model files stayed the same.
+\paragraph{The control cases and the sixth condition.} Both were added after the review named in Section~\ref{sec:e2} and ran later than the five conditions, on the product version of the hosted run. The reported local run used an earlier version, so for the local model we also ran the search tool as shipped on the later one; the comparison of the sixth condition above uses that run. It passed \KShipRec\% of new-need trials and the sixth condition \KBringRec\%, a difference of \KBringVsShippedRec{} points \KBringVsShippedRecCI; on the unprompted class the difference is \KBringVsShippedUnp{} points \KBringVsShippedUnpCI. In both, every unprompted pass followed a search. The two runs are eight days apart, and the model server had been updated in between (Ollama 0.40.13 and 0.40.16) while the model files stayed the same.
 
 The sixth condition adds one sentence to the instructions of the search-tool condition: ``When a remark of the listener touches something the memories may hold, you may search for it and bring that memory up without being asked. Cite the page first.'' We compared the instructions that each condition sends to the model. Lag 1, blocking retrieval and blocking with lag 1 receive identical instructions, which hold the same permission worded for a recalled page. The search tool with lag 1 receives the instructions of the search tool and three paragraphs more: two describe the block of recalled pages, and the third is that permission. The sixth condition therefore removes the one difference in instructions that could explain why the shipped search tool stays silent.
 
 On the hosted models the sixth condition passed \KHBringUnpPassed{} of \KHBringUnpTrials{} unprompted trials. The model searched, cited the page and brought the memory up in \KHBringUnpSupported{} of them. The other \KHBringUnpLoose{} belong to one case, in which the listener has lost a passport: the reply is general advice to contact the passport office or the consulate, with no search, no citation and no mention of the person, and it passes because ``consulate'' is a key of that case. The grades are reported as the evaluator gave them. A pass of this kind, an unprompted trial with neither the target note in working memory nor a search, occurs in \KLooseMain{} of the 250 unprompted trials of the reported local run and in \KHLooseMain{} of those of the reported hosted run.
 
-Four attempts on the hosted models are not reported: one of each run that stopped early, when the provider's embedding requests stalled and when the network failed, and two passes of blocking retrieval on the control cases during which the machine went to sleep. The second of these completed with two trials lost, and we ran the condition a third time in full so that lost trials would not count against blocking retrieval. The conditions of the control cases therefore ran on three days: the search tool and lag 1 on 16 November, the two conditions that add lag 1 to another source on 17 November and blocking retrieval on 24 November. The reported run of the sixth condition lost \KHBringAbstErrors{} trials of the must-abstain class to a second network failure; they count as failures, so that the model declined by tool call in \KHBringAbstTool\% of the must-abstain trials and in \KHBringAbstToolRan\% of those that ran. The reported runs of Experiment~3 on hosted models cost \KHCostAll{} US dollars together, and the pilot and the first run \KHCostEarlier{} more; the stopped attempts, under ten cents each, are not included.
+Four attempts on the hosted models are not reported: one of each run that stopped early, when the provider's embedding requests stalled and when the network failed, and two passes of blocking retrieval on the control cases during which the machine went to sleep. The second of these completed with two trials lost, and we ran the condition a third time in full so that lost trials would not count against blocking retrieval. The conditions of the control cases therefore ran on three days: the search tool and lag 1 on 16 November, the two conditions that add lag 1 to another source on 17 November and blocking retrieval on 24 November. The reported run of the sixth condition lost \KHBringAbstErrors{} trials of the must-abstain class to a second network failure; they count as failures, so that the model declined by tool call in \KHBringAbstTool\% of the must-abstain trials and in \KHBringAbstToolRan\% of those that ran. The reported runs of the product experiment on hosted models cost \KHCostAll{} US dollars together, and the pilot and the first run \KHCostEarlier{} more; the stopped attempts, under ten cents each, are not included.
+
+\section{What waiting costs in time}
+\label{sec:time}
+
+What a never-wait agent loses in correctness depends on which memories are in context, not on the speed of the machine. What it gains is time, which does. Table~\ref{tab:deploy} collects the timings of the set-ups with cheap recall, the product of Appendix~\ref{app:e3} included, and Figure~\ref{fig:ontime} shows time and correctness together for the new-need cases.
+
+\begin{table}[t]
+\caption{What waiting costs in each set-up: the median wait for recall when it blocks the reply, and the median time from the end of the listener's utterance to a complete reply. Times of the hosted set-ups include the network round trips to the providers. The cloud GPU is one NVIDIA L4 and ran one trial per case.}
+\label{tab:deploy}
+\vspace{4pt}
+\centering
+\small
+\begin{tabular}{@{}lrcccc@{}}
+\toprule
+ & Wait for & \multicolumn{4}{c}{Complete reply (s)} \\
+\cmidrule(l){3-6}
+Set-up & recall (ms) & Lag 1 & Blocking & Search tool & Lag 1 + search \\
+\midrule
+\tabinput{tab-deploy.tex}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig-ontime.pdf}
+\caption{Correct answers by time on the 30 new-need cases. Each curve gives the share of the 150 trials of a condition that had received a correct reply by that time. Orange curves with circles load a lag-1 record and blue curves do not; dashes mark a search on the reply path. A faster set-up moves the curves to the left; where a curve ends is set by what the model was shown.}
+\label{fig:ontime}
+\end{figure}
+
+\emph{The wait is one embedding call.} Blocking retrieval embeds the ambience and searches the store. That took a median of \PreBlockMed\,ms with a local embedding model on the laptop and \CloudRecallMs\,ms on a cloud GPU, \KBlockMs\,ms in the product, and \HsRecallMs{} and \KHBlockMs\,ms with a hosted embedding model in the reference agent and in the product, where most of it is the network round trip. This wait is all that moving recall off the reply path can save. The reply times of the two conditions in Table~\ref{tab:deploy} differ by more, because an answer takes longer to write than a refusal.
+
+\emph{In these set-ups the lag-1 agent is never usefully ahead.} In every set-up the lag-1 curve leaves the axis together with the blocking curve and stops at \LagCeilMin\% to \LagCeilMax\% of the trials. Its largest lead is \OnTimeLeadMax{} points, \OnTimeLeadMaxAt\,s after the utterance \OnTimeLeadMaxSetup; \OnTimeLeadMaxLost\,s later, blocking retrieval has answered more trials correctly than lag 1 ever does. This outcome was settled by the cost of retrieval and not by the trials: when waiting costs a third of a second at most, there is no time for a design that never waits to win.
+
+\emph{Slower recall changes the trade.} Section~\ref{sec:slow} tests recall that takes seconds.
 
 \section{Agent instructions}
 \label{app:prompt}
@@ -550,7 +689,7 @@ In the search-tool condition the MEMORIES block reads: ``No memories are loaded 
 \section{Example cases}
 \label{app:cases}
 
-One case from each class, as authored. The target note is shown where there is one, with the strings that the text match accepts.
+One case from each class, as authored. The target note is shown where there is one, with the strings that the text match accepts. The last two classes are those of Experiment~3.
 
 \begin{quote}
 \small
@@ -591,6 +730,22 @@ Listener: I'm planning a trip to Japan next spring.\\
 Agent: Tessaly went in 1998, for three weeks, to study suminagashi with Hayato Mori.\\
 Listener: Which city did she stay in?\\
 \emph{The store names no city.}
+
+\medskip
+\textbf{In play, fast lookup misses the note} (Experiment~3).\\
+Listener: She did that long hike when she was older.\\
+Agent: She did, and she was proud of it, as she had every right to be at her age.\\
+Listener: Did anyone keep her company on the way?\\
+\emph{Target note:} At sixty she walked the Greywether coast path, 190 miles in sixteen days, with Rosalind joining her for the last three.\\
+\emph{Accepted:} ``Rosalind''.
+
+\medskip
+\textbf{New need, fast lookup misses the note} (Experiment~3).\\
+Listener: I went swimming in the harbour last week.\\
+Agent: She swam there every New Year's Day until she was seventy.\\
+Listener: By the way, was there an instrument she wished she could play?\\
+\emph{Target note:} Her one stated regret was never learning the piano. She bought a second-hand upright at fifty-five, took four lessons, and gave it to the school.\\
+\emph{Accepted:} ``piano''.
 \end{quote}
 
 \end{document}

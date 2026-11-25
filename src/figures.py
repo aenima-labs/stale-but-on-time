@@ -151,6 +151,7 @@ NAMES = {
     "hybrid": "Lag 1 + search",
 }
 ORDER = ["none", "tool", "blocking", "prefetch50", "lag1", "hybrid"]
+MAIN_ORDER = ["none", "blocking", "prefetch50", "lag1"]  # the main text leaves the search tool to the appendix
 # The control class first: the three "asked" classes run from the memory in play,
 # over another memory on the same topic, to a memory on a new topic.
 NEW_NEED = ("asked-continuing", "asked-shift", "unprompted")  # as in e2_analyze
@@ -163,11 +164,11 @@ CLASS_TITLES = {
 }
 
 
-def fig_classes(e2: dict) -> None:
-    fig, axes = plt.subplots(1, len(CLASS_TITLES), figsize=(WIDTH, 1.85), sharey=True)
-    y = np.arange(len(ORDER))[::-1]
+def fig_classes(e2: dict, order: list[str] = ORDER, name: str = "fig-classes-all") -> None:
+    fig, axes = plt.subplots(1, len(CLASS_TITLES), figsize=(WIDTH, 0.65 + 0.2 * len(order)), sharey=True)
+    y = np.arange(len(order))[::-1]
     for ax, (cls, title) in zip(axes, CLASS_TITLES.items(), strict=True):
-        triples = [e2["by_condition"][c]["by_class"][cls]["pass"] for c in ORDER]
+        triples = [e2["by_condition"][c]["by_class"][cls]["pass"] for c in order]
         mean = np.array([100 * t[0] for t in triples])
         lo = np.array([100 * t[1] for t in triples])
         hi = np.array([100 * t[2] for t in triples])
@@ -177,15 +178,15 @@ def fig_classes(e2: dict) -> None:
         ax.set_title(title, pad=4)
         ax.set_xlim(-6, 106)
         ax.set_xticks([0, 50, 100])
-        ax.set_ylim(-0.6, len(ORDER) - 0.4)
+        ax.set_ylim(-0.6, len(order) - 0.4)
         ax.grid(axis="y", visible=False)
         ax.tick_params(axis="y", length=0)
-    axes[0].set_yticks(y, [NAMES[c] for c in ORDER])
+    axes[0].set_yticks(y, [NAMES[c] for c in order])
     for label in axes[0].get_yticklabels():
         label.set_color(INK)
-    fig.supxlabel("trials passed (%)", fontsize=9, y=-0.08)
+    fig.supxlabel("trials passed (%)", fontsize=9, y=-0.08 if len(order) > 4 else -0.12)
     fig.subplots_adjust(wspace=0.12)
-    save(fig, "fig-classes")
+    save(fig, name)
 
 
 RUN_TITLES = {
@@ -295,8 +296,56 @@ def fig_ontime() -> None:
     save(fig, "fig-ontime")
 
 
+# ---------------------------------------------------------------- slow recall
+SLOW_CELLS = {  # as in slow_analyze
+    "A": "Memory in play,\nfast lookup finds it",
+    "B": "New need,\nfast lookup finds it",
+    "C": "Memory in play,\nfast lookup misses it",
+    "D": "New need,\nfast lookup misses it",
+}
+SLOW_STYLE = {  # colour: does the agent wait for what it loads; circles: it loads a stale record
+    "blocking": (BLUE, "-", None, "Fast, fresh"),
+    "deep": (BLUE, (0, (4, 2)), None, "Deep, fresh"),
+    "deep_stale": (ORANGE, "-", "o", "Deep, stale"),
+    "both": (ORANGE, (0, (4, 2)), "o", "Both"),
+}
+SLOW_MAX_S = 9.0
+
+
+def fig_slow() -> None:
+    """Correct replies by time in the experiment with slow recall, one panel per kind of turn."""
+    with open(ROOT / "results" / "slow-recall_trials.csv", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    grid = np.linspace(0, SLOW_MAX_S, 901)
+    fig, axes = plt.subplots(1, len(SLOW_CELLS), figsize=(WIDTH, 2.05), sharey=True)
+    for ax, (cell, title) in zip(axes, SLOW_CELLS.items(), strict=True):
+        for condition, (colour, dashes, marker, _) in SLOW_STYLE.items():
+            sub = [r for r in rows if r["condition"] == condition and r["cell"] == cell]
+            done = np.array([float(r["total_ms"]) / 1000 if r["passed"] == "True" else np.inf for r in sub])
+            done[np.isnan(done)] = np.inf
+            ax.plot(grid, [100 * np.mean(done <= t) for t in grid], color=colour, linestyle=dashes,
+                    linewidth=1.5, marker=marker, markevery=(70, 150), markersize=3.4,
+                    markerfacecolor="white", markeredgewidth=0.9)
+        ax.set_title(title, pad=4)
+        ax.set_xlim(0, SLOW_MAX_S)
+        ax.set_xticks([0, 3, 6, 9])
+        ax.set_ylim(0, 100)
+        ax.set_yticks([0, 25, 50, 75, 100])
+    axes[0].set_ylabel("trials answered correctly\nby this time (%)")
+    handles = [plt.Line2D([], [], color=c, linestyle=d, linewidth=1.5, label=label, marker=m,
+                          markersize=3.4, markerfacecolor="white", markeredgewidth=0.9)
+               for c, d, m, label in SLOW_STYLE.values()]
+    fig.legend(handles=handles, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.17),
+               handlelength=2.6, columnspacing=1.6)
+    fig.supxlabel("seconds after the listener's utterance ends", fontsize=9, y=-0.05)
+    fig.subplots_adjust(wspace=0.16)
+    save(fig, "fig-slow")
+
+
 def main() -> None:
-    which = sys.argv[1:] or ["e1", "e2"]
+    which = sys.argv[1:] or ["e1", "e2", "slow"]
+    if "slow" in which and (ROOT / "results" / "slow-recall_trials.csv").exists():
+        fig_slow()
     if "e1" in which:
         e1 = json.loads((ROOT / "results" / "e1_summary.json").read_text())
         fig_staleness(e1)
@@ -304,6 +353,7 @@ def main() -> None:
     if "e2" in which:
         e2 = json.loads((ROOT / "results" / "e2_summary.json").read_text())
         fig_classes(e2)
+        fig_classes(e2, MAIN_ORDER, "fig-classes")
         runs = {
             run: json.loads((ROOT / "results" / f"{run}_summary.json").read_text())
             for run in RUN_TITLES

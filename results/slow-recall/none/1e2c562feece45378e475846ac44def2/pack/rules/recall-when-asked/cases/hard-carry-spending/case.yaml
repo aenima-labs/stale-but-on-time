@@ -1,0 +1,57 @@
+id: recall-when-asked/hard-carry-spending
+title: Did she ever borrow to buy anything big?
+description: hard-carry after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: asyncrecall.memorome
+  version: '1'
+  digest: sha256:0a91e52430ada86f04a875cccf2e7e6e18f09485bb8c6342c9204645d1af6089
+  privacy: public
+  config:
+    memorome: tessaly-v1
+    history:
+    - role: user
+      content: Grandma was always so careful with what she spent.
+    - role: assistant
+      content: She was, yes, and she had her own firm way of keeping on top of it all.
+actions:
+- kind: message
+  role: user
+  content: Did she ever borrow to buy anything big?
+expected_outcomes:
+- 'Mention a fact from: v-money.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - credit
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: She kept household accounts in a blue ledger from 1964 onwards and never bought on credit.
+      She let Corwin pay his rent late more than once.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:hard-carry
+- continuity:continuing
+- gold:v-money

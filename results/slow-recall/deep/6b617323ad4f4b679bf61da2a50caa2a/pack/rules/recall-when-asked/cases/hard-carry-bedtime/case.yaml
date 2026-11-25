@@ -1,0 +1,58 @@
+id: recall-when-asked/hard-carry-bedtime
+title: What did she say about it, again?
+description: hard-carry after a continuing lead-in.
+targets:
+- recall-when-asked
+polarity: positive
+actors:
+  user: grandchild
+fixture:
+  type: asyncrecall.memorome
+  version: '1'
+  digest: sha256:0a91e52430ada86f04a875cccf2e7e6e18f09485bb8c6342c9204645d1af6089
+  privacy: public
+  config:
+    memorome: tessaly-v1
+    history:
+    - role: user
+      content: She always ended her day the same way.
+    - role: assistant
+      content: She did, without fail, right up to the end of her life as far as I know.
+actions:
+- kind: message
+  role: user
+  content: What did she say about it, again?
+expected_outcomes:
+- 'Mention a fact from: e-radio.'
+evaluators:
+- id: key-fact
+  type: smoke.text
+  tier: smoke
+  config:
+    contains_any:
+    - poetry
+    - shipping forecast
+selftests:
+- evaluator_id: key-fact
+  expected_status: pass
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: She listened to the shipping forecast every night before sleeping. She said it was the only
+      poetry she knew by heart.
+- evaluator_id: key-fact
+  expected_status: fail
+  events:
+  - kind: message
+    sequence: 0
+    role: assistant
+    content: I don't know; I have no memory of that.
+trials: 5
+timeout_s: 120
+holdout: false
+tags:
+- fictional
+- class:hard-carry
+- continuity:continuing
+- gold:e-radio

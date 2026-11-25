@@ -1,0 +1,617 @@
+{
+ "run": "slow-recall",
+ "trials": 1400,
+ "errors": 0,
+ "cases": {
+  "A": 10,
+  "B": 30,
+  "C": 10,
+  "D": 10,
+  "abstain": 10
+ },
+ "candidates_read": 16,
+ "by_condition": {
+  "blocking": {
+   "trials": 350,
+   "reply_ms_median": 614.1488750072313,
+   "wait_ms_median": 11.061124998377636,
+   "notes_loaded_mean": 4.0,
+   "abstain_pass": [
+    0.9,
+    0.7,
+    1.0
+   ],
+   "by_cell": {
+    "A": {
+     "pass": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "gold_in_context": 1.0,
+     "gold_cases": 10,
+     "cases": 10,
+     "reply_ms_median": 604.5304165018024
+    },
+    "B": {
+     "pass": [
+      0.7533333333333334,
+      0.6,
+      0.8933333333333333
+     ],
+     "gold_in_context": 0.8333333333333334,
+     "gold_cases": 25,
+     "cases": 30,
+     "reply_ms_median": 782.5973749932018
+    },
+    "C": {
+     "pass": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "gold_in_context": 0.0,
+     "gold_cases": 0,
+     "cases": 10,
+     "reply_ms_median": 496.79129149444634
+    },
+    "D": {
+     "pass": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "gold_in_context": 0.0,
+     "gold_cases": 0,
+     "cases": 10,
+     "reply_ms_median": 358.1067500053905
+    }
+   },
+   "pass_given_gold": [
+    0.9314285714285714,
+    175
+   ],
+   "pass_given_no_gold": [
+    0.0,
+    125
+   ]
+  },
+  "deep": {
+   "trials": 350,
+   "reply_ms_median": 5952.853770999354,
+   "wait_ms_median": 5240.013458504109,
+   "notes_loaded_mean": 1.9142857142857144,
+   "abstain_pass": [
+    0.9,
+    0.7,
+    1.0
+   ],
+   "by_cell": {
+    "A": {
+     "pass": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "gold_in_context": 1.0,
+     "gold_cases": 10,
+     "cases": 10,
+     "reply_ms_median": 5855.310770493816,
+     "gold_among_candidates": 1.0,
+     "gold_selected": 1.0,
+     "gold_selected_cases": 10
+    },
+    "B": {
+     "pass": [
+      0.9266666666666666,
+      0.8266666666666667,
+      1.0
+     ],
+     "gold_in_context": 0.9666666666666667,
+     "gold_cases": 29,
+     "cases": 30,
+     "reply_ms_median": 6132.630541505932,
+     "gold_among_candidates": 1.0,
+     "gold_selected": 0.9666666666666667,
+     "gold_selected_cases": 29
+    },
+    "C": {
+     "pass": [
+      0.9400000000000001,
+      0.82,
+      1.0
+     ],
+     "gold_in_context": 1.0,
+     "gold_cases": 10,
+     "cases": 10,
+     "reply_ms_median": 5893.796791504428,
+     "gold_among_candidates": 1.0,
+     "gold_selected": 1.0,
+     "gold_selected_cases": 10
+    },
+    "D": {
+     "pass": [
+      0.82,
+      0.6,
+      1.0
+     ],
+     "gold_in_context": 0.9,
+     "gold_cases": 9,
+     "cases": 10,
+     "reply_ms_median": 5844.431999998051,
+     "gold_among_candidates": 1.0,
+     "gold_selected": 0.9,
+     "gold_selected_cases": 9
+    }
+   },
+   "pass_given_gold": [
+    0.9551724137931035,
+    290
+   ],
+   "pass_given_no_gold": [
+    0.0,
+    10
+   ],
+   "deep_recall_ms": {
+    "median": 5240.013458504109,
+    "min": 5047.778167005163,
+    "p90": 5406.26778359001,
+    "max": 6515.126041995245
+   }
+  },
+  "deep_stale": {
+   "trials": 350,
+   "reply_ms_median": 533.0424790008692,
+   "wait_ms_median": 0.0017499987734481692,
+   "notes_loaded_mean": 1.497142857142857,
+   "abstain_pass": [
+    0.9,
+    0.7,
+    1.0
+   ],
+   "by_cell": {
+    "A": {
+     "pass": [
+      0.9,
+      0.7,
+      1.0
+     ],
+     "gold_in_context": 0.9,
+     "gold_cases": 9,
+     "cases": 10,
+     "reply_ms_median": 621.3853330045822,
+     "gold_among_candidates": 1.0,
+     "gold_selected": 1.0,
+     "gold_selected_cases": 10,
+     "ready": 0.9,
+     "ready_cases": 9
+    },
+    "B": {
+     "pass": [
+      0.13333333333333333,
+      0.03333333333333333,
+      0.26666666666666666
+     ],
+     "gold_in_context": 0.13333333333333333,
+     "gold_cases": 4,
+     "cases": 30,
+     "reply_ms_median": 495.4042289973586,
+     "gold_among_candidates": 0.5333333333333333,
+     "gold_selected": 0.13333333333333333,
+     "gold_selected_cases": 4,
+     "ready": 1.0,
+     "ready_cases": 30
+    },
+    "C": {
+     "pass": [
+      0.9,
+      0.7,
+      1.0
+     ],
+     "gold_in_context": 0.9,
+     "gold_cases": 9,
+     "cases": 10,
+     "reply_ms_median": 699.2018125019968,
+     "gold_among_candidates": 1.0,
+     "gold_selected": 0.9,
+     "gold_selected_cases": 9,
+     "ready": 1.0,
+     "ready_cases": 10
+    },
+    "D": {
+     "pass": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "gold_in_context": 0.0,
+     "gold_cases": 0,
+     "cases": 10,
+     "reply_ms_median": 379.3342494973331,
+     "gold_among_candidates": 0.0,
+     "gold_selected": 0.0,
+     "gold_selected_cases": 0,
+     "ready": 0.78,
+     "ready_cases": 8
+    }
+   },
+   "pass_given_gold": [
+    1.0,
+    110
+   ],
+   "pass_given_no_gold": [
+    0.0,
+    190
+   ],
+   "deep_recall_ms": {
+    "median": 5189.698875008617,
+    "min": 4943.6535840068245,
+    "p90": 5250.612649990944,
+    "max": 5350.099832998239
+   },
+   "ready": 0.9257142857142857,
+   "not_ready_trials": 26,
+   "not_ready_cases": [
+    "abs-chess-opening",
+    "abs-edmund-birth-year",
+    "carry-cat-sleep",
+    "hard-shift-believer",
+    "hard-shift-food",
+    "hard-shift-money"
+   ],
+   "available_ms": {
+    "median": 6571.428571428572,
+    "min": 3428.5714285714284,
+    "max": 9428.571428571428
+   },
+   "pass_given_ready_by_cell": {
+    "A": [
+     1.0,
+     45
+    ],
+    "B": [
+     0.13333333333333333,
+     150
+    ],
+    "C": [
+     0.9,
+     50
+    ],
+    "D": [
+     0.0,
+     39
+    ]
+   }
+  },
+  "both": {
+   "trials": 350,
+   "reply_ms_median": 632.5012294983026,
+   "wait_ms_median": 17.67025000299327,
+   "notes_loaded_mean": 4.442857142857143,
+   "abstain_pass": [
+    0.9,
+    0.7,
+    1.0
+   ],
+   "by_cell": {
+    "A": {
+     "pass": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "gold_in_context": 1.0,
+     "gold_cases": 10,
+     "cases": 10,
+     "reply_ms_median": 617.3364794958616,
+     "gold_among_candidates": 1.0,
+     "gold_selected": 1.0,
+     "gold_selected_cases": 10,
+     "ready": 1.0,
+     "ready_cases": 10
+    },
+    "B": {
+     "pass": [
+      0.7533333333333334,
+      0.6,
+      0.8933333333333333
+     ],
+     "gold_in_context": 0.8333333333333334,
+     "gold_cases": 25,
+     "cases": 30,
+     "reply_ms_median": 763.4059375050128,
+     "gold_among_candidates": 0.5333333333333333,
+     "gold_selected": 0.13333333333333333,
+     "gold_selected_cases": 4,
+     "ready": 1.0,
+     "ready_cases": 30
+    },
+    "C": {
+     "pass": [
+      0.8800000000000001,
+      0.6799999999999999,
+      1.0
+     ],
+     "gold_in_context": 0.9,
+     "gold_cases": 9,
+     "cases": 10,
+     "reply_ms_median": 754.3606880062725,
+     "gold_among_candidates": 1.0,
+     "gold_selected": 0.9,
+     "gold_selected_cases": 9,
+     "ready": 1.0,
+     "ready_cases": 10
+    },
+    "D": {
+     "pass": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "gold_in_context": 0.0,
+     "gold_cases": 0,
+     "cases": 10,
+     "reply_ms_median": 383.6717710000812,
+     "gold_among_candidates": 0.0,
+     "gold_selected": 0.0,
+     "gold_selected_cases": 0,
+     "ready": 0.78,
+     "ready_cases": 8
+    }
+   },
+   "pass_given_gold": [
+    0.9409090909090909,
+    220
+   ],
+   "pass_given_no_gold": [
+    0.0,
+    80
+   ],
+   "deep_recall_ms": {
+    "median": 5063.135250500636,
+    "min": 4923.840874995221,
+    "p90": 5139.711395800987,
+    "max": 6683.722624991788
+   },
+   "ready": 0.94,
+   "not_ready_trials": 21,
+   "not_ready_cases": [
+    "abs-chess-opening",
+    "abs-edmund-birth-year",
+    "hard-shift-abroad",
+    "hard-shift-believer",
+    "hard-shift-money"
+   ],
+   "available_ms": {
+    "median": 6571.428571428572,
+    "min": 3428.5714285714284,
+    "max": 9428.571428571428
+   },
+   "pass_given_ready_by_cell": {
+    "A": [
+     1.0,
+     50
+    ],
+    "B": [
+     0.7533333333333333,
+     150
+    ],
+    "C": [
+     0.88,
+     50
+    ],
+    "D": [
+     0.0,
+     39
+    ]
+   }
+  }
+ },
+ "contrasts": {
+  "deep_stale|blocking": {
+   "A": {
+    "diff": [
+     -0.1,
+     -0.3,
+     0.0
+    ],
+    "cases": 10,
+    "ahead": 0,
+    "behind": 1,
+    "level": 9,
+    "sign_flip_p": 1.0
+   },
+   "B": {
+    "diff": [
+     -0.62,
+     -0.8,
+     -0.4266666666666667
+    ],
+    "cases": 30,
+    "ahead": 1,
+    "behind": 20,
+    "level": 9,
+    "sign_flip_p": 9.99990000099999e-06
+   },
+   "C": {
+    "diff": [
+     0.9,
+     0.7,
+     1.0
+    ],
+    "cases": 10,
+    "ahead": 9,
+    "behind": 0,
+    "level": 1,
+    "sign_flip_p": 0.003909960900390996
+   },
+   "D": {
+    "diff": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "cases": 10,
+    "ahead": 0,
+    "behind": 0,
+    "level": 10,
+    "sign_flip_p": 1.0
+   }
+  },
+  "both|blocking": {
+   "A": {
+    "diff": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "cases": 10,
+    "ahead": 0,
+    "behind": 0,
+    "level": 10,
+    "sign_flip_p": 1.0
+   },
+   "B": {
+    "diff": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "cases": 30,
+    "ahead": 0,
+    "behind": 0,
+    "level": 30,
+    "sign_flip_p": 1.0
+   },
+   "C": {
+    "diff": [
+     0.8800000000000001,
+     0.6799999999999999,
+     1.0
+    ],
+    "cases": 10,
+    "ahead": 9,
+    "behind": 0,
+    "level": 1,
+    "sign_flip_p": 0.003909960900390996
+   },
+   "D": {
+    "diff": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "cases": 10,
+    "ahead": 0,
+    "behind": 0,
+    "level": 10,
+    "sign_flip_p": 1.0
+   }
+  },
+  "deep|blocking": {
+   "A": {
+    "diff": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "cases": 10,
+    "ahead": 0,
+    "behind": 0,
+    "level": 10,
+    "sign_flip_p": 1.0
+   },
+   "B": {
+    "diff": [
+     0.17333333333333334,
+     0.020000000000000004,
+     0.3333333333333333
+    ],
+    "cases": 30,
+    "ahead": 7,
+    "behind": 1,
+    "level": 22,
+    "sign_flip_p": 0.07104928950710493
+   },
+   "C": {
+    "diff": [
+     0.9400000000000001,
+     0.82,
+     1.0
+    ],
+    "cases": 10,
+    "ahead": 10,
+    "behind": 0,
+    "level": 0,
+    "sign_flip_p": 0.0020799792002079978
+   },
+   "D": {
+    "diff": [
+     0.82,
+     0.6,
+     1.0
+    ],
+    "cases": 10,
+    "ahead": 9,
+    "behind": 0,
+    "level": 1,
+    "sign_flip_p": 0.004049959500404996
+   }
+  },
+  "both|deep_stale": {
+   "A": {
+    "diff": [
+     0.1,
+     0.0,
+     0.3
+    ],
+    "cases": 10,
+    "ahead": 1,
+    "behind": 0,
+    "level": 9,
+    "sign_flip_p": 1.0
+   },
+   "B": {
+    "diff": [
+     0.62,
+     0.43333333333333335,
+     0.8
+    ],
+    "cases": 30,
+    "ahead": 20,
+    "behind": 1,
+    "level": 9,
+    "sign_flip_p": 9.99990000099999e-06
+   },
+   "C": {
+    "diff": [
+     -0.019999999999999997,
+     -0.059999999999999984,
+     0.0
+    ],
+    "cases": 10,
+    "ahead": 0,
+    "behind": 1,
+    "level": 9,
+    "sign_flip_p": 1.0
+   },
+   "D": {
+    "diff": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "cases": 10,
+    "ahead": 0,
+    "behind": 0,
+    "level": 10,
+    "sign_flip_p": 1.0
+   }
+  }
+ },
+ "no_memory_check": {
+  "trials": 100,
+  "passed": 0,
+  "cases": 20
+ }
+}

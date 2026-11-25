@@ -58,7 +58,7 @@ memorome:
   e-ansel: Her brother Ansel emigrated in 1960 and worked as a ship's engineer. They wrote to each other every month after they reconciled; she kept his letters in a biscuit tin.
   e-radio: She listened to the shipping forecast every night before sleeping. She said it was the only poetry she knew by heart.
 
-# class: asked-continuing | asked-carry | asked-shift | unprompted | abstain
+# class: asked-continuing | asked-carry | asked-shift | unprompted | abstain | hard-carry | hard-shift
 # continuity: continuing (the lead-in is on the topic) | abrupt (it is not)
 cases:
   # --- asked, continuing topic ------------------------------------------------
@@ -467,3 +467,178 @@ cases:
     u1: I still have one of her fisherman's jumpers.
     a1: She knitted one each winter, always in undyed wool, and never made two alike.
     u2: By the way, which university did Mum study at?
+
+  # ---- Cases for the experiment with slow recall (pack 1.2.0) ----------------
+  # In these 20 cases the question is worded away from the note, so that the
+  # cheap lookup does not load it: on the whole conversation it ranks the
+  # target note between 5 and 16. They were fitted to the cheap retriever only,
+  # which is deterministic and needs no model, and committed before any trial.
+  # design/slow-recall.md states the expected outcome.
+  #
+  # hard-carry: the lead-in is about the target memory without quoting it, and
+  # the cheap lookup ranks the note between 5 and 16 on the lead-in as well.
+  # The scripted agent line has 12 to 21 words, the range of the asked-carry
+  # class, so that a background job gets the time it gets there.
+  - id: hard-carry-ward
+    class: hard-carry
+    continuity: continuing
+    gold: [l-hip]
+    u1: She was laid up for a while after that operation.
+    a1: She was, and by all accounts she was not one for lying still and doing nothing.
+    u2: So how did she keep herself busy in there?
+    keys: [visitor book, rebound]
+  - id: hard-carry-needle
+    class: hard-carry
+    continuity: continuing
+    gold: [c-mother]
+    u1: Her mum worked with a needle too, didn't she?
+    a1: She did, all year round, and the work changed with the seasons as far as I know.
+    u2: What did she make in the cold months, then?
+    keys: [sails]
+  - id: hard-carry-cure
+    class: hard-carry
+    continuity: continuing
+    gold: [f-soup]
+    u1: She had her own cure for a cold.
+    a1: She did, and she was quite certain of it, whatever anybody else had to say.
+    u2: Go on then, what went into it?
+    keys: [leek, haddock]
+  - id: hard-carry-teaching
+    class: hard-carry
+    continuity: continuing
+    gold: [l-classes]
+    u1: She kept teaching people after she closed the shop.
+    a1: She did, and from what I have been told she never charged anybody a penny for it.
+    u2: Where did they all meet for it?
+    keys: [library]
+  - id: hard-carry-boat-pet
+    class: hard-carry
+    continuity: continuing
+    gold: [c-dog]
+    u1: There was a pet that went out in the boat with her dad.
+    a1: There was, on every single trip, and she talked about it fondly for the rest of her life.
+    u2: How long did it live, do you know?
+    keys: [fifteen, "15"]
+  - id: hard-carry-hike
+    class: hard-carry
+    continuity: continuing
+    gold: [t-walk]
+    u1: She did that long hike when she was older.
+    a1: She did, and she was proud of it, as she had every right to be at her age.
+    u2: Did anyone keep her company on the way?
+    keys: [Rosalind]
+  - id: hard-carry-show
+    class: hard-carry
+    continuity: continuing
+    gold: [b-honey]
+    u1: She entered her produce in a show once.
+    a1: She did, and I gather she never quite forgave the judges for how it turned out.
+    u2: How did she do in the end?
+    keys: [second prize]
+  - id: hard-carry-spending
+    class: hard-carry
+    continuity: continuing
+    gold: [v-money]
+    u1: Grandma was always so careful with what she spent.
+    a1: She was, yes, and she had her own firm way of keeping on top of it all.
+    u2: Did she ever borrow to buy anything big?
+    keys: [credit]
+  - id: hard-carry-bedtime
+    class: hard-carry
+    continuity: continuing
+    gold: [e-radio]
+    u1: She always ended her day the same way.
+    a1: She did, without fail, right up to the end of her life as far as I know.
+    u2: What did she say about it, again?
+    keys: [poetry, shipping forecast]
+  - id: hard-carry-shed
+    class: hard-carry
+    continuity: continuing
+    gold: [h-clockmaker]
+    u1: Grandpa was good with his hands, in that shed of his.
+    a1: He was, and he spent most of his days out there, by all accounts.
+    u2: Did he ever get paid for the big one?
+    keys: [refused, town hall]
+
+  # hard-shift: the lead-in is about something else, and the cheap lookup ranks
+  # the target note below 16 on the lead-in.
+  - id: hard-shift-food
+    class: hard-shift
+    continuity: abrupt
+    gold: [f-celery]
+    u1: Did she really play chess every week?
+    a1: Every Thursday evening with her neighbour Mr Okafor.
+    u2: "Another thing: was there any food she refused to eat?"
+    keys: [celery]
+  - id: hard-shift-money
+    class: hard-shift
+    continuity: abrupt
+    gold: [v-money]
+    u1: I walked past the lighthouse yesterday.
+    a1: Her father Wilmot kept it, out at Carrow Point.
+    u2: On another note, how was she with money?
+    keys: [credit, household accounts, blue ledger]
+  - id: hard-shift-accident
+    class: hard-shift
+    continuity: abrupt
+    gold: [k-arm]
+    u1: Her marbled papers were beautiful.
+    a1: Her own pattern was called storm tide, in indigo and rust.
+    u2: "Different question: did Uncle Jory ever hurt himself badly as a child?"
+    keys: [pear tree, left arm, "1977"]
+  - id: hard-shift-abroad
+    class: hard-shift
+    continuity: abrupt
+    gold: [t-japan]
+    u1: The ship's clock still runs fast.
+    a1: Edmund set it four minutes fast on purpose.
+    u2: On another subject, did she ever go abroad to learn something new?
+    keys: [Japan, suminagashi, Mori]
+  - id: hard-shift-instrument
+    class: hard-shift
+    continuity: abrupt
+    gold: [v-piano]
+    u1: I went swimming in the harbour last week.
+    a1: She swam there every New Year's Day until she was seventy.
+    u2: By the way, was there an instrument she wished she could play?
+    keys: [piano]
+  - id: hard-shift-night
+    class: hard-shift
+    continuity: abrupt
+    gold: [e-radio]
+    u1: She loved that old terrier story.
+    a1: Pilchard rode in the bow of her father's skiff.
+    u2: "Something else: what did she do last thing at night?"
+    keys: [shipping forecast]
+  - id: hard-shift-tool
+    class: hard-shift
+    continuity: abrupt
+    gold: [o-bone-folder]
+    u1: Their honeymoon sounds like fun.
+    a1: They took the night train to Vessant and stayed five days.
+    u2: On another note, did she have a favourite thing to work with?
+    keys: [bone folder]
+  - id: hard-shift-believer
+    class: hard-shift
+    continuity: abrupt
+    gold: [v-faith]
+    u1: Vellum was a lovely cat.
+    a1: She slept in the paper drawer.
+    u2: "Different question: was Grandma a believer?"
+    keys: [hymns, St Brannoc, Christmas]
+  - id: hard-shift-living
+    class: hard-shift
+    continuity: abrupt
+    gold: [h-clockmaker]
+    u1: The flood must have been frightening.
+    a1: She was eleven and spent two nights in the church hall.
+    u2: "Something I never asked: what did Grandpa do for a living?"
+    keys: [clockmaker]
+  - id: hard-shift-last-home
+    class: hard-shift
+    continuity: abrupt
+    gold: [l-flat]
+    u1: Her bees were famous too.
+    a1: She kept them from 1980 and told them the family news first.
+    u2: "Different topic: where was she living at the very end?"
+    keys: [Quay Street, second-floor]

@@ -1,0 +1,47 @@
+{
+  "none": {
+    "trials": 100,
+    "chat_calls": 100,
+    "input_tokens": 24580,
+    "output_tokens": 1794,
+    "embed_tokens": 0,
+    "cost_usd": 0.0,
+    "duration_s": 46.942922
+  },
+  "blocking": {
+    "trials": 350,
+    "chat_calls": 350,
+    "input_tokens": 136235,
+    "output_tokens": 9448,
+    "embed_tokens": 15960,
+    "cost_usd": 0.0,
+    "duration_s": 221.762899
+  },
+  "both": {
+    "trials": 350,
+    "chat_calls": 5950,
+    "input_tokens": 1341095,
+    "output_tokens": 49233,
+    "embed_tokens": 27680,
+    "cost_usd": 0.0,
+    "duration_s": 2006.061508
+  },
+  "deep": {
+    "trials": 350,
+    "chat_calls": 5950,
+    "input_tokens": 1393935,
+    "output_tokens": 50476,
+    "embed_tokens": 15960,
+    "cost_usd": 0.0,
+    "duration_s": 2087.824321
+  },
+  "deep_stale": {
+    "trials": 350,
+    "chat_calls": 5950,
+    "input_tokens": 1302881,
+    "output_tokens": 47491,
+    "embed_tokens": 11720,
+    "cost_usd": 0.0,
+    "duration_s": 2003.047219
+  }
+}
