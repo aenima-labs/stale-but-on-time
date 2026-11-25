@@ -1,6 +1,6 @@
 # Design: an experiment with slow recall
 
-Status: draft for approval, 25 November 2026. No trial of this experiment has been run.
+Status: draft for approval, 25 November 2026, second version (slower recall step). No trial of this experiment has been run.
 Once approved, this file and the new cases are committed before the first trial.
 
 ## 1. Why
@@ -26,14 +26,31 @@ there is no room.
 ### A deeper recall step
 
 The cheap lookup (BM25 and embeddings, fused) returns its 16 best notes instead of 4.
-One call to the agent's own model (`gemma4:e4b`, reasoning off, temperature 0) reads
-them with the last three utterances and selects at most four. Those four are loaded.
+The agent's own model (`gemma4:e4b`, reasoning off, temperature 0) then reads each of
+the 16 in turn, with the last three utterances, and says whether the reply needs it:
+16 model calls. The notes it says are needed are loaded, at most four, in the order of
+the cheap lookup. If it names none, none is loaded.
 
-- A timing probe on throwaway queries took 0.3 to 0.8 s per call on the laptop, against
-  12 ms for the cheap lookup. With reasoning on, the same call took 12 to 14 s.
-- The experiment uses the call without reasoning. A background job has between 3.4 and
-  9.4 s in the present cases (the scripted agent line and the listener's last utterance
-  at 210 words per minute), so a 13 s job could never be ready one utterance later.
+This step takes seconds because it does more, and its cost grows with the number of
+notes it reads. Timing probes on throwaway queries, on the laptop:
+
+| Recall step | Model calls | Time |
+|---|---|---|
+| Cheap lookup | none | 12 ms |
+| Rerank, all 16 notes in one call | 1 | 0.3 to 0.8 s |
+| **Judge each of 16 notes (chosen)** | **16** | **2.8 to 4.0 s** |
+| One call with a written verdict on each of 16 notes | 1 | 5.9 to 7.9 s |
+| Rerank in one call with reasoning on | 1 | 12 to 14 s |
+
+- **Why this one.** Waiting three to four seconds for recall is not acceptable in a
+  spoken reply, so the trade is real. A background job has between 3.4 and 9.4 s in the
+  present cases (median 6.6 s: the scripted agent line and the listener's last
+  utterance at 210 words per minute), so this job is ready one utterance later in most
+  cases and not in the shortest.
+- **Why not slower still.** The 6 to 8 s step would be ready in about half of the cases
+  and the 13 s step in none. Both would mix two causes of failure, a stale record and a
+  record that is not ready. The second needs lead-ins of more than two utterances to
+  study, which these cases do not have.
 - The prompt of this step is written and frozen on four development cases that are not
   in the test set.
 
@@ -65,6 +82,13 @@ the retriever alone put the target note outside the top four in 11.
 The background job is timed in every trial. If it took longer than the time the
 conversation gave it, its record is not loaded, as the never-wait rule demands.
 
+- The time given is computed, not measured: the words of the scripted agent line and of
+  the listener's last utterance at 210 words per minute, as in the paper's timing model.
+- The job runs alone on the machine. In a deployed agent it would share the model with
+  the reply, and take longer.
+- The new cases are written for their content. Their lengths are not adjusted to let
+  the job finish.
+
 ## 4. Conditions
 
 | Agent | What it loads | What it waits for |
@@ -81,7 +105,7 @@ With no memory loaded, the 20 new cases run once more as a check that their answ
 cannot be guessed.
 
 70 cases, five trials each: 1,400 trials in the four conditions and 100 in the check.
-About an hour on the laptop, with no hosted model and no cost.
+About two hours on the laptop, with no hosted model and no cost.
 
 ## 5. Expected outcome, recorded before any trial
 
@@ -94,7 +118,9 @@ About an hour on the laptop, with no hosted model and no cost.
 
 The stale deep record should beat the fast fresh lookup in cell C only. "Both" should
 match the better of the two in every cell and fail only in D. Deep fresh recall should
-pass everywhere and answer later than the others by the time of one model call.
+pass everywhere and answer three to four seconds later than the others. In the few
+cases that give the job less time than it takes, the stale record should be missing and
+the deep stale agent should fail in every cell.
 
 What the construction of the cases fixes, and what it does not:
 
@@ -126,8 +152,9 @@ Any of these would change the conclusion:
 
 - **How often each cell occurs in real conversation.** The cells are built. The result
   says what happens in each, not which matters most in use.
-- **Recall slower than the gap between turns.** The step used here takes under a
-  second. A step of 13 s is reported only as a measured duration that does not fit.
+- **Recall slower than the gap between turns.** The step used here takes three to four
+  seconds and fits the gap in most cases. Steps of 6 to 14 s are reported only as
+  measured durations that would not fit.
 - **Another deeper recall.** One step, one model, one prompt. A hosted model or a
   second hop may select better or worse.
 - **Scale.** The store has 48 notes, and the deeper step reads a third of them.
@@ -159,6 +186,6 @@ appendix. Nothing leaves the repository.
 
 - 26 trial wordings were ranked with the cheap retriever to see whether hard cases can
   be written against the present notes. No agent model was involved.
-- Six timing calls of a rerank prompt were made on three throwaway queries, three with
-  reasoning and three without. Only durations and the number of selected notes were
-  looked at.
+- Timing calls were made on three throwaway queries for each of the four model steps in
+  the table of section 3. Only durations and the number of selected notes were looked
+  at.
