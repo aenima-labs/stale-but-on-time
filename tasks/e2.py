@@ -55,8 +55,26 @@ def analyze(c):
 
 @task
 def analyze_product(c):
-    """Experiment 3: analysis of the two runs against the product (results/e3-kodama*)."""
+    """The product experiment: analysis of the runs against the product (results/e3-kodama*)."""
     run_src(c, "e3_analyze.py")
+
+
+@task
+def analyze_slow(c):
+    """Experiment 3: analysis of the run with slow recall (results/slow-recall)."""
+    run_src(c, "slow_analyze.py")
+
+
+@task
+def run_slow(c):
+    """Experiment 3: the no-memory check on the 20 new cases, then the four agents on all 70
+    (about 2 hours, needs Ollama)."""
+    import yaml
+
+    cases = yaml.safe_load(open("pack-src/tessaly.yaml"))["cases"]
+    new = " ".join(f"--case recall-when-asked/{c['id']}" for c in cases if c["class"].startswith("hard-"))
+    run_src(c, "e2_run.py", f"--conditions none {new} --out results/slow-recall")
+    run_src(c, "e2_run.py", "--conditions blocking deep deep_stale both --out results/slow-recall")
 
 
 @task

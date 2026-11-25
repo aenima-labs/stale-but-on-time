@@ -580,6 +580,11 @@ for cond in ORDER:
     cells += [f"{e['pre_generation_ms']['median']:.0f}"]
     rows.append(" & ".join(cells) + r" \\")
 (PAPER / "tab-e2.tex").write_text("\n".join(rows) + "\n")
+# The main text shows the four conditions without a search tool; the appendix shows all six.
+MAIN = ("none", "blocking", "prefetch50", "lag1")
+(PAPER / "tab-e2-main.tex").write_text(
+    "\n".join(row for cond, row in zip(ORDER, rows, strict=True) if cond in MAIN) + "\n"
+)
 
 rows = []
 for label, key in (("6", "L6"), ("5", "L5"), ("4", "L4"), ("3", "L3"), ("2", "L2"), ("1", "L1")):
